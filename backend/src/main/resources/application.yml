@@ -1,0 +1,33 @@
+# Solo referencias a variables de entorno. Sin valores reales. Ver .env.example
+spring:
+  application:
+    name: agp-backend
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate      # el esquema lo maneja Flyway, no Hibernate
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+    placeholders:
+      admin_username: ${ADMIN_USERNAME}
+      admin_password_hash: ${ADMIN_PASSWORD_HASH}
+
+server:
+  port: ${PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-hours: ${JWT_EXPIRATION_HOURS:8}
+    issuer: agp-desing
+  cors:
+    allowed-origin: ${CORS_ALLOWED_ORIGIN}

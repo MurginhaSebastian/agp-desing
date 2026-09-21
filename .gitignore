@@ -1,0 +1,19 @@
+# Dependencias y builds (cada subproyecto tiene el suyo; esto es red de seguridad)
+node_modules/
+dist/
+target/
+
+# Secretos
+.env
+.env.*
+!.env.example
+
+# SO / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# Capturas de QA se versionan; el resto de PNG temporales no
+*.log
