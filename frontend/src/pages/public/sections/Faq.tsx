@@ -5,7 +5,7 @@ import { Reveal } from '@/components/ui/Reveal'
 const faqs = [
   {
     q: '¿Cuánto cuesta un cuadro?',
-    a: 'Depende del tamaño y la técnica. Los formatos pequeños (30 × 40 cm) arrancan alrededor de $280.000 COP; una pieza de metro y medio puede superar el millón. Cada obra del catálogo tiene su precio publicado.',
+    a: 'Depende del tamaño y la técnica. Los formatos pequeños (30 × 40 cm) arrancan alrededor de S/ 350; una pieza de metro y medio puede pasar de S/ 2.000. Cada obra del catálogo tiene su precio publicado.',
   },
   {
     q: '¿Puedo pedir un cuadro personalizado?',
@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     q: '¿Cómo se paga?',
-    a: '50 % para apartar y arrancar, 50 % al terminar, antes del envío o la entrega. Transferencia bancaria o Nequi. No manejamos pagos en la web: todo se acuerda por WhatsApp.',
+    a: '50 % para apartar y arrancar, 50 % al terminar, antes del envío o la entrega. Transferencia bancaria, Yape o Plin. No manejamos pagos en la web: todo se acuerda por WhatsApp.',
   },
 ]
 

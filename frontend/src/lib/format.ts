@@ -1,7 +1,7 @@
 import type { Currency } from '@/types/product'
 
 const formatters: Record<Currency, Intl.NumberFormat> = {
-  COP: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }),
+  PEN: new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 }),
   USD: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }),
 }
 

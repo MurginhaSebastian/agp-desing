@@ -61,4 +61,4 @@ Para conectar el front al back: `frontend/.env` con `VITE_API_URL=http://localho
 
 ## Estado y pendientes
 
-Ver `docs/plan-agp-design.md` § Fases. Pendientes conocidos: logo con fondo transparente (el actual es PNG con rojo), fotos reales de las obras (las SVG en `frontend/public/images/obras/` son de muestra). WhatsApp (+51 977 463 110), Instagram (`agp_desinger`) y TikTok (`@agp.desing`) reales ya están como valores por defecto en `frontend/src/config/env.ts` y en `.env.example`. Ojo: el número es de Perú pero precios y copy están en COP/Colombia; confirmar con el cliente.
+Ver `docs/plan-agp-design.md` § Fases. Pendientes conocidos: logo con fondo transparente (el actual es PNG con rojo), fotos reales de las obras (las SVG en `frontend/public/images/obras/` son de muestra). WhatsApp (+51 977 463 110), Instagram (`agp_desinger`) y TikTok (`@agp.desing`) reales ya están como valores por defecto en `frontend/src/config/env.ts` y en `.env.example`. El negocio es peruano: precios en soles (`PEN`, centavos en `priceCents`), formato `es-PE`.
