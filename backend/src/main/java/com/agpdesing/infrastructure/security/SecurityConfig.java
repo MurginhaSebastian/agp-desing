@@ -2,6 +2,7 @@ package com.agpdesing.infrastructure.security;
 
 import com.agpdesing.application.port.out.PasswordHasher;
 import com.agpdesing.infrastructure.security.jwt.JwtAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,8 +23,10 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
     @Bean
+    // @Qualifier: Spring MVC registra otro CorsConfigurationSource (mvcHandlerMappingIntrospector)
+    // y sin esto el arranque falla por bean ambiguo.
     SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter,
-                                    CorsConfigurationSource cors) throws Exception {
+                                    @Qualifier("corsConfigurationSource") CorsConfigurationSource cors) throws Exception {
         return http
                 .cors(c -> c.configurationSource(cors))
                 // Sin sesión ni cookie de sesión: no hay CSRF que explotar. El token va en el header.

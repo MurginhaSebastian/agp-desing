@@ -28,13 +28,15 @@ npm run build        # tsc -b && vite build — debe pasar antes de cualquier en
 npm run lint         # oxlint
 npm run qa:shots     # capturas a 375/768/1440 en docs/qa/ (necesita dev server y Edge/Chrome)
 
-# Backend (requiere JDK 21 + Maven; docker para Postgres)
-cd backend && docker compose up -d       # Postgres local
+# Backend (requiere JDK 21 y Docker; Maven NO: ./mvnw lo descarga solo la primera vez)
+cd backend && docker compose up -d       # Postgres local (puerto 5432, BD/usuario "agp")
 cp .env.example .env                     # rellenar JWT_SECRET y ADMIN_PASSWORD_HASH
-mvn test                                 # ArchUnit (capas) + tests de casos de uso, sin BD
-mvn spring-boot:run                      # http://localhost:8080
-mvn test -Dtest=CreateProductUseCaseTest # un solo test
+.\mvnw.cmd test                          # ArchUnit (capas) + tests de casos de uso, sin BD
+.\run-dev.ps1                            # carga .env y hace mvnw spring-boot:run → http://localhost:8080
+.\mvnw.cmd test -Dtest=CreateProductUseCaseTest # un solo test
 ```
+
+En Linux/macOS usar `./mvnw` en lugar de `.\mvnw.cmd`. Spring Boot **no lee `.env`** por sí solo: `application.yml` solo tiene `${VARS}`, así que las variables deben estar en el entorno del proceso. `run-dev.ps1` las carga desde `backend/.env`; sin él, exportarlas a mano antes de `mvnw spring-boot:run`.
 
 Para conectar el front al back: `frontend/.env` con `VITE_API_URL=http://localhost:8080` y en el back `CORS_ALLOWED_ORIGIN=http://localhost:5173`.
 
@@ -59,4 +61,4 @@ Para conectar el front al back: `frontend/.env` con `VITE_API_URL=http://localho
 
 ## Estado y pendientes
 
-Ver `docs/plan-agp-design.md` § Fases. Pendientes conocidos: logo con fondo transparente (el actual es PNG con rojo), fotos reales de las obras (las SVG en `frontend/public/images/obras/` son de muestra), número de WhatsApp y URLs de redes reales en `frontend/.env`.
+Ver `docs/plan-agp-design.md` § Fases. Pendientes conocidos: logo con fondo transparente (el actual es PNG con rojo), fotos reales de las obras (las SVG en `frontend/public/images/obras/` son de muestra). WhatsApp (+51 977 463 110), Instagram (`agp_desinger`) y TikTok (`@agp.desing`) reales ya están como valores por defecto en `frontend/src/config/env.ts` y en `.env.example`. Ojo: el número es de Perú pero precios y copy están en COP/Colombia; confirmar con el cliente.

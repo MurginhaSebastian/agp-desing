@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -52,6 +53,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ProductNotFoundException.class)
     ProblemDetail onNotFound(ProductNotFoundException ex) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        pd.setTitle("No encontrado");
+        return pd;
+    }
+
+    /** /api/products/no-es-uuid: un id con formato inválido es un recurso que no existe, no un 500. */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ProblemDetail onBadPathVariable(MethodArgumentTypeMismatchException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "No existe un cuadro con identificador " + ex.getValue());
         pd.setTitle("No encontrado");
         return pd;
     }
