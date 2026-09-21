@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { Wordmark } from '@/components/layout/Wordmark'
 import { buildWhatsAppUrl } from '@/lib/whatsapp'
 
@@ -17,10 +17,9 @@ const EASE_DRAWER = [0.32, 0.72, 0, 1] as const
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
-  const location = useLocation()
+  const close = () => setOpen(false)
 
-  // Cerrar el menú al navegar y bloquear scroll del fondo mientras está abierto
-  useEffect(() => setOpen(false), [location])
+  // Bloquear scroll del fondo mientras el menú está abierto
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
     return () => {
@@ -76,7 +75,7 @@ export function Navbar() {
               className="fixed top-16 right-0 bottom-0 z-40 w-[min(85vw,22rem)] bg-silk border-l border-oat md:hidden"
               initial={{ transform: 'translateX(100%)' }}
               animate={{ transform: 'translateX(0%)' }}
-              exit={{ transform: 'translateX(100%)' }}
+              exit={{ transform: 'translateX(100%)', transition: { duration: 0.2, ease: EASE_DRAWER } }}
               transition={{ duration: 0.28, ease: EASE_DRAWER }}
             >
               <ul className="flex flex-col py-4">
@@ -89,6 +88,7 @@ export function Navbar() {
                   >
                     <Link
                       to={l.to}
+                      onClick={close}
                       className="flex items-center min-h-12 px-6 font-display text-2xl text-ink"
                     >
                       {l.label}
