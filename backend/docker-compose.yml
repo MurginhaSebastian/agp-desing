@@ -1,0 +1,14 @@
+# Solo la base de datos para desarrollo local: docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: agp
+      POSTGRES_USER: agp
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-agp-dev-only}
+    ports:
+      - "5432:5432"
+    volumes:
+      - agp-pgdata:/var/lib/postgresql/data
+volumes:
+  agp-pgdata:

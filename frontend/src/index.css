@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   AGP Desing — design tokens (Tailwind v4, no config file)
+   Paleta del cliente + rojo del logotipo. Ver docs/plan-agp-design.md
+   ------------------------------------------------------------------ */
+@theme {
+  /* Marca */
+  --color-brand: #7e0e0e;          /* rojo del logotipo — el único acento fuerte */
+  --color-brand-deep: #5a1f24;     /* Cherry Velvet (aclarado desde la foto) */
+  --color-burgundy: #4b1d3f;       /* Burgundy del brief — uso puntual */
+  --color-bordeaux: #32191d;       /* Bordeaux Noir — footer, superficies oscuras */
+
+  /* Neutros cálidos */
+  --color-silk: #eee2d4;           /* Vanilla Silk — fondo principal */
+  --color-nude: #e8d9c1;           /* Nude — bandas alternas */
+  --color-oat: #d8c7b7;            /* Alpine Oat — bordes, líneas */
+  --color-greige: #b19e90;         /* Warm Greige — texto secundario sobre claro */
+  --color-rose: #d8a7b1;           /* Rose Smoke — acento suave */
+  --color-ink: #1b1b1b;            /* Off Black — texto */
+  --color-ink-soft: #4a423f;       /* texto secundario con contraste AA */
+
+  /* Tipografía */
+  --font-display: "Cormorant Garamond", "Georgia", serif;
+  --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Consolas", monospace;
+
+  /* Escala fluida */
+  --text-display: clamp(2.75rem, 1.5rem + 5.5vw, 6.5rem);
+  --text-display--line-height: 0.95;
+  --text-h2: clamp(2rem, 1.2rem + 3vw, 3.75rem);
+  --text-h2--line-height: 1.02;
+  --text-h3: clamp(1.375rem, 1.1rem + 1.2vw, 2rem);
+  --text-h3--line-height: 1.15;
+  --text-lead: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  --text-lead--line-height: 1.5;
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.14em;
+
+  /* Espaciado de sección */
+  --spacing-section: clamp(5rem, 4rem + 6vw, 10rem);
+  --spacing-gutter: clamp(1.25rem, 0.5rem + 3vw, 4rem);
+
+  /* Motion — tres curvas canónicas, nunca ease-in en UI */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Utilidades base reutilizables con @apply (Tailwind v4 exige @utility para eso) */
+@utility label {
+  /* Etiqueta de museo: mono, versalitas, tracking amplio */
+  @apply font-mono text-label uppercase text-ink-soft;
+}
+@utility btn {
+  /* Botones — press feedback 160ms, ease-out, scale 0.97 (ver .btn:active) */
+  @apply inline-flex items-center justify-center gap-2 min-h-11 px-6 font-body font-semibold text-[0.9375rem] select-none;
+  transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out), color 160ms var(--ease-out), border-color 160ms var(--ease-out);
+}
+@utility container-x { padding-inline: var(--spacing-gutter); }
+@utility section-y { padding-block: var(--spacing-section); }
+@utility tabular { font-variant-numeric: tabular-nums; }
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-silk text-ink font-body;
+    font-size: 1rem;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-brand);
+    color: var(--color-silk);
+  }
+  h1, h2, h3 {
+    @apply font-display;
+    font-weight: 500;
+    text-wrap: balance;
+  }
+  p { text-wrap: pretty; }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 3px;
+  }
+  button, [role="button"], a { cursor: pointer; }
+  img { display: block; max-width: 100%; height: auto; }
+}
+
+@layer components {
+  .label-brand { @apply label text-brand; }
+
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { @apply btn bg-brand text-silk; }
+  .btn-secondary { @apply btn bg-transparent text-ink border border-ink; }
+  .btn-ghost { @apply btn bg-transparent text-ink px-3; }
+  .btn-on-dark { @apply btn bg-silk text-bordeaux; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-primary:hover { @apply bg-brand-deep; }
+    .btn-secondary:hover { @apply bg-ink text-silk; }
+    .btn-ghost:hover { @apply text-brand; }
+    .btn-on-dark:hover { @apply bg-nude; }
+  }
+
+  /* Campos de formulario */
+  .field-label { @apply block font-body text-sm font-semibold text-ink mb-1.5; }
+  .field-input {
+    @apply w-full min-h-11 px-3.5 bg-transparent border border-oat text-ink font-body text-base;
+    transition: border-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+  }
+  .field-input:focus { @apply border-brand outline-none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-brand) 18%, transparent); }
+  .field-input[aria-invalid="true"] { @apply border-brand; }
+  .field-error { @apply mt-1.5 text-sm text-brand; }
+
+  /* Línea de regla editorial */
+  .rule { @apply border-t border-oat; }
+  .rule-dark { @apply border-t border-silk/20; }
+
+  /* Enlace con subrayado que crece */
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 220ms var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .link-underline:hover { background-size: 100% 1px; }
+  }
+}
+
+/* Reduced motion: más suave, no cero. Se conservan opacidad y color. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 120ms !important;
+  }
+  .btn:active { transform: none; }
+}
