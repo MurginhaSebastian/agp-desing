@@ -15,7 +15,7 @@ const empty: ProductCreateDTO = {
   name: '',
   description: '',
   priceCents: 0,
-  currency: 'COP',
+  currency: 'PEN',
   widthCm: 0,
   heightCm: 0,
   technique: '',
@@ -131,7 +131,7 @@ export function ProductForm({ initial = empty, submitLabel, onSubmit }: Props) {
           <div>
             <label htmlFor="currency" className="field-label">Moneda</label>
             <select id="currency" className="field-input" value={dto.currency} onChange={(e) => set('currency', e.target.value as Currency)}>
-              <option value="COP">COP</option>
+              <option value="PEN">PEN (soles)</option>
               <option value="USD">USD</option>
             </select>
           </div>

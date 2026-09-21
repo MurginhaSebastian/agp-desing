@@ -99,7 +99,7 @@ agp-frontend/
 
 ```ts
 export type ProductStatus = "AVAILABLE" | "SOLD" | "COMMISSION";
-export type Currency = "COP" | "USD";
+export type Currency = "PEN" | "USD";
 
 export interface Product {
   id: string;             // UUID generado por el backend

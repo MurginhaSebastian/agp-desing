@@ -46,12 +46,12 @@ class CreateProductUseCaseTest {
 
     @Test
     void rejectsInvalidPrice() {
-        ProductCommand bad = new ProductCommand("Ok", "", 0, Money.Currency.COP, 10, 10, "Óleo", "/x.jpg", ProductStatus.AVAILABLE, false);
+        ProductCommand bad = new ProductCommand("Ok", "", 0, Money.Currency.PEN, 10, 10, "Óleo", "/x.jpg", ProductStatus.AVAILABLE, false);
         assertThrows(DomainValidationException.class, () -> useCase.execute(bad));
     }
 
     private static ProductCommand command(String name) {
-        return new ProductCommand(name, "desc", 68_000_000, Money.Currency.COP, 80, 100, "Acrílico", "/images/a.jpg", ProductStatus.AVAILABLE, true);
+        return new ProductCommand(name, "desc", 95_000, Money.Currency.PEN, 80, 100, "Acrílico", "/images/a.jpg", ProductStatus.AVAILABLE, true);
     }
 
     static final class InMemoryProducts implements ProductRepository {

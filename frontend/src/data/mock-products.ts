@@ -6,7 +6,7 @@ import type { Product } from '@/types/product'
  * Las imágenes son composiciones SVG de muestra: reemplazar por fotos reales.
  */
 const base = {
-  currency: 'COP' as const,
+  currency: 'PEN' as const,
   createdAt: '2026-08-01T10:00:00Z',
   updatedAt: '2026-08-01T10:00:00Z',
 }
@@ -18,7 +18,7 @@ export const mockProducts: Product[] = [
     slug: 'tarde-en-bordeaux',
     description:
       'Campos de color superpuestos, del vino al rosa quemado. Pintado en tres sesiones sobre lienzo de algodón. Se ve distinto con luz de mañana y de noche, que es un poco la idea.',
-    priceCents: 68000000,
+    priceCents: 95000,
     widthCm: 80,
     heightCm: 100,
     technique: 'Acrílico sobre lienzo',
@@ -33,7 +33,7 @@ export const mockProducts: Product[] = [
     slug: 'seda-i',
     description:
       'Primera pieza de una serie de tres. Un solo trazo ancho sobre fondo crudo, sin retoques. Lo que salió en el primer intento es lo que quedó.',
-    priceCents: 42000000,
+    priceCents: 60000,
     widthCm: 50,
     heightCm: 70,
     technique: 'Óleo sobre lienzo',
@@ -48,7 +48,7 @@ export const mockProducts: Product[] = [
     slug: 'avena',
     description:
       'Formato horizontal para pared larga. Tonos de avena y greige con una línea roja que cruza de lado a lado. Funciona bien sobre un sofá o una cabecera.',
-    priceCents: 95000000,
+    priceCents: 130000,
     widthCm: 150,
     heightCm: 60,
     technique: 'Mixta sobre madera',
@@ -63,7 +63,7 @@ export const mockProducts: Product[] = [
     slug: 'retrato-sin-nombre',
     description:
       'Encargo. Un retrato a partir de una foto que el cliente envía; se trabaja la paleta según el espacio donde va a colgarse. Tiempo de entrega: 3 a 4 semanas.',
-    priceCents: 120000000,
+    priceCents: 180000,
     widthCm: 60,
     heightCm: 80,
     technique: 'Óleo sobre lienzo',
@@ -78,7 +78,7 @@ export const mockProducts: Product[] = [
     slug: 'humo-rosa',
     description:
       'Pequeño formato. Veladuras de rosa sobre negro cálido. Ya tiene casa, pero se puede pintar una versión nueva por encargo.',
-    priceCents: 28000000,
+    priceCents: 38000,
     widthCm: 30,
     heightCm: 40,
     technique: 'Acrílico sobre papel',
@@ -93,7 +93,7 @@ export const mockProducts: Product[] = [
     slug: 'linea-de-horizonte',
     description:
       'Dos bloques, uno claro y uno oscuro, y el borde donde se tocan. De lejos es un paisaje. De cerca es textura.',
-    priceCents: 74000000,
+    priceCents: 105000,
     widthCm: 90,
     heightCm: 90,
     technique: 'Óleo sobre lienzo',

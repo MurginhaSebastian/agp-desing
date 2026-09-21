@@ -8,7 +8,7 @@ Actúa como arquitecto de software, desarrollador full-stack senior y especialis
 
 ## Contexto de negocio
 
-Taller de pintura de una persona. Vende cuadros originales y por encargo. No hay carrito ni pagos en la web: el cliente ve el catálogo y **cotiza por WhatsApp**. Público: personas que quieren un cuadro para su casa u oficina, en Colombia (COP), móvil primero.
+Taller de pintura de una persona. Vende cuadros originales y por encargo. No hay carrito ni pagos en la web: el cliente ve el catálogo y **cotiza por WhatsApp**. Público: personas que quieren un cuadro para su casa u oficina, en Perú (soles, PEN), móvil primero.
 
 ## Decisiones cerradas (no volver a preguntar)
 
@@ -23,7 +23,7 @@ Taller de pintura de una persona. Vende cuadros originales y por encargo. No hay
 | Paleta | Rojo de marca `#7E0E0E` (logo). Burgundy `#4B1D3F`, Nude `#E8D9C1`, Rose Smoke `#D8A7B1`, Off Black `#1B1B1B`, Vanilla Silk `#EEE2D4`, Alpine Oat `#D8C7B7`, Warm Greige `#B19E90`, Cherry Velvet `#5A1F24`, Bordeaux Noir `#32191D` |
 | Tipografía | Cormorant Garamond (display), Manrope (cuerpo), JetBrains Mono (etiquetas). Prohibido Inter, Roboto, Arial, system-ui como principal |
 | Hosting previsto | Front en Vercel; back + Postgres en Railway o Render |
-| Idioma de la web | Español (Colombia) |
+| Idioma de la web | Español (Perú) |
 
 ## Entregables (verificables)
 
