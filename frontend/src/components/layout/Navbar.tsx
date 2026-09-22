@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { Menu, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { Wordmark } from '@/components/layout/Wordmark'
 import { buildWhatsAppUrl } from '@/lib/whatsapp'
@@ -17,7 +17,14 @@ const EASE_DRAWER = [0.32, 0.72, 0, 1] as const
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const close = () => setOpen(false)
+  /** Cerrar sin navegar: el foco vuelve al botón que abrió el menú. */
+  const dismiss = () => {
+    setOpen(false)
+    toggleRef.current?.focus()
+  }
 
   // Bloquear scroll del fondo mientras el menú está abierto
   useEffect(() => {
@@ -25,6 +32,21 @@ export function Navbar() {
     return () => {
       document.body.style.overflow = ''
     }
+  }, [open])
+
+  // El panel tapa la página: con el teclado hay que poder salir con Escape y
+  // empezar dentro del menú, no detrás de él.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false)
+        toggleRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    panelRef.current?.querySelector<HTMLElement>('a')?.focus()
+    return () => document.removeEventListener('keydown', onKey)
   }, [open])
 
   return (
@@ -46,6 +68,7 @@ export function Navbar() {
         </ul>
 
         <button
+          ref={toggleRef}
           type="button"
           className="md:hidden inline-flex items-center justify-center size-11 -mr-2 text-ink"
           aria-expanded={open}
@@ -60,18 +83,21 @@ export function Navbar() {
       <AnimatePresence>
         {open && (
           <>
-            <motion.button
-              type="button"
-              aria-label="Cerrar menú"
+            <motion.div
+              aria-hidden="true"
               className="fixed inset-0 top-16 z-30 bg-bordeaux/40 md:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, ease: EASE_DRAWER }}
-              onClick={() => setOpen(false)}
+              onClick={dismiss}
             />
             <motion.div
+              ref={panelRef}
               id="menu-movil"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menú"
               className="fixed top-16 right-0 bottom-0 z-40 w-[min(85vw,22rem)] bg-silk border-l border-oat md:hidden"
               initial={{ transform: 'translateX(100%)' }}
               animate={{ transform: 'translateX(0%)' }}

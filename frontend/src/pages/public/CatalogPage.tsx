@@ -39,7 +39,7 @@ export function CatalogPage() {
                     type="button"
                     aria-pressed={active}
                     onClick={() => setFilter(f.value)}
-                    className={`btn min-h-10 px-4 text-sm border ${active ? 'bg-ink text-silk border-ink' : 'bg-transparent text-ink border-oat hover:border-ink'}`}
+                    className={`btn min-h-11 sm:min-h-10 px-4 text-sm border ${active ? 'bg-ink text-silk border-ink' : 'bg-transparent text-ink border-oat hover:border-ink'}`}
                   >
                     {f.label}
                   </button>
