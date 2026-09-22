@@ -11,9 +11,10 @@ interface Props {
 /*
  * Pared de galería: los cuadros cuelgan a alturas distintas. En escritorio
  * cada columna arranca con un desplazamiento diferente (0 / 4rem / 2rem),
- * así la cuadrícula no parece una tabla. En móvil es una sola columna.
+ * así la cuadrícula no parece una tabla. En tablet, donde son dos columnas,
+ * solo se desplaza la segunda. En móvil es una sola columna.
  */
-const offsets3 = ['lg:mt-0', 'lg:mt-16', 'lg:mt-8']
+const offsets3 = ['lg:mt-0', 'md:mt-12 lg:mt-16', 'lg:mt-8']
 const offsets2 = ['md:mt-0', 'md:mt-20']
 
 export function ProductGrid({ products, columns = 3 }: Props) {

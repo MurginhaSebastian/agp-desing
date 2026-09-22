@@ -8,7 +8,9 @@ export function AdminLayout() {
   return (
     <div className="min-h-dvh flex flex-col">
       <header className="border-b border-oat bg-silk">
-        <div className="container-x h-16 flex items-center justify-between gap-6">
+        {/* En móvil la cabecera envuelve en dos líneas: con cuatro acciones no cabe
+            en 375px y el panel acababa con scroll horizontal. */}
+        <div className="container-x min-h-16 py-2 sm:py-0 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
           <div className="flex items-center gap-6">
             <Wordmark />
             <span className="label hidden sm:inline">Panel</span>
@@ -21,11 +23,25 @@ export function AdminLayout() {
             >
               Cuadros
             </NavLink>
-            <Link to="/" className="btn-ghost text-sm" target="_blank" rel="noopener noreferrer">
-              Ver web <ExternalLink size={16} strokeWidth={1.75} aria-hidden="true" />
+            <NavLink
+              to="/admin/portada"
+              className={({ isActive }) => `btn-ghost text-sm ${isActive ? 'text-brand' : ''}`}
+            >
+              Portada
+            </NavLink>
+            <Link
+              to="/"
+              className="btn-ghost text-sm"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Ver la web en otra pestaña"
+            >
+              <span className="hidden sm:inline">Ver web</span>
+              <ExternalLink size={16} strokeWidth={1.75} aria-hidden="true" />
             </Link>
-            <button type="button" onClick={logout} className="btn-ghost text-sm">
-              <LogOut size={16} strokeWidth={1.75} aria-hidden="true" /> Salir
+            <button type="button" onClick={logout} className="btn-ghost text-sm" aria-label="Cerrar sesión">
+              <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
+              <span className="hidden sm:inline">Salir</span>
             </button>
           </nav>
         </div>

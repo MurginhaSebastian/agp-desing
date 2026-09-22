@@ -17,7 +17,7 @@ agp-desing/
                       playwright-cli, shadcn-ui
 ```
 
-Front y back **nunca se mezclan**: cada uno tiene su `package.json`/`pom.xml`, su `.env.example` y su `.gitignore`. El contrato entre ambos es `frontend/src/types/product.ts` ↔ `backend/.../presentation/dto/response/ProductResponse.java` — si cambia uno, cambia el otro.
+Front y back **nunca se mezclan**: cada uno tiene su `package.json`/`pom.xml`, su `.env.example` y su `.gitignore`. El contrato entre ambos son `frontend/src/types/product.ts` ↔ `ProductResponse.java` y `frontend/src/types/settings.ts` ↔ `SiteSettingsResponse.java` (ambos en `backend/.../presentation/dto/response/`) — si cambia uno, cambia el otro.
 
 ## Comandos
 
@@ -49,6 +49,8 @@ La base de datos real está en **Supabase** (Session pooler, ver `docs/DEPLOY.md
 - Tokens en `frontend/src/index.css` (`@theme`). Rojo de marca `#7e0e0e` (del logo) es el único acento fuerte; paleta del cliente en `docs/brand/paleta.png`. No inventar colores nuevos.
 - Fuentes: Cormorant Garamond (display), Manrope (cuerpo), JetBrains Mono (etiquetas de museo). Solo esas tres.
 - La "pared de galería" (`ProductGrid` + `ProductCard`) es la pieza distintiva: cada cuadro a su proporción real, etiqueta debajo, alturas escalonadas. No convertirla en grid uniforme.
+- La portada es **editorial** (titular tipográfico), no una foto a pantalla con capa oscura. La imagen opcional de `/admin/portada` (`GET/PUT /api/settings`) se cuelga en vertical junto al titular; vacía, el hero queda solo con texto.
+- `--color-greige` es para bordes y líneas: sobre `silk` da 2:1 y no vale para texto (usar `ink-soft`).
 - Motion: `animate` → `emil-design-eng`. Solo `transform`/`opacity`, curva `--ease-out`, UI < 300 ms, hero/scroll ≤ 800 ms, `scale(0.97)` en `:active`, nunca `ease-in` ni `transition: all`. Transforms como string (`transform: 'translateY(0px)'`), no `y: 0`.
 - Antes de entregar UI nueva: invocar `review-animations` por nombre (no se auto-invoca) y corregir todo Block.
 - Copy en español, tono de taller pequeño. Pasar por `humanizer`: sin "vibrante", "innovador", "único en su tipo", tríadas ni guiones largos decorativos.

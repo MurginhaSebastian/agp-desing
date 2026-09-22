@@ -89,7 +89,7 @@ export function ProductDetailPage() {
             </div>
             <div className="flex justify-between gap-6 py-3 border-b border-oat">
               <dt className="label">Precio</dt>
-              <dd className={`text-right tabular font-semibold ${product.status === 'SOLD' ? 'line-through text-greige' : ''}`}>
+              <dd className={`text-right tabular font-semibold ${product.status === 'SOLD' ? 'line-through text-ink-soft' : ''}`}>
                 {formatPrice(product.priceCents, product.currency)}
               </dd>
             </div>

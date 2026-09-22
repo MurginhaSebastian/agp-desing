@@ -6,6 +6,7 @@ import { AdminLayout } from '@/pages/admin/AdminLayout'
 import { LoginPage } from '@/pages/admin/LoginPage'
 import { ProductEditPage } from '@/pages/admin/ProductEditPage'
 import { ProductListPage } from '@/pages/admin/ProductListPage'
+import { SettingsPage } from '@/pages/admin/SettingsPage'
 import { CatalogPage } from '@/pages/public/CatalogPage'
 import { HomePage } from '@/pages/public/HomePage'
 import { ProductDetailPage } from '@/pages/public/ProductDetailPage'
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
               { index: true, element: <ProductListPage /> },
               { path: 'cuadros/nuevo', element: <ProductEditPage /> },
               { path: 'cuadros/:id', element: <ProductEditPage /> },
+              { path: 'portada', element: <SettingsPage /> },
             ],
           },
         ],
