@@ -6,6 +6,8 @@ spring:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}   # el pooler gratis de Supabase admite pocas conexiones
   jpa:
     hibernate:
       ddl-auto: validate      # el esquema lo maneja Flyway, no Hibernate

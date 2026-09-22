@@ -10,7 +10,8 @@ Idioma de trabajo: **español** con el usuario. Código y comentarios en españo
 agp-desing/
 ├── frontend/    React 19 + TypeScript + Vite 8 + Tailwind v4 + React Router 7 + Motion
 ├── backend/     Java 21 + Spring Boot 3.3 + PostgreSQL + Flyway + JWT — Clean Architecture
-├── docs/        plan-agp-design.md (arquitectura completa), PROMPT-MAESTRO.md, brand/, qa/
+├── docs/        plan-agp-design.md (arquitectura), DEPLOY.md (Render + Vercel), PROMPT-MAESTRO.md, brand/, qa/
+├── .github/workflows/keep-alive.yml   ping diario a Supabase; ping a Render cuando exista BACKEND_URL
 └── .claude/skills/   frontend-design, ui-ux-pro-max, humanizer, emil-design-eng, animate,
                       review-animations, find-animation-opportunities, web-design-guidelines,
                       playwright-cli, shadcn-ui
@@ -39,6 +40,8 @@ cp .env.example .env                     # rellenar JWT_SECRET y ADMIN_PASSWORD_
 En Linux/macOS usar `./mvnw` en lugar de `.\mvnw.cmd`. Spring Boot **no lee `.env`** por sí solo: `application.yml` solo tiene `${VARS}`, así que las variables deben estar en el entorno del proceso. `run-dev.ps1` las carga desde `backend/.env`; sin él, exportarlas a mano antes de `mvnw spring-boot:run`.
 
 Para conectar el front al back: `frontend/.env` con `VITE_API_URL=http://localhost:8080` y en el back `CORS_ALLOWED_ORIGIN=http://localhost:5173`.
+
+La base de datos real está en **Supabase** (Session pooler, ver `docs/DEPLOY.md`); el Postgres de `docker compose` es solo respaldo local. Producción (Render + Vercel) está preparada pero **no desplegada**: no proponer deploy salvo que el usuario lo pida.
 
 ## Reglas de diseño (frontend)
 

@@ -1,0 +1,42 @@
+# Mantiene despiertos los servicios gratuitos.
+# - Supabase pausa el proyecto tras 7 días sin actividad → un ping diario a su API REST.
+# - Render duerme el backend tras 15 min sin tráfico → ping cada 10 min, solo cuando exista
+#   la variable de repositorio BACKEND_URL (gh variable set BACKEND_URL --body https://...).
+# Ojo: GitHub desactiva los crons de un repo público tras 60 días sin commits; se reactiva
+# desde la pestaña Actions o con cualquier commit.
+name: keep-alive
+
+on:
+  schedule:
+    - cron: "0 12 * * *"    # diario, 07:00 Perú
+    - cron: "*/10 * * * *"  # cada 10 min (solo actúa el job de Render)
+  workflow_dispatch:
+
+jobs:
+  supabase:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 12 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping a la API REST de Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Faltan los secretos SUPABASE_URL / SUPABASE_ANON_KEY"; exit 1
+          fi
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            "$SUPABASE_URL/rest/v1/products?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+          echo "Supabase respondió $code"
+          [ "$code" = "200" ]
+
+  render:
+    if: vars.BACKEND_URL != '' && (github.event_name == 'workflow_dispatch' || github.event.schedule == '*/10 * * * *')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping al backend
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "${{ vars.BACKEND_URL }}/api/products")
+          echo "Backend respondió $code"
+          [ "$code" = "200" ]
