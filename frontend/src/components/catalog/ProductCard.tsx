@@ -18,7 +18,9 @@ export function ProductCard({ product, index }: Props) {
 
   return (
     <article className="group">
-      <Link to={`/catalogo/${product.slug}`} className="block" aria-label={`${product.name}, ver detalle`}>
+      {/* Enlace redundante con el del título: clicable, pero fuera del orden de tabulación
+          y oculto para lectores de pantalla para no anunciar dos veces el mismo destino. */}
+      <Link to={`/catalogo/${product.slug}`} className="block" tabIndex={-1} aria-hidden="true">
         <figure
           className="relative bg-nude overflow-hidden"
           style={{ aspectRatio: String(ratio) }}
@@ -30,7 +32,7 @@ export function ProductCard({ product, index }: Props) {
             decoding="async"
             width={product.widthCm * 10}
             height={product.heightCm * 10}
-            className={`size-full object-cover transition-transform duration-500 [transition-timing-function:var(--ease-out)] group-hover:scale-[1.025] ${sold ? 'opacity-80' : ''}`}
+            className={`size-full object-cover transition-transform duration-500 [transition-timing-function:var(--ease-out)] motion-safe:group-hover:scale-[1.025] ${sold ? 'opacity-80' : ''}`}
           />
           {product.status !== 'AVAILABLE' && (
             <span className="absolute top-3 left-3 label bg-silk/90 text-ink px-2 py-1">
@@ -51,7 +53,7 @@ export function ProductCard({ product, index }: Props) {
           <p className="label mt-1.5">
             {product.technique} · {formatDimensions(product.widthCm, product.heightCm)}
           </p>
-          <p className={`mt-2 font-body text-[0.9375rem] tabular ${sold ? 'text-greige line-through' : 'text-ink'}`}>
+          <p className={`mt-2 font-body text-[0.9375rem] tabular ${sold ? 'text-ink-soft line-through' : 'text-ink'}`}>
             {formatPrice(product.priceCents, product.currency)}
           </p>
         </div>

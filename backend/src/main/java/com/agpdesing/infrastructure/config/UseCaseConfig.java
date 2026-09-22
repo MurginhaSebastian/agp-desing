@@ -8,8 +8,11 @@ import com.agpdesing.application.usecase.product.DeleteProductUseCase;
 import com.agpdesing.application.usecase.product.GetProductUseCase;
 import com.agpdesing.application.usecase.product.ListProductsUseCase;
 import com.agpdesing.application.usecase.product.UpdateProductUseCase;
+import com.agpdesing.application.usecase.settings.GetSiteSettingsUseCase;
+import com.agpdesing.application.usecase.settings.UpdateSiteSettingsUseCase;
 import com.agpdesing.domain.repository.AdminUserRepository;
 import com.agpdesing.domain.repository.ProductRepository;
+import com.agpdesing.domain.repository.SiteSettingsRepository;
 import com.agpdesing.infrastructure.security.jwt.JwtProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -54,6 +57,16 @@ public class UseCaseConfig {
     @Bean
     ListProductsUseCase listProductsUseCase(ProductRepository repo) {
         return new ListProductsUseCase(repo);
+    }
+
+    @Bean
+    GetSiteSettingsUseCase getSiteSettingsUseCase(SiteSettingsRepository settings) {
+        return new GetSiteSettingsUseCase(settings);
+    }
+
+    @Bean
+    UpdateSiteSettingsUseCase updateSiteSettingsUseCase(SiteSettingsRepository settings) {
+        return new UpdateSiteSettingsUseCase(settings);
     }
 
     @Bean

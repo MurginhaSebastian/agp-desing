@@ -15,7 +15,7 @@
   --color-silk: #eee2d4;           /* Vanilla Silk — fondo principal */
   --color-nude: #e8d9c1;           /* Nude — bandas alternas */
   --color-oat: #d8c7b7;            /* Alpine Oat — bordes, líneas */
-  --color-greige: #b19e90;         /* Warm Greige — texto secundario sobre claro */
+  --color-greige: #b19e90;         /* Warm Greige — solo bordes y líneas: 2:1 sobre silk, no vale para texto */
   --color-rose: #d8a7b1;           /* Rose Smoke — acento suave */
   --color-ink: #1b1b1b;            /* Off Black — texto */
   --color-ink-soft: #4a423f;       /* texto secundario con contraste AA */

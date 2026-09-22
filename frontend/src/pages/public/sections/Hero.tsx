@@ -2,6 +2,7 @@ import { motion, useReducedMotion } from 'motion/react'
 import { ArrowDownRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WhatsAppButton } from '@/components/catalog/WhatsAppButton'
+import { useSettings } from '@/hooks/useSettings'
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const
 
@@ -11,6 +12,8 @@ const EASE_OUT = [0.23, 1, 0.32, 1] as const
  */
 export function Hero() {
   const reduce = useReducedMotion()
+  const { settings } = useSettings()
+  const heroImage = settings.heroImageUrl.trim()
   const item = (i: number) => ({
     initial: { opacity: 0, transform: reduce ? 'translateY(0px)' : 'translateY(22px)' },
     animate: { opacity: 1, transform: 'translateY(0px)' },
@@ -42,27 +45,34 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* Columna lateral: ficha técnica al estilo de etiqueta de museo. Asimetría a propósito. */}
-        <motion.aside
-          {...item(4)}
-          className="lg:col-span-3 lg:col-start-10 lg:self-end border-t border-ink pt-5"
-          aria-label="Datos del taller"
-        >
-          <dl className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-y-5 gap-x-6">
-            <div>
-              <dt className="label">Técnica</dt>
-              <dd className="mt-1 font-display text-2xl">Óleo · Acrílico · Mixta</dd>
-            </div>
-            <div>
-              <dt className="label">Formatos</dt>
-              <dd className="mt-1 font-display text-2xl">30 × 40 a 150 × 100 cm</dd>
-            </div>
-            <div>
-              <dt className="label">Entrega</dt>
-              <dd className="mt-1 font-display text-2xl">2 a 4 semanas</dd>
-            </div>
-          </dl>
-        </motion.aside>
+        {/* Columna lateral: la obra colgada (si el panel puso una) y la ficha técnica
+            al estilo de etiqueta de museo. Asimetría a propósito. */}
+        <motion.div {...item(4)} className="lg:col-span-3 lg:col-start-10 lg:self-end">
+          {heroImage && (
+            <figure className="mb-8 bg-nude overflow-hidden aspect-[3/4]">
+              {/* Decorativa: el titular ya dice de qué va la portada, y el panel no
+                  pide un texto alternativo que pudiéramos usar aquí. */}
+              <img src={heroImage} alt="" className="size-full object-cover" decoding="async" />
+            </figure>
+          )}
+
+          <aside className="border-t border-ink pt-5" aria-label="Datos del taller">
+            <dl className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-y-5 gap-x-6">
+              <div>
+                <dt className="label">Técnica</dt>
+                <dd className="mt-1 font-display text-2xl">Óleo · Acrílico · Mixta</dd>
+              </div>
+              <div>
+                <dt className="label">Formatos</dt>
+                <dd className="mt-1 font-display text-2xl">30 × 40 a 150 × 100 cm</dd>
+              </div>
+              <div>
+                <dt className="label">Entrega</dt>
+                <dd className="mt-1 font-display text-2xl">2 a 4 semanas</dd>
+              </div>
+            </dl>
+          </aside>
+        </motion.div>
       </div>
     </section>
   )
