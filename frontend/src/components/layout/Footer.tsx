@@ -69,7 +69,7 @@ export function Footer() {
 
       <div className="rule-dark">
         <div className="container-x py-5 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between text-xs text-silk/55">
-          <p>© {year} AGP Desing. Todas las obras son originales.</p>
+          <p>© {year} AGP desing. Regalos con intención y diseño estructurado.</p>
           <Link to="/admin" className="link-underline">Administrar</Link>
         </div>
       </div>
