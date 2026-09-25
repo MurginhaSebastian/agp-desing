@@ -31,35 +31,35 @@ export function Footer() {
         <div className="md:col-span-5">
           <Wordmark onDark />
           <p className="mt-5 max-w-sm text-silk/75 text-[0.9375rem]">
-            Cuadros pintados a mano, uno a la vez. Sin catálogo infinito ni carrito: miras, preguntas, y lo pintamos para tu pared.
+            Detalles únicos, ensamblados a mano.
           </p>
         </div>
 
         <nav aria-label="Pie de página" className="md:col-span-3 md:col-start-7">
           <p className="label text-silk/60 mb-4">Navegar</p>
-          <ul className="space-y-2.5">
-            <li><Link className="link-underline" to="/#sobre">Sobre AGP</Link></li>
-            <li><Link className="link-underline" to="/#como-funciona">Cómo funciona</Link></li>
-            <li><Link className="link-underline" to="/catalogo">Catálogo</Link></li>
-            <li><Link className="link-underline" to="/#faq">Preguntas frecuentes</Link></li>
+          <ul className="space-y-0.5">
+            <li><Link className="link-underline inline-flex items-center min-h-11" to="/#sobre">Sobre AGP</Link></li>
+            <li><Link className="link-underline inline-flex items-center min-h-11" to="/#como-funciona">Cómo funciona</Link></li>
+            <li><Link className="link-underline inline-flex items-center min-h-11" to="/catalogo">Catálogo</Link></li>
+            <li><Link className="link-underline inline-flex items-center min-h-11" to="/#faq">Preguntas frecuentes</Link></li>
           </ul>
         </nav>
 
         <div className="md:col-span-3">
           <p className="label text-silk/60 mb-4">Escríbenos</p>
-          <ul className="space-y-2.5">
+          <ul className="space-y-0.5">
             <li>
-              <a className="link-underline" href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
+              <a className="link-underline inline-flex items-center min-h-11" href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
                 WhatsApp
               </a>
             </li>
             <li>
-              <a className="inline-flex items-center gap-2 link-underline" href={env.instagramUrl} target="_blank" rel="noopener noreferrer">
+              <a className="inline-flex items-center gap-2 min-h-11 link-underline" href={env.instagramUrl} target="_blank" rel="noopener noreferrer">
                 <InstagramIcon size={18} /> Instagram
               </a>
             </li>
             <li>
-              <a className="inline-flex items-center gap-2 link-underline" href={env.tiktokUrl} target="_blank" rel="noopener noreferrer">
+              <a className="inline-flex items-center gap-2 min-h-11 link-underline" href={env.tiktokUrl} target="_blank" rel="noopener noreferrer">
                 <TikTokIcon size={18} /> TikTok
               </a>
             </li>
@@ -69,8 +69,8 @@ export function Footer() {
 
       <div className="rule-dark">
         <div className="container-x py-5 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between text-xs text-silk/55">
-          <p>© {year} AGP desing. Regalos con intención y diseño estructurado.</p>
-          <Link to="/admin" className="link-underline">Administrar</Link>
+          <p>© {year} AGP Desing. Regalos con intención y diseño estructurado.</p>
+          <Link to="/admin" className="link-underline inline-flex items-center min-h-11">Administrar</Link>
         </div>
       </div>
     </footer>

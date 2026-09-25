@@ -4,6 +4,10 @@
    AGP Desing — design tokens (Tailwind v4, no config file)
    Paleta del cliente + rojo del logotipo. Ver docs/plan-agp-design.md
    ------------------------------------------------------------------ */
+/* Portatiles de poca altura (1366x768 y similares): la portada no puede empujar
+   los botones fuera de la pantalla. Se usa como short:pt-8 */
+@custom-variant short (@media (max-height: 820px));
+
 @theme {
   /* Marca */
   --color-brand: #7e0e0e;          /* rojo del logotipo — el único acento fuerte */
@@ -26,7 +30,7 @@
   --font-mono: "JetBrains Mono", "Consolas", monospace;
 
   /* Escala fluida */
-  --text-display: clamp(2.75rem, 1.5rem + 5.5vw, 6.5rem);
+  --text-display: clamp(2.5rem, 1.25rem + 4.6vw, 5.25rem);
   --text-display--line-height: 0.95;
   --text-h2: clamp(2rem, 1.2rem + 3vw, 3.75rem);
   --text-h2--line-height: 1.02;

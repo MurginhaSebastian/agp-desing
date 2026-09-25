@@ -27,13 +27,13 @@ const empty: ProductCreateDTO = {
 /** Validación en cliente — el backend repite las mismas reglas con @Valid. */
 function validate(dto: ProductCreateDTO): Errors {
   const e: Errors = {}
-  if (dto.name.trim().length < 2) e.name = 'Escribe el nombre del cuadro (mínimo 2 caracteres).'
+  if (dto.name.trim().length < 2) e.name = 'Escribe el nombre del producto (mínimo 2 caracteres).'
   if (dto.name.length > 120) e.name = 'Máximo 120 caracteres.'
   if (dto.description.length > 2000) e.description = 'Máximo 2000 caracteres.'
   if (!Number.isInteger(dto.priceCents) || dto.priceCents <= 0) e.priceCents = 'El precio debe ser mayor que cero.'
   if (dto.widthCm <= 0) e.widthCm = 'Ancho en cm, mayor que cero.'
   if (dto.heightCm <= 0) e.heightCm = 'Alto en cm, mayor que cero.'
-  if (dto.technique.trim().length === 0) e.technique = 'Indica la técnica (ej. Óleo sobre lienzo).'
+  if (dto.technique.trim().length === 0) e.technique = 'Indica el formato (ej. Cuadro 3D o Box Temático).'
   if (!/^(https?:\/\/|\/)/.test(dto.imageUrl)) e.imageUrl = 'Debe ser una URL (https://…) o una ruta que empiece por /.'
   return e
 }
@@ -77,7 +77,7 @@ export function ProductForm({ initial = empty, submitLabel, onSubmit }: Props) {
   return (
     <form onSubmit={handleSubmit} noValidate className="grid gap-8 lg:grid-cols-12">
       <fieldset className="lg:col-span-7 space-y-5">
-        <legend className="label mb-2">Obra</legend>
+        <legend className="label mb-2">Producto</legend>
 
         <div>
           <label htmlFor="name" className="field-label">Nombre <span aria-hidden="true" className="text-brand">*</span></label>
@@ -88,13 +88,13 @@ export function ProductForm({ initial = empty, submitLabel, onSubmit }: Props) {
         <div>
           <label htmlFor="description" className="field-label">Descripción</label>
           <textarea id="description" className="field-input min-h-32 py-2.5" value={dto.description} maxLength={2000} rows={5} aria-invalid={invalid('description')} aria-describedby="description-help" onChange={(e) => set('description', e.target.value)} />
-          <p id="description-help" className="mt-1.5 text-sm text-ink-soft">Texto plano. Se muestra en la ficha del cuadro. {dto.description.length}/2000</p>
+          <p id="description-help" className="mt-1.5 text-sm text-ink-soft">Texto plano. Se muestra en la ficha del producto. {dto.description.length}/2000</p>
           {errors.description && <p className="field-error">{errors.description}</p>}
         </div>
 
         <div>
-          <label htmlFor="technique" className="field-label">Técnica <span aria-hidden="true" className="text-brand">*</span></label>
-          <input id="technique" className="field-input" value={dto.technique} placeholder="Óleo sobre lienzo" required aria-invalid={invalid('technique')} onChange={(e) => set('technique', e.target.value)} />
+          <label htmlFor="technique" className="field-label">Formato <span aria-hidden="true" className="text-brand">*</span></label>
+          <input id="technique" className="field-input" value={dto.technique} placeholder="Cuadro 3D o Box Temático" required aria-invalid={invalid('technique')} onChange={(e) => set('technique', e.target.value)} />
           {errors.technique && <p className="field-error">{errors.technique}</p>}
         </div>
 
