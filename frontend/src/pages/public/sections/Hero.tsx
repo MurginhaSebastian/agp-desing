@@ -21,22 +21,22 @@ export function Hero() {
   })
 
   return (
-    <section id="inicio" aria-labelledby="hero-title" className="container-x pt-14 pb-20 md:pt-24 md:pb-28">
+    <section id="inicio" aria-labelledby="hero-title" className="container-x pt-10 pb-16 md:pt-16 md:pb-20 lg:pt-20 short:pt-6 short:md:pt-8 short:lg:pt-8 short:pb-10">
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-8">
           <motion.p {...item(0)} className="label-brand">
             Detalles únicos · Ensamblados a mano
           </motion.p>
 
-          <motion.h1 {...item(1)} id="hero-title" className="text-display mt-6 max-w-[16ch]">
+          <motion.h1 {...item(1)} id="hero-title" className="text-display mt-5 max-w-[17ch]">
             Tus recuerdos y pasiones <em className="italic font-normal text-brand">tangibles</em>. Nosotros los estructuramos.
           </motion.h1>
 
-          <motion.p {...item(2)} className="text-lead mt-8 max-w-[38ch] text-ink-soft">
-            AGP desing materializa emociones y aficiones en cuadros personalizados y boxes temáticos con precisión técnica. Eliges del catálogo o diseñamos desde cero, y coordinamos cada detalle por WhatsApp. Sin carritos automatizados. Diseño empático y trato directo.
+          <motion.p {...item(2)} className="text-lead mt-6 max-w-[42ch] text-ink-soft">
+            AGP Desing materializa emociones y aficiones en cuadros personalizados y boxes temáticos con precisión técnica. Eliges del catálogo o diseñamos desde cero, y coordinamos cada detalle por WhatsApp. Sin carritos automatizados. Diseño empático y trato directo.
           </motion.p>
 
-          <motion.div {...item(3)} className="mt-10 flex flex-wrap items-center gap-4">
+          <motion.div {...item(3)} className="mt-8 flex flex-wrap items-center gap-4">
             <Link to="/catalogo" className="btn-primary">
               Ver el catálogo
               <ArrowDownRight size={18} strokeWidth={1.75} aria-hidden="true" />

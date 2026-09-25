@@ -10,10 +10,10 @@ interface Props {
 
 /**
  * El "botón inteligente": no hay carrito. Abre WhatsApp con el mensaje
- * pre-llenado con el nombre del cuadro.
+ * pre-llenado con el nombre de la pieza.
  */
 export function WhatsAppButton({ product, className = '', variant = 'primary' }: Props) {
-  const label = product?.status === 'SOLD' ? 'Pedir uno similar' : product ? 'Cotizar este cuadro' : 'Cotizar por WhatsApp'
+  const label = product?.status === 'SOLD' ? 'Pedir uno similar' : product ? 'Cotizar esta pieza' : 'Cotizar por WhatsApp'
   const cls = variant === 'primary' ? 'btn-primary' : variant === 'secondary' ? 'btn-secondary' : 'btn-on-dark'
   return (
     <a

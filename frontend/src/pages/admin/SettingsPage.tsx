@@ -65,7 +65,7 @@ function HeroImageForm({ initial, onSave }: FormProps) {
           type="url"
           className="field-input"
           value={url}
-          placeholder="https://… o /images/obras/mi-cuadro.jpg"
+          placeholder="https://… o /images/productos/mi-diseño.jpg"
           aria-invalid={error ? true : undefined}
           aria-describedby="hero-help"
           onChange={(e) => {
@@ -75,7 +75,7 @@ function HeroImageForm({ initial, onSave }: FormProps) {
         />
         {error && <p className="field-error">{error}</p>}
         <p id="hero-help" className="mt-1.5 text-sm text-ink-soft">
-          Aparece junto al titular, en vertical, como un cuadro colgado. Sube la foto a Cloudinary (o
+          Aparece junto al titular, en formato vertical. Sube la foto a Cloudinary (o
           déjala en <code className="font-mono">public/images/</code>) y pega aquí el enlace.
           <strong className="font-semibold"> Déjalo vacío</strong> y la portada vuelve a ser solo texto.
         </p>
@@ -94,7 +94,7 @@ function HeroImageForm({ initial, onSave }: FormProps) {
 
       <div className="lg:col-span-4 lg:col-start-9">
         <p className="label mb-3">Vista previa</p>
-        <div className="aspect-[3/4] bg-nude border border-oat overflow-hidden">
+        <div className="aspect-[3/4] max-w-xs lg:max-w-none bg-nude border border-oat overflow-hidden">
           {preview ? (
             <img src={preview} alt="" className="size-full object-cover" />
           ) : (

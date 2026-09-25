@@ -10,7 +10,7 @@ export interface Product {
   currency: Currency
   widthCm: number
   heightCm: number
-  technique: string // "Óleo sobre lienzo", "Acrílico", ...
+  technique: string // formato: "Cuadro 3D", "Box Temático", ...
   imageUrl: string
   status: ProductStatus
   featured: boolean

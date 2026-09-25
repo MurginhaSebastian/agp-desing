@@ -26,14 +26,14 @@ export function ProductDetailPage() {
       .catch(() => alive && setState('missing'))
     return () => {
       alive = false
-      document.title = 'AGP Desing — Cuadros hechos a mano'
+      document.title = 'AGP Desing - Regalos con intención'
     }
   }, [slug])
 
   if (state === 'loading') {
     return (
       <div className="container-x py-24">
-        <p className="label" role="status">Cargando obra…</p>
+        <p className="label" role="status">Cargando diseño…</p>
       </div>
     )
   }
@@ -42,8 +42,8 @@ export function ProductDetailPage() {
     return (
       <div className="container-x py-24 max-w-xl">
         <p className="label-brand">404</p>
-        <h1 className="text-h2 mt-4">Ese cuadro no está en la pared.</h1>
-        <p className="mt-4 text-ink-soft">Puede que se haya vendido o que el enlace esté mal escrito.</p>
+        <h1 className="text-h2 mt-4">Ese diseño aún no existe. ¡Escríbenos para crearlo!</h1>
+        <p className="mt-4 text-ink-soft">Puede que ya no esté en el catálogo o que el enlace esté mal escrito.</p>
         <Link to="/catalogo" className="btn-secondary mt-8">
           <ArrowLeft size={18} strokeWidth={1.75} aria-hidden="true" /> Volver al catálogo
         </Link>
@@ -59,9 +59,9 @@ export function ProductDetailPage() {
         <ArrowLeft size={18} strokeWidth={1.75} aria-hidden="true" /> Catálogo
       </Link>
 
-      <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-        <Reveal as="figure" className="lg:col-span-7 bg-nude" >
-          <div style={{ aspectRatio: String(ratio) }} className="w-full">
+      <div className="grid gap-10 md:grid-cols-12 md:gap-10 lg:gap-16">
+        <Reveal as="figure" className="md:col-span-6 lg:col-span-7 bg-nude" >
+          <div style={{ aspectRatio: String(ratio) }} className="w-full max-h-[70vh] mx-auto">
             <img
               src={product.imageUrl}
               alt={`${product.name} — ${product.technique}, ${formatDimensions(product.widthCm, product.heightCm)}`}
@@ -74,13 +74,13 @@ export function ProductDetailPage() {
         </Reveal>
 
         {/* Ficha: la etiqueta de museo a tamaño completo, pegada al scroll en escritorio */}
-        <Reveal delay={80} className="lg:col-span-4 lg:col-start-9 lg:sticky lg:top-28 lg:self-start">
+        <Reveal delay={80} className="md:col-span-6 lg:col-span-4 lg:col-start-9 lg:sticky lg:top-28 lg:self-start">
           <p className="label-brand">{PRODUCT_STATUS_LABEL[product.status]}</p>
           <h1 className="text-h2 mt-4">{product.name}</h1>
 
           <dl className="mt-8 border-t border-ink">
             <div className="flex justify-between gap-6 py-3 border-b border-oat">
-              <dt className="label">Técnica</dt>
+              <dt className="label">Formato</dt>
               <dd className="text-right">{product.technique}</dd>
             </div>
             <div className="flex justify-between gap-6 py-3 border-b border-oat">

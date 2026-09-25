@@ -28,10 +28,10 @@ export function ProductListPage() {
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
           <p className="label-brand">Catálogo</p>
-          <h1 className="text-h2 mt-2">Cuadros</h1>
+          <h1 className="text-h2 mt-2">Productos</h1>
         </div>
         <Link to="/admin/cuadros/nuevo" className="btn-primary">
-          <Plus size={18} strokeWidth={1.75} aria-hidden="true" /> Nuevo cuadro
+          <Plus size={18} strokeWidth={1.75} aria-hidden="true" /> Añadir un producto
         </Link>
       </div>
 
@@ -41,8 +41,8 @@ export function ProductListPage() {
 
         {!loading && !error && products.length === 0 && (
           <div className="border-t border-ink pt-8 max-w-md">
-            <p className="font-display text-2xl">La pared está vacía.</p>
-            <p className="mt-2 text-ink-soft">Sube el primer cuadro y aparecerá en el catálogo público al instante.</p>
+            <p className="font-display text-2xl">El catálogo está vacío</p>
+            <p className="mt-2 text-ink-soft">Añade el primer producto y aparecerá en el catálogo público al instante.</p>
           </div>
         )}
 
@@ -51,8 +51,8 @@ export function ProductListPage() {
             <table className="w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-y border-ink text-left">
-                  <th scope="col" className="label py-3 pr-4 font-normal">Obra</th>
-                  <th scope="col" className="label py-3 pr-4 font-normal">Técnica</th>
+                  <th scope="col" className="label py-3 pr-4 font-normal sticky left-0 bg-silk">Producto</th>
+                  <th scope="col" className="label py-3 pr-4 font-normal">Formato</th>
                   <th scope="col" className="label py-3 pr-4 font-normal">Medidas</th>
                   <th scope="col" className="label py-3 pr-4 font-normal">Precio</th>
                   <th scope="col" className="label py-3 pr-4 font-normal">Estado</th>
@@ -62,7 +62,7 @@ export function ProductListPage() {
               <tbody>
                 {products.map((p) => (
                   <tr key={p.id} className="border-b border-oat">
-                    <td className="py-3 pr-4">
+                    <td className="py-3 pr-4 sticky left-0 bg-silk">
                       <div className="flex items-center gap-3">
                         <img src={p.imageUrl} alt="" width={40} height={40} className="size-10 object-cover bg-nude" loading="lazy" />
                         <div>

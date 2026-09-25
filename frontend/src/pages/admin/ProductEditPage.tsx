@@ -39,7 +39,7 @@ export function ProductEditPage() {
   if (state === 'missing') {
     return (
       <div>
-        <p className="font-display text-2xl">Ese cuadro no existe.</p>
+        <p className="font-display text-2xl">Ese producto no existe.</p>
         <Link to="/admin" className="btn-secondary mt-6"><ArrowLeft size={18} aria-hidden="true" /> Volver</Link>
       </div>
     )
@@ -63,10 +63,10 @@ export function ProductEditPage() {
   return (
     <>
       <Link to="/admin" className="btn-ghost -ml-3 mb-6">
-        <ArrowLeft size={18} strokeWidth={1.75} aria-hidden="true" /> Cuadros
+        <ArrowLeft size={18} strokeWidth={1.75} aria-hidden="true" /> Productos
       </Link>
       <p className="label-brand">{isNew ? 'Nuevo' : 'Editar'}</p>
-      <h1 className="text-h2 mt-2 mb-10">{isNew ? 'Colgar un cuadro' : product?.name}</h1>
+      <h1 className="text-h2 mt-2 mb-10">{isNew ? 'Añadir un producto' : product?.name}</h1>
       <ProductForm key={product?.id ?? 'new'} initial={initial} submitLabel={isNew ? 'Publicar en el catálogo' : 'Guardar cambios'} onSubmit={save} />
     </>
   )

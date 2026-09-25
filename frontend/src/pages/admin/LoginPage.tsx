@@ -86,7 +86,7 @@ export function LoginPage() {
       <aside className="hidden lg:block lg:col-span-7 bg-bordeaux" aria-hidden="true">
         <div className="h-full flex items-end p-16">
           <p className="font-display italic text-4xl text-silk/70 max-w-md">
-            Lo que cuelgas aquí, aparece en la pared.
+            Lo que subes aquí aparece en el catálogo.
           </p>
         </div>
       </aside>

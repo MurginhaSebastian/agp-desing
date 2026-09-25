@@ -23,9 +23,9 @@ export function CatalogPage() {
       <Reveal className="grid gap-8 lg:grid-cols-12 lg:items-end">
         <div className="lg:col-span-7">
           <p className="label-brand">Catálogo</p>
-          <h1 className="text-display mt-4">La pared.</h1>
+          <h1 className="text-display mt-4">El Catálogo.</h1>
           <p className="text-lead mt-6 max-w-[40ch] text-ink-soft">
-            Cada cuadro se muestra a su proporción real. Toca uno para ver la ficha completa y cotizarlo.
+            Explora nuestras piezas o inspírate para crear la tuya desde cero.
           </p>
         </div>
 
@@ -39,7 +39,7 @@ export function CatalogPage() {
                     type="button"
                     aria-pressed={active}
                     onClick={() => setFilter(f.value)}
-                    className={`btn min-h-11 sm:min-h-10 px-4 text-sm border ${active ? 'bg-ink text-silk border-ink' : 'bg-transparent text-ink border-oat hover:border-ink'}`}
+                    className={`btn min-h-11 px-4 text-sm border ${active ? 'bg-ink text-silk border-ink' : 'bg-transparent text-ink border-oat hover:border-ink'}`}
                   >
                     {f.label}
                   </button>
@@ -51,7 +51,7 @@ export function CatalogPage() {
       </Reveal>
 
       <div className="mt-14 lg:mt-20 border-t border-ink pt-12 lg:pt-16">
-        {loading && <p className="label" role="status">Cargando obras…</p>}
+        {loading && <p className="label" role="status">Cargando diseños…</p>}
         {error && (
           <div role="alert" className="max-w-md">
             <p className="font-display text-2xl">No pudimos cargar el catálogo.</p>

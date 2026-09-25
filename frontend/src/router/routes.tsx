@@ -9,6 +9,7 @@ import { ProductListPage } from '@/pages/admin/ProductListPage'
 import { SettingsPage } from '@/pages/admin/SettingsPage'
 import { CatalogPage } from '@/pages/public/CatalogPage'
 import { HomePage } from '@/pages/public/HomePage'
+import { NotFoundPage } from '@/pages/public/NotFoundPage'
 import { ProductDetailPage } from '@/pages/public/ProductDetailPage'
 import { ProtectedRoute } from '@/security/ProtectedRoute'
 
@@ -46,6 +47,8 @@ export const router = createBrowserRouter([
           { path: '/', element: <HomePage /> },
           { path: '/catalogo', element: <CatalogPage /> },
           { path: '/catalogo/:slug', element: <ProductDetailPage /> },
+          // Cualquier otra dirección: sin esto React Router enseña su error en inglés.
+          { path: '*', element: <NotFoundPage /> },
         ],
       },
       { path: '/admin/login', element: <LoginPage /> },

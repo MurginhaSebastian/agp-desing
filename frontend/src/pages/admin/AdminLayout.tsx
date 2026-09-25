@@ -21,7 +21,7 @@ export function AdminLayout() {
               end
               className={({ isActive }) => `btn-ghost text-sm ${isActive ? 'text-brand' : ''}`}
             >
-              Cuadros
+              Productos
             </NavLink>
             <NavLink
               to="/admin/portada"
