@@ -4,24 +4,24 @@ import { Reveal } from '@/components/ui/Reveal'
 
 const faqs = [
   {
-    q: '¿Cuánto cuesta un cuadro?',
-    a: 'Depende del tamaño y la técnica. Los formatos pequeños (30 × 40 cm) arrancan alrededor de S/ 350; una pieza de metro y medio puede pasar de S/ 2.000. Cada obra del catálogo tiene su precio publicado.',
+    q: '¿Cuánto cuesta un cuadro o box?',
+    a: 'Los precios varían según el nivel de personalización. En nuestro catálogo encontrarás opciones como el «Cuadro 3D» a 75,00 PEN y los «Boxes personalizados» completos a 115,00 PEN.',
   },
   {
-    q: '¿Puedo pedir un cuadro personalizado?',
-    a: 'Sí. Es la mitad de lo que hacemos. Cuéntanos colores, medidas y dónde va a ir. Si tienes una referencia, mejor. Enviamos un boceto antes de empezar.',
+    q: '¿Puedo pedir una temática que no está en el catálogo?',
+    a: 'Sí, el diseño con propósito es nuestra especialidad. Adaptamos la estética, ya sean estadísticas de tu deporte favorito, réplicas de plataformas de streaming para aniversarios, o tributos con modelos a escala.',
   },
   {
-    q: '¿Cuánto tarda?',
-    a: 'Entre dos y cuatro semanas desde el abono, según la técnica. El óleo necesita más tiempo de secado que el acrílico. Si tienes una fecha límite, dilo al cotizar.',
+    q: '¿Qué incluye la presentación del regalo?',
+    a: 'El diseño no termina en el marco. Los boxes incluyen un empaque estructurado, fondos temáticos, tarjetas personalizadas y complementos visuales para lograr una experiencia completa.',
   },
   {
     q: '¿Hacen envíos?',
-    a: 'Sí, a todo el país. El cuadro viaja embalado en cartón rígido y plástico burbuja, con esquineros. El costo del envío se cotiza aparte según destino y tamaño.',
+    a: 'Sí, coordinamos entregas asegurando que el producto y su empaque lleguen en perfectas condiciones.',
   },
   {
     q: '¿Cómo se paga?',
-    a: '50 % para apartar y arrancar, 50 % al terminar, antes del envío o la entrega. Transferencia bancaria, Yape o Plin. No manejamos pagos en la web: todo se acuerda por WhatsApp.',
+    a: 'Trabajamos con un adelanto del 50 % para iniciar la manufactura. Puedes realizar el pago de forma rápida a través de Yape o Plin.',
   },
 ]
 

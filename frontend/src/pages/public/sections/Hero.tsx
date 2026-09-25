@@ -25,15 +25,15 @@ export function Hero() {
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-8">
           <motion.p {...item(0)} className="label-brand">
-            Cuadros originales · Pintados a mano
+            Detalles únicos · Ensamblados a mano
           </motion.p>
 
-          <motion.h1 {...item(1)} id="hero-title" className="text-display mt-6 max-w-[14ch]">
-            Un cuadro que <em className="italic font-normal text-brand">no</em> existe todavía. Hasta que lo pides.
+          <motion.h1 {...item(1)} id="hero-title" className="text-display mt-6 max-w-[16ch]">
+            Tus recuerdos y pasiones <em className="italic font-normal text-brand">tangibles</em>. Nosotros los estructuramos.
           </motion.h1>
 
           <motion.p {...item(2)} className="text-lead mt-8 max-w-[38ch] text-ink-soft">
-            AGP Desing pinta piezas únicas para paredes concretas. Eliges del catálogo o pides algo a medida, y lo cerramos por WhatsApp. Sin carrito. Sin intermediarios.
+            AGP desing materializa emociones y aficiones en cuadros personalizados y boxes temáticos con precisión técnica. Eliges del catálogo o diseñamos desde cero, y coordinamos cada detalle por WhatsApp. Sin carritos automatizados. Diseño empático y trato directo.
           </motion.p>
 
           <motion.div {...item(3)} className="mt-10 flex flex-wrap items-center gap-4">
@@ -59,16 +59,16 @@ export function Hero() {
           <aside className="border-t border-ink pt-5" aria-label="Datos del taller">
             <dl className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-y-5 gap-x-6">
               <div>
-                <dt className="label">Técnica</dt>
-                <dd className="mt-1 font-display text-2xl">Óleo · Acrílico · Mixta</dd>
+                <dt className="label">Enfoque</dt>
+                <dd className="mt-1 font-display text-2xl">Diseño 3D · Temático · Personalizado</dd>
               </div>
               <div>
                 <dt className="label">Formatos</dt>
-                <dd className="mt-1 font-display text-2xl">30 × 40 a 150 × 100 cm</dd>
+                <dd className="mt-1 font-display text-2xl">Cuadros con profundidad · Cajas decorativas · Placas interactivas</dd>
               </div>
               <div>
-                <dt className="label">Entrega</dt>
-                <dd className="mt-1 font-display text-2xl">2 a 4 semanas</dd>
+                <dt className="label">Elaboración</dt>
+                <dd className="mt-1 font-display text-2xl">Manufactura meticulosa (Bajo pedido)</dd>
               </div>
             </dl>
           </aside>

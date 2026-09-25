@@ -14,10 +14,10 @@ export function Contact() {
         <Reveal className="lg:col-span-7">
           <p className="label text-rose">Contacto</p>
           <h2 id="contacto-title" className="text-h2 mt-4 text-silk">
-            ¿Tienes una pared vacía? Cuéntanos de ella.
+            ¿Listo para materializar esa historia? Cuéntanosla.
           </h2>
           <p className="text-lead mt-6 max-w-[40ch] text-silk/80">
-            Escríbenos por WhatsApp con una foto del espacio o el nombre del cuadro que te gustó. Respondemos el mismo día.
+            Escríbenos por WhatsApp con los detalles de tu idea, la pasión que quieres homenajear o el producto de nuestro catálogo que te interesó. Respondemos el mismo día para empezar a estructurar tu diseño.
           </p>
           <div className="mt-10">
             <WhatsAppButton variant="on-dark" />

@@ -2,20 +2,20 @@ import { Reveal } from '@/components/ui/Reveal'
 
 const steps = [
   {
-    title: 'Eliges o describes',
-    body: 'Miras el catálogo y escoges un cuadro, o nos cuentas qué tienes en mente: colores, tamaño, dónde va a colgarse. Una foto de la pared ayuda mucho.',
+    title: 'Exploras o propones',
+    body: 'Miras el catálogo y escoges un diseño, o nos detallas a fondo esa afición, fecha o recuerdo que deseas encapsular.',
   },
   {
-    title: 'Cotizamos por WhatsApp',
-    body: 'Respondemos con precio, tiempo de entrega y, si es un encargo, un boceto rápido de la idea. Sin compromiso hasta que digas que sí.',
+    title: 'Diseñamos por WhatsApp',
+    body: 'Te respondemos con el precio, los detalles técnicos de la pieza y, si es un encargo a medida, estructuramos la idea inicial contigo.',
   },
   {
-    title: 'Lo pintamos',
-    body: 'Se aparta con un abono del 50 %. Te vamos mandando fotos del avance. Puedes pedir ajustes mientras la pintura aún está fresca.',
+    title: 'Manufactura y precisión',
+    body: 'Se aparta con un abono del 50 %. Iniciamos la producción meticulosa de tu cuadro o box, asegurando que la estética y la calidad física encajen perfectamente.',
   },
   {
-    title: 'Llega a tu pared',
-    body: 'Entrega en mano en la ciudad o envío embalado para el resto del país. Cada cuadro sale con su ficha: técnica, medidas, fecha y firma.',
+    title: 'La experiencia de entrega',
+    body: 'Recibes una caja con ingeniería de empaque, pensada para que el impacto emocional y visual comience desde el primer segundo en que se abre.',
   },
 ]
 
@@ -29,7 +29,7 @@ export function HowItWorks() {
       <Reveal className="max-w-2xl">
         <p className="label-brand">Cómo funciona</p>
         <h2 id="como-title" className="text-h2 mt-4">
-          Cuatro pasos. Uno de ellos es esperar.
+          Cuatro pasos. Desde tu idea hasta el unboxing.
         </h2>
       </Reveal>
 
