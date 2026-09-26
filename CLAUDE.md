@@ -28,6 +28,8 @@ npm run dev          # http://localhost:5173 — sin VITE_API_URL arranca en MOD
 npm run build        # tsc -b && vite build — debe pasar antes de cualquier entrega
 npm run lint         # oxlint
 npm run qa:shots     # capturas a 375/768/1440 en docs/qa/ (necesita dev server y Edge/Chrome)
+npm run qa           # suite de calidad: accesibilidad, contraste, pantallas, enlaces, textos, Lighthouse
+npm run qa:rapido    # lo mismo sin Lighthouse (~90 s)
 
 # Backend (requiere JDK 21 y Docker; Maven NO: ./mvnw lo descarga solo la primera vez)
 cd backend && docker compose up -d       # Postgres local (puerto 5432, BD/usuario "agp")
@@ -53,6 +55,8 @@ La base de datos real está en **Supabase** (Session pooler, ver `docs/DEPLOY.md
 - `--color-greige` es para bordes y líneas: sobre `silk` da 2:1 y no vale para texto (usar `ink-soft`).
 - Motion: `animate` → `emil-design-eng`. Solo `transform`/`opacity`, curva `--ease-out`, UI < 300 ms, hero/scroll ≤ 800 ms, `scale(0.97)` en `:active`, nunca `ease-in` ni `transition: all`. Transforms como string (`transform: 'translateY(0px)'`), no `y: 0`.
 - Antes de entregar UI nueva: invocar `review-animations` por nombre (no se auto-invoca) y corregir todo Block.
+- Antes de publicar: `npm run qa` (skill `qa-suite`). Nunca aflojar un control para que pase; si da un falso positivo, se arregla el control y se anota en `.claude/skills/qa-suite/TRAMPAS.md`.
+- Tipografías servidas desde `/fonts` (ver `src/fonts.css`). No volver a enlazar Google Fonts: metería un tercero y la política de privacidad dice que no hay ninguno.
 - Copy en español, tono de taller pequeño. Pasar por `humanizer`: sin "vibrante", "innovador", "único en su tipo", tríadas ni guiones largos decorativos.
 
 ## Reglas de arquitectura (backend)

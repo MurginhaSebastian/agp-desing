@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./fonts.css";
 
 /* ------------------------------------------------------------------
    AGP Desing — design tokens (Tailwind v4, no config file)

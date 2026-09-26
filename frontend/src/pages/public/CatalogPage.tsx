@@ -51,6 +51,8 @@ export function CatalogPage() {
       </Reveal>
 
       <div className="mt-14 lg:mt-20 border-t border-ink pt-12 lg:pt-16">
+        {/* Cada pieza es un h3; sin este h2 el salto desde el h1 rompe el orden de títulos. */}
+        <h2 className="sr-only">Piezas del catálogo</h2>
         {loading && <p className="label" role="status">Cargando diseños…</p>}
         {error && (
           <div role="alert" className="max-w-md">

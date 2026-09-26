@@ -8,7 +8,15 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "qa:shots": "node scripts/qa-shots.mjs"
+    "qa:shots": "node scripts/qa-shots.mjs",
+    "qa": "node scripts/qa/run.mjs",
+    "qa:rapido": "node scripts/qa/run.mjs rapido",
+    "qa:a11y": "node scripts/qa/a11y.mjs",
+    "qa:contraste": "node scripts/qa/contrast.mjs",
+    "qa:pantallas": "node scripts/qa/responsive.mjs",
+    "qa:textos": "node scripts/qa/content.mjs",
+    "qa:enlaces": "node scripts/qa/links.mjs",
+    "qa:lighthouse": "node scripts/qa/lighthouse.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -20,11 +28,15 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
+    "chrome-launcher": "^1.2.1",
+    "lighthouse": "^12.8.2",
     "oxlint": "^1.81.0",
+    "pa11y": "^9.1.1",
     "playwright": "^1.63.0",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"
