@@ -1,41 +1,26 @@
-import { Outlet, createBrowserRouter } from 'react-router-dom'
-import { Footer } from '@/components/layout/Footer'
-import { Navbar } from '@/components/layout/Navbar'
-import { ScrollManager } from '@/components/layout/ScrollManager'
-import { AdminLayout } from '@/pages/admin/AdminLayout'
-import { LoginPage } from '@/pages/admin/LoginPage'
-import { ProductEditPage } from '@/pages/admin/ProductEditPage'
-import { ProductListPage } from '@/pages/admin/ProductListPage'
-import { SettingsPage } from '@/pages/admin/SettingsPage'
+// oxlint-disable react/only-export-components -- este archivo es configuración de rutas:
+// exporta `router` (que no es un componente) junto a los lazy() de cada página. El aviso
+// va de Fast Refresh y aquí no aplica; los componentes de verdad viven en layouts.tsx.
+import { lazy } from 'react'
+import { createBrowserRouter } from 'react-router-dom'
+import { AdminSuspense, PublicLayout, Root } from '@/router/layouts'
 import { CatalogPage } from '@/pages/public/CatalogPage'
 import { HomePage } from '@/pages/public/HomePage'
 import { NotFoundPage } from '@/pages/public/NotFoundPage'
 import { ProductDetailPage } from '@/pages/public/ProductDetailPage'
 import { ProtectedRoute } from '@/security/ProtectedRoute'
 
-function PublicLayout() {
-  return (
-    <>
-      <a href="#contenido" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 btn-primary">
-        Saltar al contenido
-      </a>
-      <Navbar />
-      <main id="contenido">
-        <Outlet />
-      </main>
-      <Footer />
-    </>
-  )
-}
-
-function Root() {
-  return (
-    <>
-      <ScrollManager />
-      <Outlet />
-    </>
-  )
-}
+/*
+ * El panel y las páginas legales se cargan aparte. Un visitante nunca entra al
+ * panel, así que no tiene por qué descargar sus formularios.
+ */
+const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout').then((m) => ({ default: m.AdminLayout })))
+const LoginPage = lazy(() => import('@/pages/admin/LoginPage').then((m) => ({ default: m.LoginPage })))
+const ProductEditPage = lazy(() => import('@/pages/admin/ProductEditPage').then((m) => ({ default: m.ProductEditPage })))
+const ProductListPage = lazy(() => import('@/pages/admin/ProductListPage').then((m) => ({ default: m.ProductListPage })))
+const SettingsPage = lazy(() => import('@/pages/admin/SettingsPage').then((m) => ({ default: m.SettingsPage })))
+const PrivacyPage = lazy(() => import('@/pages/public/PrivacyPage').then((m) => ({ default: m.PrivacyPage })))
+const TermsPage = lazy(() => import('@/pages/public/TermsPage').then((m) => ({ default: m.TermsPage })))
 
 export const router = createBrowserRouter([
   {
@@ -47,22 +32,29 @@ export const router = createBrowserRouter([
           { path: '/', element: <HomePage /> },
           { path: '/catalogo', element: <CatalogPage /> },
           { path: '/catalogo/:slug', element: <ProductDetailPage /> },
+          { path: '/privacidad', element: <PrivacyPage /> },
+          { path: '/terminos', element: <TermsPage /> },
           // Cualquier otra dirección: sin esto React Router enseña su error en inglés.
           { path: '*', element: <NotFoundPage /> },
         ],
       },
-      { path: '/admin/login', element: <LoginPage /> },
       {
-        element: <ProtectedRoute />,
+        element: <AdminSuspense />,
         children: [
+          { path: '/admin/login', element: <LoginPage /> },
           {
-            path: '/admin',
-            element: <AdminLayout />,
+            element: <ProtectedRoute />,
             children: [
-              { index: true, element: <ProductListPage /> },
-              { path: 'cuadros/nuevo', element: <ProductEditPage /> },
-              { path: 'cuadros/:id', element: <ProductEditPage /> },
-              { path: 'portada', element: <SettingsPage /> },
+              {
+                path: '/admin',
+                element: <AdminLayout />,
+                children: [
+                  { index: true, element: <ProductListPage /> },
+                  { path: 'cuadros/nuevo', element: <ProductEditPage /> },
+                  { path: 'cuadros/:id', element: <ProductEditPage /> },
+                  { path: 'portada', element: <SettingsPage /> },
+                ],
+              },
             ],
           },
         ],

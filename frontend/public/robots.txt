@@ -1,0 +1,7 @@
+# AGP Desing
+User-agent: *
+Allow: /
+Disallow: /admin
+
+# Sustituir por el dominio real al publicar
+# Sitemap: https://agpdesing.com/sitemap.xml
