@@ -50,7 +50,8 @@ La base de datos real está en **Supabase** (Session pooler, ver `docs/DEPLOY.md
 - Cargar `frontend-design` antes de tocar UI. Pasar el AI Slop Test: nada de tarjetas iguales con sombra, gradientes morados, Inter/Roboto/Arial, todo centrado.
 - Tokens en `frontend/src/index.css` (`@theme`). Rojo de marca `#7e0e0e` (del logo) es el único acento fuerte; paleta del cliente en `docs/brand/paleta.png`. No inventar colores nuevos.
 - Fuentes: Cormorant Garamond (display), Manrope (cuerpo), JetBrains Mono (etiquetas de museo). Solo esas tres.
-- La "pared de galería" (`ProductGrid` + `ProductCard`) es la pieza distintiva: cada cuadro a su proporción real, etiqueta debajo, alturas escalonadas. No convertirla en grid uniforme.
+- La "pared de galería" (`ProductGrid` + `ProductCard`) es la pieza distintiva: etiqueta debajo, alturas escalonadas. No convertirla en grid uniforme.
+- **Las fotos no se recortan nunca.** La tarjeta toma su proporción de la imagen (`onLoad` → `naturalWidth/naturalHeight`), usando los centímetros solo como estimación mientras carga; la ficha usa `object-contain`. Antes la caja salía de `widthCm/heightCm` y con `object-cover` llegó a comerse el 38 % de una foto.
 - La portada es **editorial** (titular tipográfico), no una foto a pantalla con capa oscura. La imagen opcional de `/admin/portada` (`GET/PUT /api/settings`) se cuelga en vertical junto al titular; vacía, el hero queda solo con texto.
 - `--color-greige` es para bordes y líneas: sobre `silk` da 2:1 y no vale para texto (usar `ink-soft`).
 - Motion: `animate` → `emil-design-eng`. Solo `transform`/`opacity`, curva `--ease-out`, UI < 300 ms, hero/scroll ≤ 800 ms, `scale(0.97)` en `:active`, nunca `ease-in` ni `transition: all`. Transforms como string (`transform: 'translateY(0px)'`), no `y: 0`.

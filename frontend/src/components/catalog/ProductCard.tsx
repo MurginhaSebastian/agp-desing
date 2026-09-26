@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { catalogNumber, formatDimensions, formatPrice } from '@/lib/format'
 import { PRODUCT_STATUS_LABEL, type Product } from '@/types/product'
@@ -13,8 +14,14 @@ interface Props {
  * de la web: nada de tarjetas iguales con sombra.
  */
 export function ProductCard({ product, index }: Props) {
-  const ratio = product.widthCm / product.heightCm
   const sold = product.status === 'SOLD'
+  /*
+   * La tarjeta toma la forma de la FOTO, no de los centímetros del panel: si no
+   * coinciden (una foto vertical con medidas horizontales, por ejemplo) se recortaba
+   * un tercio de la imagen. Mientras la foto carga se usa la proporción en centímetros
+   * como estimación, así el hueco ya está reservado y la página no da un salto.
+   */
+  const [ratio, setRatio] = useState(product.widthCm / product.heightCm)
 
   return (
     <article className="group">
@@ -30,8 +37,10 @@ export function ProductCard({ product, index }: Props) {
             alt={`${product.name} — ${product.technique}`}
             loading="lazy"
             decoding="async"
-            width={product.widthCm * 10}
-            height={product.heightCm * 10}
+            onLoad={(e) => {
+              const img = e.currentTarget
+              if (img.naturalWidth > 0) setRatio(img.naturalWidth / img.naturalHeight)
+            }}
             className={`size-full object-cover transition-transform duration-500 [transition-timing-function:var(--ease-out)] motion-safe:group-hover:scale-[1.025] ${sold ? 'opacity-80' : ''}`}
           />
           {product.status !== 'AVAILABLE' && (

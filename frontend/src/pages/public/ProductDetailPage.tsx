@@ -51,7 +51,6 @@ export function ProductDetailPage() {
     )
   }
 
-  const ratio = product.widthCm / product.heightCm
 
   return (
     <article className="container-x pt-8 pb-24 md:pt-12 md:pb-32">
@@ -60,17 +59,20 @@ export function ProductDetailPage() {
       </Link>
 
       <div className="grid gap-10 md:grid-cols-12 md:gap-10 lg:gap-16">
-        <Reveal as="figure" className="md:col-span-6 lg:col-span-7 bg-nude" >
-          <div style={{ aspectRatio: String(ratio) }} className="w-full max-h-[70vh] mx-auto">
-            <img
-              src={product.imageUrl}
-              alt={`${product.name} — ${product.technique}, ${formatDimensions(product.widthCm, product.heightCm)}`}
-              width={product.widthCm * 10}
-              height={product.heightCm * 10}
-              className="size-full object-cover"
-              fetchPriority="high"
-            />
-          </div>
+        {/*
+          La foto se ve ENTERA: aquí manda la imagen, no los centímetros del panel.
+          Antes la caja tomaba su forma de widthCm/heightCm y el `object-cover` recortaba
+          lo que sobrara; con el tope de altura en escritorio llegaba a comerse el 38 %.
+          El tope sigue (si no, en tablet el precio se iba una pantalla abajo), pero ahora
+          la imagen se encoge para caber en vez de recortarse.
+        */}
+        <Reveal as="figure" className="md:col-span-6 lg:col-span-7 self-start justify-self-center w-fit bg-nude p-4 md:p-6 flex items-center justify-center">
+          <img
+            src={product.imageUrl}
+            alt={`${product.name} — ${product.technique}, ${formatDimensions(product.widthCm, product.heightCm)}`}
+            className="w-auto max-w-full max-h-[70vh] object-contain"
+            fetchPriority="high"
+          />
         </Reveal>
 
         {/* Ficha: la etiqueta de museo a tamaño completo, pegada al scroll en escritorio */}
