@@ -2,6 +2,7 @@
  * Piezas comunes de la suite de calidad.
  * Todos los controles arrancan de aquí para que midan igual.
  */
+import { readFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 
 export const BASE = process.env.QA_BASE ?? 'http://localhost:5173'
@@ -13,6 +14,29 @@ export const ADMIN = {
 
 /** No hay Chrome en esta máquina; Edge usa el mismo motor. */
 export const CANAL = process.env.QA_CHANNEL ?? 'msedge'
+
+/**
+ * Lee `frontend/.env` para saber contra qué contactos comparar. Los reales no se
+ * guardan en el repositorio, así que la única fuente fiable es ese archivo; si no
+ * existe, se usan los mismos valores de ejemplo que trae el código.
+ */
+export function configuracionWeb() {
+  const ruta = new URL('../../.env', import.meta.url)
+  const valores = { whatsapp: '51999999999', instagram: 'https://www.instagram.com/ejemplo/', tiktok: 'https://www.tiktok.com/@ejemplo', configurado: false }
+  try {
+    const texto = readFileSync(ruta, 'utf8')
+    const leer = (clave) => texto.match(new RegExp('^' + clave + '=(.*)$', 'm'))?.[1]?.trim()
+    const wa = leer('VITE_WHATSAPP_NUMBER')
+    const ig = leer('VITE_INSTAGRAM_URL')
+    const tt = leer('VITE_TIKTOK_URL')
+    if (wa) { valores.whatsapp = wa.replace(/\D/g, ''); valores.configurado = true }
+    if (ig) valores.instagram = ig
+    if (tt) valores.tiktok = tt
+  } catch {
+    // sin .env: quedan los de ejemplo
+  }
+  return valores
+}
 
 export const ANCHOS = [
   { w: 375, h: 812, nombre: 'móvil' },

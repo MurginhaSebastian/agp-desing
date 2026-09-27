@@ -71,4 +71,4 @@ La base de datos real está en **Supabase** (Session pooler, ver `docs/DEPLOY.md
 
 ## Estado y pendientes
 
-Ver `docs/plan-agp-design.md` § Fases. Pendientes conocidos: logo con fondo transparente (el actual es PNG con rojo), fotos reales de las obras (las SVG en `frontend/public/images/obras/` son de muestra). WhatsApp (+51 999 999 999), Instagram (`ejemplo`) y TikTok (`@ejemplo`) reales ya están como valores por defecto en `frontend/src/config/env.ts` y en `.env.example`. El negocio es peruano: precios en soles (`PEN`, centavos en `priceCents`), formato `es-PE`.
+Ver `docs/plan-agp-design.md` § Fases. Pendientes conocidos: logo con fondo transparente (el actual es PNG con rojo), fotos reales de las obras (las SVG en `frontend/public/images/obras/` son de muestra). Los contactos reales (WhatsApp, Instagram, TikTok, correo) **no se guardan en el repositorio**: viven en `frontend/.env` y en las variables del hosting. `src/config/env.ts` y `.env.example` solo llevan valores de ejemplo evidentes. No volver a escribir los reales en el código. El negocio es peruano: precios en soles (`PEN`, centavos en `priceCents`), formato `es-PE`.

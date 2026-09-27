@@ -29,7 +29,7 @@ export function PrivacyPage() {
             <p className="mt-3">
               AGP Desing, taller de regalos personalizados con sede en Trujillo, La Libertad (Perú).
               Para cualquier asunto sobre tus datos escribe a{' '}
-              <a className="link-underline text-ink" href="mailto:correo@ejemplo.com">correo@ejemplo.com</a>.
+              <a className="link-underline text-ink" href={`mailto:${env.contactEmail}`}>{env.contactEmail}</a>.
             </p>
           </section>
 
@@ -102,7 +102,7 @@ export function PrivacyPage() {
               La Ley 29733 de Protección de Datos Personales y su reglamento (Decreto Supremo 016-2024-JUS)
               te dan derecho a saber qué tenemos tuyo, a corregirlo, a que lo borremos y a oponerte a que lo
               usemos. Para ejercerlos basta con un correo a{' '}
-              <a className="link-underline text-ink" href="mailto:correo@ejemplo.com">correo@ejemplo.com</a>{' '}
+              <a className="link-underline text-ink" href={`mailto:${env.contactEmail}`}>{env.contactEmail}</a>{' '}
               diciendo qué quieres; te respondemos en los plazos que marca la ley.
             </p>
             <p className="mt-3">

@@ -7,12 +7,18 @@ import { pathToFileURL } from 'node:url'
  * No se navega a las redes sociales: se comprueba la dirección escrita, que es lo
  * que se puede romper. Entrar a WhatsApp con el número real sería molestar al dueño.
  */
-import { BASE, GRAVEDAD, abrirNavegador, entrarAlPanel, imprimir } from './shared.mjs'
+import { BASE, GRAVEDAD, abrirNavegador, configuracionWeb, entrarAlPanel, imprimir } from './shared.mjs'
 
+/*
+ * Lo que se espera sale de `frontend/.env`, no está escrito aquí: los contactos
+ * reales no se guardan en el repositorio. Si falta el .env se comparan contra los
+ * valores de ejemplo y se avisa de que la comprobación vale poco.
+ */
+const CFG = configuracionWeb()
 const ESPERADOS = {
-  whatsapp: /^https:\/\/wa\.me\/51999999999\?text=/,
-  instagram: 'https://www.instagram.com/ejemplo/',
-  tiktok: 'https://www.tiktok.com/@ejemplo',
+  whatsapp: new RegExp(`^https://wa\\.me/${CFG.whatsapp}\\?text=`),
+  instagram: CFG.instagram,
+  tiktok: CFG.tiktok,
 }
 
 export async function run() {

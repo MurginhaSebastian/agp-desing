@@ -24,7 +24,7 @@ export function TermsPage() {
             <h2 className="text-h3 text-ink">Quiénes somos</h2>
             <p className="mt-3">
               AGP Desing, taller de regalos personalizados en Trujillo, La Libertad (Perú). Contacto:{' '}
-              <a className="link-underline text-ink" href="mailto:correo@ejemplo.com">correo@ejemplo.com</a>{' '}
+              <a className="link-underline text-ink" href={`mailto:${env.contactEmail}`}>{env.contactEmail}</a>{' '}
               y WhatsApp. Al usar esta web aceptas lo que dice esta página.
             </p>
           </section>
