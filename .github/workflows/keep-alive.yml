@@ -12,6 +12,9 @@ on:
     - cron: "*/10 * * * *"  # cada 10 min (solo actúa el job de Render)
   workflow_dispatch:
 
+# El token del workflow no necesita tocar nada del repositorio: solo hace dos curl.
+permissions: {}
+
 jobs:
   supabase:
     if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 12 * * *'
@@ -36,7 +39,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping al backend
+        env:
+          # Por variable de entorno, no interpolado dentro del script: lo que venga de vars/secrets
+          # no debe poder convertirse en comandos del shell.
+          BACKEND_URL: ${{ vars.BACKEND_URL }}
         run: |
-          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "${{ vars.BACKEND_URL }}/api/products")
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$BACKEND_URL/api/products")
           echo "Backend respondió $code"
           [ "$code" = "200" ]

@@ -2,6 +2,7 @@ package com.agpdesing.presentation.rest;
 
 import com.agpdesing.application.port.out.TokenProvider;
 import com.agpdesing.application.usecase.auth.AuthenticateAdminUseCase;
+import com.agpdesing.presentation.ratelimit.ClientIpResolver;
 import com.agpdesing.presentation.ratelimit.LoginRateLimiter;
 import com.agpdesing.presentation.dto.request.LoginRequest;
 import com.agpdesing.presentation.dto.response.AuthResponse;
@@ -21,27 +22,23 @@ public class AuthController {
 
     private final AuthenticateAdminUseCase authenticate;
     private final LoginRateLimiter rateLimiter;
+    private final ClientIpResolver clientIp;
 
-    public AuthController(AuthenticateAdminUseCase authenticate, LoginRateLimiter rateLimiter) {
+    public AuthController(AuthenticateAdminUseCase authenticate, LoginRateLimiter rateLimiter,
+                          ClientIpResolver clientIp) {
         this.authenticate = authenticate;
         this.rateLimiter = rateLimiter;
+        this.clientIp = clientIp;
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest body, HttpServletRequest request) {
-        if (!rateLimiter.tryConsume(clientKey(request))) {
+        if (!rateLimiter.tryConsume(clientIp.resolve(request))) {
             ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS,
                     "Demasiados intentos. Espera un minuto.");
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(pd);
         }
         TokenProvider.IssuedToken token = authenticate.execute(body.username(), body.password());
         return ResponseEntity.ok(new AuthResponse(token.value(), token.expiresAt(), body.username()));
-    }
-
-    /** Detrás de un proxy (Railway, Render) la IP real llega en X-Forwarded-For. */
-    private static String clientKey(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) return forwarded.split(",")[0].strip();
-        return request.getRemoteAddr();
     }
 }

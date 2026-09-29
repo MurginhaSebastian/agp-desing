@@ -16,7 +16,18 @@
     "qa:pantallas": "node scripts/qa/responsive.mjs",
     "qa:textos": "node scripts/qa/content.mjs",
     "qa:enlaces": "node scripts/qa/links.mjs",
-    "qa:lighthouse": "node scripts/qa/lighthouse.mjs"
+    "qa:muerto": "node scripts/qa/muerto.mjs",
+    "qa:lighthouse": "node scripts/qa/lighthouse.mjs",
+    "seg": "node scripts/seguridad/run.mjs",
+    "seg:rapido": "node scripts/seguridad/run.mjs rapido",
+    "seg:cabeceras": "node scripts/seguridad/cabeceras.mjs",
+    "seg:csp": "node scripts/seguridad/csp.mjs",
+    "seg:permisos": "node scripts/seguridad/autorizacion.mjs",
+    "seg:login": "node scripts/seguridad/limite-login.mjs",
+    "seg:supabase": "node scripts/seguridad/supabase.mjs",
+    "seg:fotos": "node scripts/seguridad/fotos.mjs",
+    "seg:secretos": "node scripts/seguridad/secretos.mjs",
+    "seg:dependencias": "node scripts/seguridad/dependencias.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

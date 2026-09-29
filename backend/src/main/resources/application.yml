@@ -2,6 +2,14 @@
 spring:
   application:
     name: agp-backend
+  servlet:
+    multipart:
+      # Tope de una foto. El panel avisa antes de enviar y el backend lo vuelve a comprobar.
+      max-file-size: ${MAX_IMAGEN_MB:5}MB
+      max-request-size: ${MAX_PETICION_MB:6}MB
+      # Más alto que el tope: así el archivo se queda en memoria y nunca toca el disco
+      # (en Render el disco se borra en cada despliegue).
+      file-size-threshold: ${MAX_PETICION_MB:6}MB
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
@@ -22,6 +30,10 @@ spring:
 
 server:
   port: ${PORT:8080}
+  tomcat:
+    # Sin esto, un archivo mucho más grande que el tope corta la conexión y el navegador
+    # muestra un error de red en vez del mensaje que explica el límite.
+    max-swallow-size: ${MAX_TRAGAR_MB:20}MB
   error:
     include-stacktrace: never
     include-message: never
@@ -33,3 +45,14 @@ app:
     issuer: agp-desing
   cors:
     allowed-origin: ${CORS_ALLOWED_ORIGIN}
+  storage:
+    # Supabase Storage, para las fotos que se suben desde el panel. Sin configurar, la web
+    # funciona igual y solo falla subir una foto, con un mensaje que lo dice.
+    url: ${SUPABASE_URL:}
+    key: ${SUPABASE_SERVICE_KEY:}
+    bucket: ${SUPABASE_BUCKET:productos}
+  ratelimit:
+    # Proxies propios delante de la app: 0 en local; detrás de Render/Railway, el número real
+    # (ver docs/DEPLOY.md: con 0 detrás de un proxy todos los visitantes comparten contador).
+    # Con 0 se ignora X-Forwarded-For, que la escribe quien llama y se puede falsear.
+    trusted-proxy-hops: ${TRUSTED_PROXY_HOPS:0}
