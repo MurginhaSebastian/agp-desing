@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 
-export { GRAVEDAD, ordenar, imprimir, BASE, API, ADMIN, abrirNavegador, nuevaPagina } from '../qa/shared.mjs'
+export { GRAVEDAD, ordenar, imprimir, BASE, API, ADMIN, exigirCredenciales, abrirNavegador, nuevaPagina } from '../qa/shared.mjs'
 
 /** Raíz del repositorio, desde este archivo. */
 export const RAIZ = new URL('../../../', import.meta.url)
@@ -31,7 +31,15 @@ export function variablesEnv(relativa) {
   const out = {}
   for (const linea of texto.split(/\r?\n/)) {
     const m = linea.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)$/)
-    if (m) out[m[1]] = m[2].trim()
+    // Se quitan las comillas que rodeen el valor: `CLAVE='algo'` es una forma normal de
+    // escribirlo y tomárselas al pie de la letra hace fallar la comparación sin decir por qué.
+    if (m) {
+      const valor = m[2].trim()
+      const primero = valor.slice(0, 1)
+      out[m[1]] = (primero === "'" || primero === '"') && valor.endsWith(primero) && valor.length >= 2
+        ? valor.slice(1, -1)
+        : valor
+    }
   }
   return out
 }
@@ -58,6 +66,11 @@ export function supabase() {
  * Ejecuta un comando y devuelve su salida; nunca lanza.
  * `opciones.entorno` añade variables al entorno del proceso hijo (las de `process.env`
  * siguen estando, para no dejar al comando sin PATH).
+ *
+ * `opciones.shell === false` ejecuta el programa directamente, sin pasar por `cmd`. Hace falta
+ * para `git grep`: los patrones llevan comillas y barras verticales, y `cmd` se los come o los
+ * toma por tuberías. El síntoma es venenoso —el comando "funciona" pero no encuentra nada— así
+ * que todo lo que lleve un patrón dentro va sin shell.
  */
 export function ejecutar(comando, args, opciones = {}) {
   try {
@@ -69,7 +82,7 @@ export function ejecutar(comando, args, opciones = {}) {
         env: opciones.entorno ? { ...process.env, ...opciones.entorno } : process.env,
         maxBuffer: 32 * 1024 * 1024,
         stdio: ['ignore', 'pipe', 'pipe'],
-        shell: process.platform === 'win32',
+        shell: opciones.shell === false ? false : process.platform === 'win32',
         timeout: opciones.timeout ?? 180_000,
       }),
     }

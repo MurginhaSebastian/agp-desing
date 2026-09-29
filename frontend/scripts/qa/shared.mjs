@@ -7,9 +7,60 @@ import { chromium } from 'playwright'
 
 export const BASE = process.env.QA_BASE ?? 'http://localhost:5173'
 export const API = process.env.QA_API ?? 'http://localhost:8080'
+/**
+ * Credenciales del panel para los controles que necesitan entrar.
+ *
+ * Aquí NO hay ninguna contraseña escrita. La hubo —el valor por defecto de `QA_ADMIN_PASS`— y
+ * este archivo está en un repositorio público, así que la contraseña real del panel estuvo a la
+ * vista durante cuatro días. La lección: lo que abre una puerta no se escribe en el código
+ * aunque sea "solo para las pruebas", porque las pruebas corren contra la puerta de verdad.
+ *
+ * Sale de `QA_ADMIN_PASS`, del entorno o de `frontend/.env` (que git ignora). Si no está, los
+ * controles que entran al panel paran y lo dicen: es preferible no medir a medir con una
+ * contraseña inventada y creerse el resultado.
+ */
 export const ADMIN = {
-  usuario: process.env.QA_ADMIN_USER ?? 'admin',
-  clave: process.env.QA_ADMIN_PASS ?? process.env.QA_ADMIN_PASS_NO_ESCRITA_AQUI,
+  usuario: process.env.QA_ADMIN_USER ?? leerDelEnv('QA_ADMIN_USER') ?? 'admin',
+  clave: process.env.QA_ADMIN_PASS ?? leerDelEnv('QA_ADMIN_PASS') ?? null,
+}
+
+/** Lanza con un mensaje entendible si no hay contraseña con la que entrar. */
+export function exigirCredenciales() {
+  if (!ADMIN.clave) {
+    throw new Error(
+      'No hay contraseña del panel. Escribe QA_ADMIN_PASS=tu-clave en frontend/.env ' +
+      '(sin VITE_ delante, o acabaría dentro de la web) y repite.',
+    )
+  }
+  return ADMIN
+}
+
+/**
+ * Quita las comillas que rodean un valor de `.env`. Rodear el valor con comillas simples es
+ * perfectamente válido —así se hace cuando el valor lleva espacios— y casi todos los lectores de
+ * `.env` las quitan. El de aquí no lo hacía, y el síntoma era de los que despistan: la variable
+ * "existe", el control dice que está configurado, y el intento de entrar falla como si la
+ * contraseña estuviera mal.
+ */
+function quitarComillas(valor) {
+  if (!valor) return valor
+  const limpio = valor.trim()
+  const primero = limpio.slice(0, 1)
+  if ((primero === "'" || primero === '"') && limpio.endsWith(primero) && limpio.length >= 2) {
+    return limpio.slice(1, -1)
+  }
+  return limpio
+}
+
+/** Una variable suelta de `frontend/.env`, sin traerse el resto. */
+function leerDelEnv(clave) {
+  try {
+    const texto = readFileSync(new URL('../../.env', import.meta.url), 'utf8')
+    const valor = quitarComillas(texto.match(new RegExp('^' + clave + '=(.*)$', 'm'))?.[1])
+    return valor || null
+  } catch {
+    return null
+  }
 }
 
 /** No hay Chrome en esta máquina; Edge usa el mismo motor. */
@@ -25,7 +76,7 @@ export function configuracionWeb() {
   const valores = { whatsapp: '51999999999', instagram: 'https://www.instagram.com/ejemplo/', tiktok: 'https://www.tiktok.com/@ejemplo', configurado: false }
   try {
     const texto = readFileSync(ruta, 'utf8')
-    const leer = (clave) => texto.match(new RegExp('^' + clave + '=(.*)$', 'm'))?.[1]?.trim()
+    const leer = (clave) => quitarComillas(texto.match(new RegExp('^' + clave + '=(.*)$', 'm'))?.[1])
     const wa = leer('VITE_WHATSAPP_NUMBER')
     const ig = leer('VITE_INSTAGRAM_URL')
     const tt = leer('VITE_TIKTOK_URL')
@@ -83,6 +134,7 @@ export async function nuevaPagina(navegador, viewport = { width: 1440, height: 9
 
 /** Deja la sesión de administrador iniciada en esa página. */
 export async function entrarAlPanel(page) {
+  exigirCredenciales()
   await page.goto(BASE + '/admin/login', { waitUntil: 'networkidle' })
   await page.fill('input[type=text]', ADMIN.usuario)
   await page.fill('input[type=password]', ADMIN.clave)

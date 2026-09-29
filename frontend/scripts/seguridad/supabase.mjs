@@ -95,8 +95,13 @@ export async function run() {
  */
 async function revisarElBucket(cfg) {
   const env = variablesEnv('backend/.env')
-  const bucket = process.env.SUPABASE_BUCKET ?? env.SUPABASE_BUCKET
-  if (!bucket) return []
+  /*
+   * `productos` es el mismo valor por defecto que usa el backend (`app.storage.bucket`), así que
+   * hay que ponerlo también aquí. Antes, si la variable no estaba escrita en `backend/.env` —que
+   * es lo normal, porque el backend no la necesita— este control **se saltaba sin decir nada** y
+   * la auditoría salía en verde sin haber comprobado quién puede escribir en el almacén.
+   */
+  const bucket = process.env.SUPABASE_BUCKET ?? env.SUPABASE_BUCKET ?? 'productos'
 
   const destino = `${cfg.url}/storage/v1/object/${bucket}/${NOMBRE_DE_PRUEBA}`
   let respuesta

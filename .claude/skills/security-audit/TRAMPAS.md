@@ -143,3 +143,43 @@ lo inesperado acaba ignorándose, y entonces ya no protege de nada.
 De paso, tenía razón en una cosa que sí había que arreglar: la página de privacidad decía que
 ningún tercero recibe nada, y ahora el navegador del visitante sí se conecta a Supabase para ver
 las fotos. Se añadió a la política y se movió su fecha.
+
+## 14. El día que el control de secretos aprobó una contraseña publicada
+
+La contraseña del panel estuvo escrita en `frontend/scripts/qa/shared.mjs`, como valor por
+defecto de `QA_ADMIN_PASS`, y el repositorio es público. Cuatro días a la vista de cualquiera. El
+control decía «sin hallazgos».
+
+Fueron dos fallos encadenados, y el segundo es el que da miedo:
+
+1. **Buscaba formatos, no formas.** Los patrones reconocían claves de máquina (`sb_secret_…`,
+   `AKIA…`, tokens de GitHub). Una contraseña que escoge una persona no tiene formato. Lo que sí
+   se puede buscar es **la forma**: una variable que se llama como una credencial con un valor
+   literal al lado. Eso es lo que ahora mira `CREDENCIALES_A_MANO`.
+2. **Los patrones pasaban por `cmd`.** `ejecutar()` usaba `shell: true` en Windows, que hace
+   falta para `npm` y `mvnw.cmd`, pero destroza los patrones con comillas y barras verticales. Y
+   el comando **no fallaba**: devolvía cero resultados. Un control que no encuentra nada y un
+   control que no busca nada se ven exactamente igual desde fuera. Por eso `git` se ejecuta ahora
+   con `shell: false`.
+
+La regla que queda: **cuando un control pasa a la primera y no ha encontrado nunca nada, hay que
+darle algo que encontrar.** Si no salta, no está midiendo.
+
+## 15. Un `.env` con comillas rompe el login sin decir por qué
+
+`QA_ADMIN_PASS='clave con espacios'` es una forma perfectamente normal de escribir un `.env`, y
+casi todos los lectores quitan esas comillas. El de aquí no, así que se las llevaba dentro de la
+contraseña: la variable «existía», el control la daba por configurada, y el intento de entrar
+fallaba como si la contraseña estuviera mal. Se perdió un buen rato buscando el problema en la
+base de datos. Ahora `quitarComillas()` las quita en los tres sitios donde se leen `.env`.
+
+## 16. Una variable que falta puede apagar un control entero
+
+El control que comprueba quién puede escribir en el almacén de fotos empezaba con
+`if (!bucket) return []`. Como `SUPABASE_BUCKET` no está escrita en `backend/.env` —el backend no
+la necesita, tiene un valor por defecto—, el control **se saltaba en silencio** y la auditoría
+salía en verde sin haberlo comprobado.
+
+Los valores por defecto tienen que estar en los dos lados o en ninguno. Y un control que no puede
+medir debe **decirlo como hallazgo**, nunca devolver una lista vacía, que se lee igual que «todo
+bien».

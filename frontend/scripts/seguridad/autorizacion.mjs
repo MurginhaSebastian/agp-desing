@@ -66,7 +66,17 @@ export async function run() {
     }
   }
 
-  // Un token de verdad, para poder probar la firma cambiada
+  // Un token de verdad, para poder probar la firma cambiada.
+  // Sin contraseña no se puede: se avisa y se sigue, pero el control positivo de abajo dirá
+  // que los 401 no prueban gran cosa.
+  if (!ADMIN.clave) {
+    hallazgos.push({
+      gravedad: GRAVEDAD.medio,
+      donde: 'credenciales',
+      que: 'no hay contraseña del panel, así que esta comprobación queda a medias',
+      detalle: 'escribe QA_ADMIN_PASS=tu-clave en frontend/.env (sin VITE_ delante)',
+    })
+  }
   const login = await pedir(`${API}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },

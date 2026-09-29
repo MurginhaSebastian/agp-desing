@@ -29,6 +29,58 @@ const PATRONES = [
 ]
 
 /*
+ * Contraseñas y claves escritas a mano dentro del código.
+ *
+ * Esto es lo que se me escapó: los patrones de arriba buscan claves con **formato de máquina**
+ * (`sb_secret_…`, `AKIA…`, tokens de GitHub), y una contraseña que escoge una persona no tiene
+ * formato ninguno. `shared.mjs` llevaba la contraseña real del panel como valor por defecto de
+ * `QA_ADMIN_PASS`, en un repositorio público, y el control dijo «sin hallazgos».
+ *
+ * La pista que sí se puede buscar no es el valor, es **la forma**: una variable cuyo nombre suena
+ * a credencial con un valor literal al lado. Se buscan las tres maneras de escribirlo en este
+ * proyecto: valor por defecto de una variable de entorno (`?? 'x'`, `|| 'x'`), asignación directa
+ * (`password: 'x'`) y constante en Java (`String CLAVE = "x"`).
+ */
+const NOMBRES_DE_CREDENCIAL = 'PASS|PASSWORD|CLAVE|SECRET|SECRETO|TOKEN|APIKEY|API_KEY|CREDENTIAL'
+const CREDENCIALES_A_MANO = [
+  {
+    nombre: 'una contraseña escrita como valor por defecto',
+    // process.env.ALGO_PASS ?? 'lo que sea'   |   process.env.X_TOKEN || "lo que sea"
+    // `[?|]{2}` cubre `??` y `||` sin tener que escapar nada: los patrones los ejecuta
+    // `git grep -E`, y una contrabarra de más ahí dentro deja de buscar lo que parece.
+    regex: `(${NOMBRES_DE_CREDENCIAL})[A-Z_]*.{0,20}[?|]{2}[[:space:]]*['"][^'"]{6,}['"]`,
+    gravedad: GRAVEDAD.critico,
+  },
+  {
+    nombre: 'una contraseña asignada a mano',
+    // password: 'loquesea'   |   secret = "loquesea"   (no vale si el valor es ${una variable})
+    // Ojo con el orden dentro de los corchetes: `${` seguidos abrirían una interpolación
+    // de JavaScript dentro de este mismo texto. Por eso va `{` antes que `$`.
+    //
+    // Aquí NO entra `clave` a secas: en este proyecto significa casi siempre «nombre de campo»
+    // (`{ clave: 'content-security-policy' }`), y meterla llenaba el informe de ruido. Un
+    // control que avisa de veinte cosas inofensivas consigue que no se lea ninguna.
+    regex: `(PASS|PASSWORD|CONTRASENA|SECRET|SECRETO|APIKEY|API_KEY|CREDENTIAL|password|secret)[A-Za-z_]*[[:space:]]*[:=][[:space:]]*['"][^'"{$]{6,}['"]`,
+    gravedad: GRAVEDAD.alto,
+  },
+]
+
+/*
+ * Valores que a la vista son de mentira. Se descartan porque este proyecto está lleno de ellos
+ * a propósito: los controles de seguridad prueban contraseñas equivocadas, el modo demo usa un
+ * token falso y la documentación explica dónde va cada cosa con un hueco.
+ */
+// Se añaden sobre la marcha los que van apareciendo: un valor que es el nombre de la propia
+// variable (QA_ADMIN_PASS) o un token declaradamente inventado no son credenciales.
+const PINTA_DE_MENTIRA = /ejemplo|demo|mock|prueba|equivocada|loquesea|no[-.]es|inventad|fake|dummy|xxxx|<[^>]*>|tu-clave|placeholder|cambia(me|r)|NO_ESCRITA|_PASS.\{0,3\}[)'"]|RETIRADA/i
+
+/** Archivos cuyo trabajo es contener ejemplos de credenciales: si no, se denuncian a sí mismos. */
+const ARCHIVOS_CON_EJEMPLOS = [
+  'frontend/scripts/seguridad/secretos.mjs',
+  '.claude/skills/',
+]
+
+/*
  * Lo que se deja fuera y por qué:
  *  - *.env.example: son plantillas con los huecos vacíos; ahí los nombres deben aparecer.
  *  - package-lock.json: sus "integrity" son hashes en base64 y se parecen a una clave.
@@ -60,11 +112,41 @@ function datosPersonales() {
   return agujas
 }
 
-/** Busca en los archivos registrados hoy. `literal` usa -F, si no ERE de POSIX. */
+/**
+ * Busca en los archivos registrados hoy. `literal` usa -F, si no ERE de POSIX.
+ *
+ * `shell: false` no es un detalle: en Windows, pasar por `cmd` destroza los patrones que llevan
+ * comillas o barras verticales, y el comando **no falla**, simplemente deja de encontrar. Así se
+ * me escapó la contraseña del panel durante cuatro días.
+ */
 function enElArbol(texto, literal) {
-  const r = ejecutar('git', ['grep', '-I', '-n', '--no-color', literal ? '-F' : '-E', '-i', '-e', texto, '--', '.', ...EXCLUIR])
+  return lineasEnElArbol(texto, literal).map((l) => l.split(':')[0])
+}
+
+/** Lo mismo, pero devolviendo la línea entera, para poder mirar qué valor se encontró. */
+function lineasEnElArbol(texto, literal) {
+  const r = ejecutar('git', ['grep', '-I', '-n', '--no-color', literal ? '-F' : '-E', '-i', '-e', texto, '--', '.', ...EXCLUIR], { shell: false })
   if (!r.ok || !r.salida.trim()) return []
-  return r.salida.trim().split(/\r?\n/).map((l) => l.split(':')[0])
+  return r.salida.trim().split(/\r?\n/)
+}
+
+/** Mira dentro de un commit concreto: ¿alguna de las líneas que casan es una credencial real? */
+function hayCredencialDeVerdadEn(commit, regex) {
+  const r = ejecutar('git', ['grep', '-I', '-n', '--no-color', '-E', '-i', '-e', regex, commit, '--', '.', ...EXCLUIR], { shell: false })
+  if (!r.ok || !r.salida.trim()) return false
+  // `git grep <commit>` antepone «commit:» a cada línea; se quita para reusar el mismo filtro.
+  return r.salida.trim().split(/\r?\n/)
+    .map((l) => l.slice(l.indexOf(':') + 1))
+    .some(esDeVerdad)
+}
+
+/** Descarta lo que a la vista es un ejemplo y no una credencial de verdad. */
+function esDeVerdad(linea) {
+  const archivo = linea.split(':')[0]
+  if (ARCHIVOS_CON_EJEMPLOS.some((a) => archivo.startsWith(a))) return false
+  // Se mira la línea entera, no solo el valor: en `{ username: 'nadie', password: 'equivocada' }`
+  // la pista de que es una prueba puede estar en cualquiera de los dos.
+  return !PINTA_DE_MENTIRA.test(linea)
 }
 
 /**
@@ -76,13 +158,43 @@ function enElHistorial(texto, literal) {
   const args = ['log', '--all', '--format=%h %ad', '--date=short', '-S', texto]
   if (!literal) args.push('--pickaxe-regex')
   args.push('--', '.', ...EXCLUIR)
-  const r = ejecutar('git', args, { timeout: 300_000 })
+  const r = ejecutar('git', args, { timeout: 300_000, shell: false })
   if (!r.ok || !r.salida.trim()) return []
   return r.salida.trim().split(/\r?\n/)
 }
 
 export async function run() {
   const hallazgos = []
+
+  // Contraseñas escritas a mano: se miran línea a línea para poder descartar los ejemplos.
+  for (const p of CREDENCIALES_A_MANO) {
+    const lineas = lineasEnElArbol(p.regex, false).filter(esDeVerdad)
+    if (lineas.length) {
+      const archivos = [...new Set(lineas.map((l) => l.split(':')[0]))]
+      hallazgos.push({
+        gravedad: p.gravedad,
+        donde: 'archivos actuales',
+        que: `hay ${p.nombre} dentro del código`,
+        detalle: archivos.slice(0, 4).join(', '),
+      })
+    }
+    /*
+     * En el historial se hace lo mismo en dos pasos: el «pickaxe» de git señala los commits
+     * candidatos, y luego se mira **dentro de cada uno** para descartar los ejemplos. Sin este
+     * segundo paso el control avisaba de commits que solo traían contraseñas equivocadas puestas
+     * a propósito por las propias pruebas, y esos avisos acaban ignorándose.
+     */
+    const sospechosos = enElHistorial(p.regex, false)
+      .filter((linea) => hayCredencialDeVerdadEn(linea.trim().split(' ')[0], p.regex))
+    if (sospechosos.length) {
+      hallazgos.push({
+        gravedad: p.gravedad,
+        donde: 'historial',
+        que: `${p.nombre} aparece en commits antiguos`,
+        detalle: `${sospechosos.length} commit(s): ${sospechosos.slice(0, 3).join(' · ')} — reescribir el historial para quitarla`,
+      })
+    }
+  }
 
   for (const p of PATRONES) {
     const archivos = [...new Set(enElArbol(p.regex, false))]

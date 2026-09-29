@@ -35,7 +35,7 @@ Dos variables opcionales:
 
 `npm run seg:login` deja el login bloqueado cerca de un minuto. Es lo que mide. Va al final.
 
-## Las nueve preguntas
+## Las diez preguntas
 
 Cada control responde a una pregunta concreta. Si se añade algo al proyecto, se añade la
 pregunta que le corresponda.
@@ -51,6 +51,7 @@ pregunta que le corresponda.
 | 7 | ¿Puede una web ajena leer la API desde el navegador de un visitante? | `permisos` (CORS) |
 | 8 | ¿Esas cabeceras dejan la web usable, o la parten? | `csp` |
 | 9 | ¿Se puede colar un archivo que no es una foto, o una foto con la ubicación de alguien dentro? | `permisos` + tests del backend |
+| 10 | ¿Puede alguien con una sesión abierta llenar el almacén de fotos? | freno de `POST /api/imagenes` |
 | 9 | ¿Las fotos del catálogo salen de un servidor ajeno (y siguen ahí)? | `fotos` |
 
 ## Cómo se arregla cada cosa
@@ -98,6 +99,12 @@ que no se puede recorrer, **no se sube**: mejor un error que publicar una foto s
 tocar `UploadImageUseCase`, `DetectorDeImagen` o `LimpiadorDeMetadatos`, correr
 `.\mvnw.cmd test -Dtest=SubirImagenTest`, que comprueba que la foto sigue abriéndose y del mismo
 tamaño después de limpiarla.
+
+**Freno de la subida.** `POST /api/imagenes` admite 20 fotos por minuto y por usuario
+(`SubidaRateLimiter`, contando por el usuario del token y no por IP). Sin eso, una sesión abierta
+en un ordenador prestado basta para llenar el almacén y para tener al servidor moviendo archivos
+de 5 MB, que en Render son 512 MB de memoria en total. Si se toca ese número, medirlo: 21 subidas
+seguidas tienen que acabar en 429, y hay que **borrar del bucket lo que suba la prueba**.
 
 **Secretos (`secretos` en rojo).** Un commit nuevo no borra nada: hay que reescribir el
 historial (`git filter-branch`) y luego forzar el push, y aun así hay que dar la clave por
