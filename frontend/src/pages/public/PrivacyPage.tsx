@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { env } from '@/config/env'
 
-const ACTUALIZADO = '25 de septiembre de 2026'
+const ACTUALIZADO = '28 de septiembre de 2026'
 
 /**
  * Política de privacidad. Está escrita a partir de lo que la web hace de verdad:
@@ -46,6 +46,12 @@ export function PrivacyPage() {
               dirección IP durante un tiempo limitado. Sirve para que la web funcione y para detectar
               abusos; no lo cruzamos con nada.
             </p>
+            <p className="mt-3">
+              Las fotos del catálogo no salen del mismo sitio que la web: están guardadas en el servicio
+              que nos aloja la base de datos, así que al mirarlas tu navegador se conecta también a ese
+              servicio y le llega tu dirección IP. Es el único que interviene mientras navegas, no lleva
+              publicidad ni seguimiento, y no le pedimos nada sobre ti.
+            </p>
           </section>
 
           <section>
@@ -81,9 +87,9 @@ export function PrivacyPage() {
             <h2 className="text-h3 text-ink">Con quién compartimos</h2>
             <p className="mt-3">
               Con nadie para fines comerciales. Solo intervienen los proveedores que hacen falta para que
-              esto funcione: el servicio que aloja la web, la base de datos donde vive el catálogo, y la
-              empresa de transporte cuando hay envío, a la que le damos tu nombre, dirección y teléfono
-              porque sin eso no puede entregarte nada.
+              esto funcione: el servicio que aloja la web, el que guarda la base de datos y las fotos del
+              catálogo, y la empresa de transporte cuando hay envío, a la que le damos tu nombre, dirección
+              y teléfono porque sin eso no puede entregarte nada.
             </p>
           </section>
 

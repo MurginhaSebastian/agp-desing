@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { SubirImagen } from '@/components/admin/SubirImagen'
 import { ApiError } from '@/types/api'
 import type { Currency, ProductCreateDTO, ProductStatus } from '@/types/product'
 import { PRODUCT_STATUS_LABEL } from '@/types/product'
@@ -34,7 +35,9 @@ function validate(dto: ProductCreateDTO): Errors {
   if (dto.widthCm <= 0) e.widthCm = 'Ancho en cm, mayor que cero.'
   if (dto.heightCm <= 0) e.heightCm = 'Alto en cm, mayor que cero.'
   if (dto.technique.trim().length === 0) e.technique = 'Indica el formato (ej. Cuadro 3D o Box Temático).'
-  if (!/^(https?:\/\/|\/)/.test(dto.imageUrl)) e.imageUrl = 'Debe ser una URL (https://…) o una ruta que empiece por /.'
+  // Ya no se escribe una dirección a mano: se elige el archivo y el componente la rellena.
+  // Lo único que puede faltar es la foto.
+  if (dto.imageUrl.trim() === '') e.imageUrl = 'Elige la foto del producto.'
   return e
 }
 
@@ -98,12 +101,14 @@ export function ProductForm({ initial = empty, submitLabel, onSubmit }: Props) {
           {errors.technique && <p className="field-error">{errors.technique}</p>}
         </div>
 
-        <div>
-          <label htmlFor="imageUrl" className="field-label">Imagen (URL) <span aria-hidden="true" className="text-brand">*</span></label>
-          <input id="imageUrl" type="url" className="field-input" value={dto.imageUrl} required aria-invalid={invalid('imageUrl')} aria-describedby="imageUrl-help" onChange={(e) => set('imageUrl', e.target.value)} />
-          <p id="imageUrl-help" className="mt-1.5 text-sm text-ink-soft">Sube la foto a Cloudinary o similar y pega aquí el enlace.</p>
-          {errors.imageUrl && <p className="field-error">{errors.imageUrl}</p>}
-        </div>
+        <SubirImagen
+          etiqueta="Foto del producto"
+          requerido
+          valor={dto.imageUrl}
+          onChange={(url) => set('imageUrl', url)}
+          error={errors.imageUrl}
+          ayuda="Se publica tal cual, sin recortar. Antes de guardarla se le quitan los datos de ubicación que traiga la foto."
+        />
       </fieldset>
 
       <fieldset className="lg:col-span-4 lg:col-start-9 space-y-5">

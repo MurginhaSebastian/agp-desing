@@ -15,8 +15,11 @@ export const unauthorizedEvent = new EventTarget()
 
 export async function http<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, auth = false } = options
+  // Un archivo va como FormData: el Content-Type lo pone el navegador porque incluye el
+  // separador entre partes, y escribirlo a mano rompería el envío.
+  const esArchivo = body instanceof FormData
   const headers: Record<string, string> = { Accept: 'application/json' }
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  if (body !== undefined && !esArchivo) headers['Content-Type'] = 'application/json'
   if (auth) {
     const token = tokenStorage.get()
     if (token) headers.Authorization = `Bearer ${token}`
@@ -25,7 +28,7 @@ export async function http<T>(path: string, options: RequestOptions = {}): Promi
   const res = await fetch(`${env.apiUrl}${path}`, {
     method,
     headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body === undefined ? undefined : esArchivo ? body : JSON.stringify(body),
   })
 
   if (res.status === 401 && auth) {

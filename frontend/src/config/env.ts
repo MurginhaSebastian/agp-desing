@@ -23,6 +23,11 @@ export const env = {
   tiktokUrl: optional(raw.VITE_TIKTOK_URL, 'https://www.tiktok.com/@ejemplo'),
   /** Correo para las páginas legales (derechos de datos, contacto formal). */
   contactEmail: optional(raw.VITE_CONTACT_EMAIL, 'correo@ejemplo.com'),
+  /**
+   * Tope de peso de una foto, en MB. Tiene que coincidir con `MAX_IMAGEN_MB` del backend:
+   * el panel avisa antes de enviar y el servidor lo vuelve a comprobar.
+   */
+  maxImagenMb: Number(optional(raw.VITE_MAX_IMAGEN_MB, '5')) || 5,
   brandName: 'AGP Desing',
 } as const
 

@@ -1,8 +1,10 @@
 package com.agpdesing.infrastructure.config;
 
+import com.agpdesing.application.port.out.ImageStorage;
 import com.agpdesing.application.port.out.PasswordHasher;
 import com.agpdesing.application.port.out.TokenProvider;
 import com.agpdesing.application.usecase.auth.AuthenticateAdminUseCase;
+import com.agpdesing.application.usecase.image.UploadImageUseCase;
 import com.agpdesing.application.usecase.product.CreateProductUseCase;
 import com.agpdesing.application.usecase.product.DeleteProductUseCase;
 import com.agpdesing.application.usecase.product.GetProductUseCase;
@@ -14,7 +16,10 @@ import com.agpdesing.domain.repository.AdminUserRepository;
 import com.agpdesing.domain.repository.ProductRepository;
 import com.agpdesing.domain.repository.SiteSettingsRepository;
 import com.agpdesing.infrastructure.security.jwt.JwtProperties;
+import com.agpdesing.infrastructure.storage.SupabaseStorageProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.util.unit.DataSize;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,7 +31,7 @@ import java.time.Clock;
  * quedan sin una sola anotación de Spring.
  */
 @Configuration
-@EnableConfigurationProperties(JwtProperties.class)
+@EnableConfigurationProperties({ JwtProperties.class, SupabaseStorageProperties.class })
 public class UseCaseConfig {
 
     @Bean
@@ -67,6 +72,17 @@ public class UseCaseConfig {
     @Bean
     UpdateSiteSettingsUseCase updateSiteSettingsUseCase(SiteSettingsRepository settings) {
         return new UpdateSiteSettingsUseCase(settings);
+    }
+
+    /**
+     * El tope de tamaño se lee de la MISMA propiedad que usa Spring para cortar la subida
+     * (`spring.servlet.multipart.max-file-size`). Con dos números distintos, uno de los dos
+     * mensajes de error mentiría.
+     */
+    @Bean
+    UploadImageUseCase uploadImageUseCase(ImageStorage almacen,
+                                          @Value("${spring.servlet.multipart.max-file-size}") DataSize maxArchivo) {
+        return new UploadImageUseCase(almacen, maxArchivo.toBytes());
     }
 
     @Bean

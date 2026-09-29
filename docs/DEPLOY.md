@@ -39,6 +39,28 @@ Esta guía es para el día que se decida publicar. Todo lo que hace falta ya est
    | `ADMIN_USERNAME` | `admin` |
    | `ADMIN_PASSWORD_HASH` | hash bcrypt de una clave **nueva** de producción: `docker run --rm httpd:alpine htpasswd -bnBC 12 "" 'clave' \| tr -d ':\n'` |
    | `CORS_ALLOWED_ORIGIN` | de momento `https://agp-desing.vercel.app`; se corrige en el paso 2 con la URL real |
+   | `TRUSTED_PROXY_HOPS` | cuántos proxies propios hay delante de la app. **Hay que ponerlo** (ver aviso abajo) |
+   | `SUPABASE_URL` | `https://<ref>.supabase.co` — el mismo identificador que ya aparece en `DB_USER` |
+   | `SUPABASE_SERVICE_KEY` | la clave **secreta** de Supabase (Settings → API). Da acceso total a la base de datos: solo aquí y en `backend/.env`, nunca en Vercel ni en el código |
+   | `SUPABASE_BUCKET` | `productos` |
+   | `MAX_IMAGEN_MB` | `5` — el mismo número que `VITE_MAX_IMAGEN_MB` en Vercel |
+
+   **Aviso sobre `TRUSTED_PROXY_HOPS`.** El freno del login (5 intentos por minuto) cuenta por IP.
+   En local no hay proxy y el valor `0` es correcto: se usa la IP de la conexión y se ignora la
+   cabecera `X-Forwarded-For`, que la escribe quien llama y por tanto se puede falsear.
+
+   En Render sí hay un proxy delante, así que con `0` **todos los visitantes parecen venir de la
+   misma IP** (la del proxy) y cinco intentos fallidos de cualquiera dejarían al dueño sin poder
+   entrar a su propio panel durante un minuto.
+
+   El valor correcto es el número de proxies propios, que casi siempre es `1`, pero **hay que
+   confirmarlo tras el primer despliegue** en vez de darlo por hecho: registrar una vez el
+   contenido de `X-Forwarded-For` en una petición real y contar cuántas IPs trae. Si trae una
+   sola, el valor es `1`. Con el número bien puesto, `ClientIpResolver` toma la IP que escribió
+   el proxio contando desde la derecha, que es la única que no puede falsear el visitante.
+
+   Comprobación después: `npm run seg:login` contra la URL de producción
+   (`QA_API=https://<app>.onrender.com`) debe dar el 429 a partir del sexto intento.
 
    Ojo: `ADMIN_PASSWORD_HASH` solo se usa la **primera** vez que Flyway siembra `admin_users`. Como
    la tabla ya existe en Supabase (sembrada desde local), para cambiar la clave hay que actualizar
@@ -48,11 +70,29 @@ Esta guía es para el día que se decida publicar. Todo lo que hace falta ya est
 6. Activar el ping cada 10 min: `gh variable set BACKEND_URL --body https://<app>.onrender.com`.
    Alternativa sin sueño: Railway Hobby (~US$5/mes), mismo Dockerfile.
 
+## 1 bis. El almacén de fotos (Supabase Storage)
+
+Las fotos que se suben desde el panel van a Supabase Storage, no al disco de Render (que se
+borra en cada despliegue). Una vez, a mano:
+
+1. Supabase → **Storage → New bucket**: nombre `productos`, marcado **Public**.
+2. En los ajustes del bucket: tamaño máximo **5 MB** y tipos permitidos `image/jpeg`,
+   `image/png`, `image/webp`. Es la segunda red, además de la del backend.
+3. Storage → **Policies**: comprobar que `anon` **no** tiene permiso de escritura. El backend
+   sube con la clave secreta, que se salta las políticas; nadie más debe poder escribir.
+4. Settings → **API** → copiar la clave secreta (`service_role` o `sb_secret_…`) en
+   `SUPABASE_SERVICE_KEY`, tanto en `backend/.env` (local) como en Render.
+
+Comprobación: subir una foto desde `/admin/cuadros/nuevo` y abrir la dirección que queda
+guardada. Debe responder la imagen, sin pedir permisos.
+
 ## 2. Frontend en Vercel
 
 1. https://vercel.com → entrar con GitHub → **Add New → Project** → repo `agp-desing`.
 2. Root Directory `frontend` · Framework **Vite** (lo detecta) · Build `npm run build` · Output `dist`.
 3. Environment variable: `VITE_API_URL` = `https://<app>.onrender.com` (sin barra final).
+   Y `VITE_MAX_IMAGEN_MB` = `5`, el mismo número que `MAX_IMAGEN_MB` en Render: con dos números
+   distintos, uno de los dos avisos mentiría.
    WhatsApp, Instagram y TikTok ya van por defecto en `src/config/env.ts`.
 4. **Deploy** → anotar la URL (`https://agp-desing-xxxx.vercel.app`).
 5. Volver a Render → `CORS_ALLOWED_ORIGIN` = esa URL exacta (sin barra final) → **Manual Deploy**.
