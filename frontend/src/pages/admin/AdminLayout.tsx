@@ -1,7 +1,29 @@
 import { ExternalLink, LogOut } from 'lucide-react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { Wordmark } from '@/components/layout/Wordmark'
+import { contactosSinConfigurar, env } from '@/config/env'
 import { useAuth } from '@/hooks/useAuth'
+
+/**
+ * Aviso de contactos sin configurar. Los datos reales no viven en el código, así que es
+ * perfectamente posible publicar con el WhatsApp y el correo de ejemplo y no enterarse:
+ * la web funciona igual, solo que los botones llevan a un número que no existe.
+ *
+ * Una franja fina bajo la cabecera, no una tarjeta con sombra: tiene que verse al entrar
+ * al panel y no competir con el contenido. Dice qué pasa y cómo se arregla, sin más.
+ */
+function AvisoContactos() {
+  if (!contactosSinConfigurar) return null
+  return (
+    <div role="status" className="border-b border-brand/30 bg-nude">
+      <p className="container-x py-3 text-sm text-ink leading-relaxed">
+        La web está mostrando el WhatsApp <span className="tabular">{env.whatsappNumber}</span> y el correo{' '}
+        <span className="tabular">{env.contactEmail}</span>, que son de ejemplo. Escribe los reales en{' '}
+        <code className="text-ink-soft">frontend/.env</code> y vuelve a arrancar la web.
+      </p>
+    </div>
+  )
+}
 
 export function AdminLayout() {
   const { logout } = useAuth()
@@ -46,6 +68,7 @@ export function AdminLayout() {
           </nav>
         </div>
       </header>
+      <AvisoContactos />
       <main className="container-x py-10 md:py-14 flex-1">
         <Outlet />
       </main>

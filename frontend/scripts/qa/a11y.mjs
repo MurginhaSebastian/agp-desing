@@ -83,13 +83,19 @@ export async function run() {
   await page.waitForTimeout(400)
   await analizar(page, 'formulario con errores', hallazgos)
 
-  // Diálogo de borrado, si hay algún producto
+  /*
+   * Diálogo de borrado, si hay algún producto. Se ABRE para poder revisarlo y se cierra con
+   * Escape: **nunca se confirma**. El botón de confirmar recibe el foco solo al abrirse, así
+   * que un Enter de más borraría un producto de verdad. Si alguna vez hace falta probar el
+   * borrado entero, que sea contra el modo demo, no contra la base de datos del negocio.
+   */
   await page.goto(BASE + '/admin', { waitUntil: 'networkidle' })
   const borrar = await page.$('button[aria-label^="Eliminar"]')
   if (borrar) {
     await borrar.click()
     await page.waitForSelector('[role=alertdialog]')
     await analizar(page, 'diálogo de borrado', hallazgos)
+    await page.keyboard.press('Escape')
   }
 
   await cerrar()

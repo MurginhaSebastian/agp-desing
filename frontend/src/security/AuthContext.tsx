@@ -4,7 +4,8 @@ import { unauthorizedEvent } from '@/services/http'
 import { tokenStorage } from '@/security/tokenStorage'
 import type { LoginRequest } from '@/types/auth'
 
-export interface AuthState {
+/** Lo que ve cualquier pantalla del panel. No se exporta: solo lo usa este archivo. */
+interface AuthState {
   isAuthenticated: boolean
   login: (req: LoginRequest) => Promise<void>
   logout: () => void

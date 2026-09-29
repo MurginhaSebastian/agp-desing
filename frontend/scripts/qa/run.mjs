@@ -16,6 +16,7 @@ const CONTROLES = [
   ['./contrast.mjs', 'contraste'],
   ['./a11y.mjs', 'accesibilidad'],
   ['./responsive.mjs', 'pantallas'],
+  ['./muerto.mjs', 'código sin usar'],
   ...(rapido ? [] : [['./lighthouse.mjs', 'lighthouse']]),
 ]
 
@@ -37,6 +38,7 @@ for (const [archivo, nombre] of CONTROLES) {
     const r = await run()
     process.stdout.write(` ${r.hallazgos.length} hallazgo(s)`)
     imprimir(r.titulo, r.hallazgos)
+    if (r.nota) console.log(`  (${r.nota})`)
     todos.push(...r.hallazgos.map((h) => ({ ...h, control: nombre })))
   } catch (e) {
     process.stdout.write(' ERROR')

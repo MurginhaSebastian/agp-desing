@@ -5,8 +5,9 @@ description: Suite de calidad de AGP Desing. Detecta y arregla fallos de accesib
 
 # Suite de calidad — AGP Desing
 
-Seis controles que abren la web en un navegador real y miden. No leen el CSS y opinan:
-**pulsan, miden y comparan.** El objetivo no es un informe bonito: es dejar la web sin fallos.
+Siete controles. Seis abren la web en un navegador real y miden. No leen el CSS y opinan:
+**pulsan, miden y comparan.** El séptimo (`muerto`) no necesita navegador: revisa qué código y
+qué archivos ya no usa nadie. El objetivo no es un informe bonito: es dejar la web sin fallos.
 
 ## Antes de nada
 
@@ -27,6 +28,7 @@ cd frontend
 npm run qa              # todo, ~4 min
 npm run qa:rapido       # sin Lighthouse, ~90 s (para iterar mientras arreglas)
 npm run qa:a11y         # un control suelto
+npm run qa:muerto       # código sin usar: no necesita la web en marcha
 ```
 
 | Atajo | Qué mira |
@@ -64,6 +66,24 @@ suite. Si un control molesta, es que encontró algo.
   con errores. Ahí es donde se escondían los peores fallos de este proyecto.
 - Redacta los hallazgos para el dueño del negocio: "el botón no se ve al entrar", no "el CTA está bajo
   el fold por overflow del h1".
+
+## El control de código sin usar
+
+`muerto.mjs` **solo informa, nunca borra.** En este proyecto hay archivos que parecen huérfanos
+y no lo son, y confundirlos sale caro:
+
+- `robots.txt` y el favicon los pide el navegador por su cuenta: no los importa ningún `.tsx`.
+- **Las fotos del catálogo viven en la base de datos.** El control le pregunta al catálogo por
+  la API antes de señalar un archivo de `public/images/`. Sin backend lo dice, en vez de acusar.
+- `mock-products.ts` y los SVG de muestra existen a propósito, para el modo demo.
+- `typescript`, `@types/*` y los plugins de Vite no se importan en ningún sitio y hacen falta.
+
+Dos listas explícitas y comentadas en el archivo: `SIEMPRE_EN_USO` y `DEPENDENCIAS_NECESARIAS`.
+Y una tercera, `CONSERVADAS_A_PROPOSITO`, para lo que se detectó sin uso y el dueño decidió
+guardar: no se reporta, pero sale en la nota final para que la decisión siga a la vista.
+
+El informe termina diciendo **cuántas cosas revisó cada apartado**. Un apartado que dice «nada»
+habiendo mirado 0 archivos no está limpio, está roto; si eso pasa, el propio control lo denuncia.
 
 ## Lo que esta suite no cubre
 

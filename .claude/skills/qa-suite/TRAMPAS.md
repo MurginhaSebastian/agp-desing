@@ -83,3 +83,25 @@ Cualquier control del título tiene que navegar a una ficha y volver, no solo ca
 Si una prueba crea productos, bórralos y **verifica que se borraron**. Una vez quedaron dos productos
 de prueba publicados porque el borrado falló en silencio: la petición devolvía 404 y nadie miraba el
 código de respuesta.
+
+## Archivos que parecen no usarse y sí se usan
+
+Al buscar código muerto, tres fuentes de falsos positivos en este proyecto:
+
+1. **Las fotos del catálogo viven en la base de datos**, no en el código. Un archivo de
+   `public/images/obras/` puede estar en uso sin aparecer en ningún `.tsx`. Por eso
+   `muerto.mjs` le pregunta al catálogo por la API antes de señalar una imagen, y cuando el
+   backend no responde lo dice en vez de acusar.
+2. **`robots.txt` y el favicon los pide el navegador solo.** Nadie los importa y hacen falta.
+3. **`typescript`, `@types/*` y los plugins de Vite** no se importan en ningún archivo: los usa
+   el compilador. Una lista blanca ingenua de dependencias se los llevaría por delante.
+
+Y la trampa de fondo: un barrido que borra por su cuenta destruye trabajo. `muerto.mjs` solo
+informa; borrar es siempre decisión del dueño.
+
+## Un control que revisa 0 cosas no está limpio, está roto
+
+`muerto.mjs` termina diciendo cuántos archivos, exports, imágenes, dependencias, clases y
+métodos revisó, y si algún apartado revisó **cero**, eso se reporta como hallazgo. La versión
+anterior de otro control se quedó callada durante toda una auditoría porque no encontraba
+`mvnw` y nadie lo notó: «sin hallazgos» y «no miré» se leen igual si no se cuenta lo revisado.
