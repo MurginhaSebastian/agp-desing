@@ -4,6 +4,7 @@ import com.agpdesing.application.port.out.ImageStorage;
 import com.agpdesing.application.usecase.image.LimpiadorDeMetadatos;
 import com.agpdesing.application.usecase.image.UploadImageUseCase;
 import com.agpdesing.domain.exception.DomainValidationException;
+import com.agpdesing.presentation.ratelimit.SubidaRateLimiter;
 import com.agpdesing.domain.exception.InvalidCredentialsException;
 import com.agpdesing.domain.exception.ProductNotFoundException;
 import com.agpdesing.domain.exception.SlugAlreadyExistsException;
@@ -153,6 +154,15 @@ public class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detalle);
         pd.setTitle("Imagen ilegible");
         pd.setProperty("errors", Map.of("archivo", detalle));
+        return pd;
+    }
+
+    /** Demasiadas fotos seguidas: el freno de la subida. */
+    @ExceptionHandler(SubidaRateLimiter.DemasiadasSubidasException.class)
+    ProblemDetail onDemasiadasSubidas(SubidaRateLimiter.DemasiadasSubidasException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
+        pd.setTitle("Demasiadas subidas");
+        pd.setProperty("errors", Map.of("archivo", ex.getMessage()));
         return pd;
     }
 
