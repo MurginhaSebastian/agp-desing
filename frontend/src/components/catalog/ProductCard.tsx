@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useViewTransitionState } from 'react-router-dom'
 import { catalogNumber, formatDimensions, formatPrice } from '@/lib/format'
 import { PRODUCT_STATUS_LABEL, type Product } from '@/types/product'
 
@@ -23,11 +23,29 @@ export function ProductCard({ product, index }: Props) {
    */
   const [ratio, setRatio] = useState(product.widthCm / product.heightCm)
 
+  /*
+   * La foto viaja de esta tarjeta a la ficha (y de vuelta) con la transición del navegador.
+   * El nombre `foto-obra` solo se le pone mientras dura el viaje y solo a ESTA tarjeta: si
+   * lo llevaran todas a la vez, el navegador no sabría cuál es la foto y no animaría ninguna.
+   *   - de ida: cuando hay una transición en curso hacia la ficha de este producto;
+   *   - de vuelta: cuando se llega al catálogo desde la ficha de este producto.
+   */
+  const destino = `/catalogo/${product.slug}`
+  const yendo = useViewTransitionState(destino)
+  const volviendo = useViewTransitionState('/catalogo')
+  const { state } = useLocation()
+  const desde = (state as { desde?: string } | null)?.desde
+  const viaja = yendo || (volviendo && desde === product.slug)
+
+  // La ficha recibe el producto entero: así se pinta con la foto desde el primer instante,
+  // que es cuando el navegador la fotografía para la transición.
+  const enlace = { to: destino, viewTransition: true, state: { product } } as const
+
   return (
     <article className="group">
       {/* Enlace redundante con el del título: clicable, pero fuera del orden de tabulación
           y oculto para lectores de pantalla para no anunciar dos veces el mismo destino. */}
-      <Link to={`/catalogo/${product.slug}`} className="block" tabIndex={-1} aria-hidden="true">
+      <Link {...enlace} className="block" tabIndex={-1} aria-hidden="true">
         <figure
           className="relative bg-nude overflow-hidden"
           style={{ aspectRatio: String(ratio) }}
@@ -41,6 +59,7 @@ export function ProductCard({ product, index }: Props) {
               const img = e.currentTarget
               if (img.naturalWidth > 0) setRatio(img.naturalWidth / img.naturalHeight)
             }}
+            style={{ viewTransitionName: viaja ? 'foto-obra' : undefined }}
             className={`size-full object-cover transition-transform duration-500 [transition-timing-function:var(--ease-out)] motion-safe:group-hover:scale-[1.025] ${sold ? 'opacity-80' : ''}`}
           />
           {product.status !== 'AVAILABLE' && (
@@ -55,7 +74,7 @@ export function ProductCard({ product, index }: Props) {
         <span className="label tabular">{catalogNumber(index)}</span>
         <div>
           <h3 className="text-h3 leading-tight">
-            <Link to={`/catalogo/${product.slug}`} className="link-underline">
+            <Link {...enlace} className="link-underline">
               {product.name}
             </Link>
           </h3>

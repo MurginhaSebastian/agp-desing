@@ -62,6 +62,19 @@ export async function run() {
     }
   }
 
+  // La foto ampliada es un diálogo: axe tiene que verla ABIERTA, no solo con la página quieta.
+  if (ficha) {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto(BASE + ficha, { waitUntil: 'networkidle' })
+    const foto = await page.$('.foto-ficha img')
+    if (foto) {
+      await foto.click()
+      const abierto = await page.waitForSelector('[data-rmiz-modal][open]', { timeout: 3000 }).then(() => true).catch(() => false)
+      if (abierto) await analizar(page, 'foto ampliada', hallazgos)
+      await page.keyboard.press('Escape')
+    }
+  }
+
   // Menú móvil abierto
   await page.setViewportSize({ width: 375, height: 812 })
   await page.goto(BASE + '/', { waitUntil: 'networkidle' })

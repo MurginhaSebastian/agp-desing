@@ -105,3 +105,29 @@ informa; borrar es siempre decisión del dueño.
 métodos revisó, y si algún apartado revisó **cero**, eso se reporta como hallazgo. La versión
 anterior de otro control se quedó callada durante toda una auditoría porque no encontraba
 `mvnw` y nadie lo notó: «sin hallazgos» y «no miré» se leen igual si no se cuenta lo revisado.
+
+## Una foto que mide 0 × 0 no la ve ningún control
+
+Al meter la foto de la ficha dentro del visor de ampliar, la foto desapareció y todas las
+pruebas siguieron en verde: axe no mira tamaños, el contraste no tiene texto que medir y
+«pantallas» no encontró desbordes. La causa, de CSS puro: una imagen con `max-w-full` dentro
+de un contenedor que se ajusta a su contenido (`w-fit`) no tiene respecto a qué calcular ese
+100 %, y el navegador la reduce a cero. Encima, las SVG de muestra solo traían `viewBox`, sin
+`width`/`height`, y sin tamaño propio se colapsaban incluso con el arreglo.
+
+Ahora `seg:csp` mide la foto de la ficha y salta en CRÍTICO por debajo de 50 px, y está
+probado al revés: quitando otra vez el tamaño a las SVG, salta.
+
+## Los botones ocultos con `clip-path` no se tocan con el dedo
+
+«Pantallas» marcaba el botón de ampliar foto como demasiado pequeño para el dedo (18 px). Ese
+botón está oculto a la vista y solo aparece al llegar con el teclado: en el móvil se toca la
+foto entera. El control ya eximía la clase `sr-only`, pero las librerías ocultan con la otra
+técnica estándar, `clip-path: inset(50%)` / `clip: rect(0 0 0 0)`, y no la reconocía. Ahora
+reconoce las dos. Y cuando el botón SÍ aparece, se mide y se cumple: 44 × 44.
+
+## La lista de palabras prohibidas también lee los nombres de variables
+
+Una variable llamada `pintada` («ya se pintó la cuadrícula») saltó como resto del negocio de
+pintura. El control hace bien en leer el código entero: renombrar la variable costó menos que
+discutir si esa palabra era inocente.

@@ -139,6 +139,66 @@
   }
 }
 
+/*
+ * Transición catálogo ↔ ficha (View Transitions del navegador, pedidas por React Router).
+ * La foto pulsada lleva el nombre `foto-obra` en los dos lados y el navegador la hace viajar
+ * de su tarjeta a la ficha. Es un elemento grande cruzando la pantalla, del tamaño de un
+ * modal: 360 ms en vez de los < 300 de la interfaz, con la curva de movimiento en pantalla.
+ * El resto de la página solo cambia con un fundido corto.
+ */
+::view-transition-group(foto-obra) {
+  animation-duration: 360ms;
+  animation-timing-function: var(--ease-in-out);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+  animation-timing-function: var(--ease-out);
+}
+
+/*
+ * Visor de la foto ampliada (react-medium-image-zoom). Su hoja llega con la ficha, después de
+ * esta, así que los selectores van con un nivel más para ganarle. Su regla de reduced-motion
+ * es `!important` y sigue mandando: no se toca.
+ */
+[data-rmiz-modal] [data-rmiz-modal-overlay] {
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-out);
+}
+[data-rmiz-modal] [data-rmiz-modal-overlay="visible"] {
+  background-color: var(--color-silk);
+}
+[data-rmiz-modal] [data-rmiz-modal-img] {
+  transition-duration: 280ms;
+  transition-timing-function: var(--ease-out);
+}
+/*
+ * 44 px, el mínimo para el dedo (la librería los trae a 40). El de ampliar solo aparece al
+ * llegar con el teclado; el de cerrar se toca con el dedo en el móvil.
+ */
+[data-rmiz] [data-rmiz-btn-zoom]:focus,
+[data-rmiz] [data-rmiz-btn-zoom]:active,
+[data-rmiz-modal] [data-rmiz-btn-unzoom] {
+  width: 44px;
+  height: 44px;
+  padding: 11px;
+}
+[data-rmiz] [data-rmiz-btn-zoom],
+[data-rmiz-modal] [data-rmiz-btn-unzoom] {
+  background-color: var(--color-ink);
+  color: var(--color-silk);
+}
+
+/* El marco hueso de la foto en la ficha (ver ProductDetailPage: por qué va aquí y no en la figura). */
+.foto-ficha > [data-rmiz] {
+  min-width: 0;
+  padding: 1rem;
+  background-color: var(--color-nude);
+}
+@media (min-width: 48rem) {
+  .foto-ficha > [data-rmiz] { padding: 1.5rem; }
+}
+
 /* Reduced motion: más suave, no cero. Se conservan opacidad y color. */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -148,4 +208,8 @@
     transition-duration: 120ms !important;
   }
   .btn:active { transform: none; }
+  /* La foto no viaja: aparece en su sitio con un fundido breve, igual que el resto de la página. */
+  ::view-transition-group(*) { animation: none !important; }
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation-duration: 150ms !important; }
 }

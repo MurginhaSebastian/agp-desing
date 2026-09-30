@@ -9,15 +9,27 @@ import {
   abrirNavegador, entrarAlPanel, imprimir, rutaDeUnProducto,
 } from './shared.mjs'
 
-/** Enlaces sueltos dentro de un párrafo están exentos: solo se miden los que parecen botón. */
+/**
+ * Enlaces sueltos dentro de un párrafo están exentos: solo se miden los que parecen botón.
+ *
+ * También los ocultos a la vista, que no se pueden tocar con el dedo. Hay dos técnicas
+ * estándar y hay que reconocer las dos: la clase `sr-only` (la del proyecto) y el recorte con
+ * `clip` / `clip-path: inset(50%)` (el que usan las librerías, como el botón de ampliar foto,
+ * que solo aparece al llegar con el teclado). Cuando aparecen, sí se miden: ver TRAMPAS.
+ */
 const CONTROLES_PEQUENOS = () => {
+  const oculto = (e) => {
+    if ((e.className || '').toString().includes('sr-only')) return true
+    const cs = getComputedStyle(e)
+    return cs.clipPath === 'inset(50%)' || /rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)/.test(cs.clip)
+  }
   const esControl = (e) =>
     /btn|chip|tab/.test((e.className || '').toString()) ||
     e.getAttribute('role') === 'button' ||
     e.tagName === 'BUTTON' ||
     e.closest('nav, footer') !== null
   return [...document.querySelectorAll('a[href], button')]
-    .filter((e) => e.getClientRects().length > 0 && esControl(e) && !(e.className || '').toString().includes('sr-only'))
+    .filter((e) => e.getClientRects().length > 0 && esControl(e) && !oculto(e))
     .map((e) => ({
       t: (e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 26),
       alto: Math.round(e.getBoundingClientRect().height),

@@ -231,8 +231,30 @@ export async function run() {
       }
     }
 
+    /*
+     * La ficha: que la foto se vea (llegó a medir 0 × 0 al meterla en el visor y ningún otro
+     * control lo notó) y que el visor de ampliar se abra con la CSP puesta.
+     */
+    if (ficha) {
+      await page.goto(BASE + ficha, { waitUntil: 'networkidle' })
+      const foto = await page.$('.foto-ficha img')
+      const medida = foto ? await foto.evaluate((el) => { const b = el.getBoundingClientRect(); return { w: Math.round(b.width), h: Math.round(b.height) } }) : null
+      if (!medida || medida.w < 50 || medida.h < 50) {
+        hallazgos.push({ gravedad: GRAVEDAD.critico, donde: 'ficha', que: 'la foto del producto no se ve', detalle: medida ? `mide ${medida.w} × ${medida.h}` : 'no está' })
+      } else {
+        await foto.click()
+        const abierto = await page.waitForSelector('[data-rmiz-modal][open]', { timeout: 3000 }).then(() => true).catch(() => false)
+        if (!abierto) hallazgos.push({ gravedad: GRAVEDAD.alto, donde: 'ficha', que: 'la foto no se amplía al pulsarla' })
+        await page.keyboard.press('Escape')
+        const avisos = await page.evaluate(() => window.__cspAvisos ?? [])
+        for (const a of avisos) {
+          hallazgos.push({ gravedad: GRAVEDAD.alto, donde: 'ficha · foto ampliada', que: `la CSP bloqueó algo (${a.directiva})`, detalle: a.recurso })
+        }
+      }
+    }
+
     await contexto.close()
-    return { titulo: 'La web con sus cabeceras puestas', hallazgos, nota: `${rutas.length} páginas y la subida de una foto, con las cabeceras de vercel.json` }
+    return { titulo: 'La web con sus cabeceras puestas', hallazgos, nota: `${rutas.length} páginas, la foto ampliada y la subida de una foto, con las cabeceras de vercel.json` }
   } finally {
     if (navegador) await navegador.close().catch(() => {})
     /*
