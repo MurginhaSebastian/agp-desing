@@ -1,8 +1,9 @@
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Footer } from '@/components/layout/Footer'
 import { Navbar } from '@/components/layout/Navbar'
 import { ScrollManager } from '@/components/layout/ScrollManager'
+import { escucharClics } from '@/lib/sonido'
 
 /** Lo que se ve el instante que tarda en llegar una página cargada aparte. */
 export function Cargando() {
@@ -14,6 +15,9 @@ export function Cargando() {
 }
 
 export function PublicLayout() {
+  // El pop suena solo en la web pública: en el panel, con formularios, sería ruido.
+  useEffect(escucharClics, [])
+
   return (
     <>
       <a href="#contenido" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 btn-primary">
