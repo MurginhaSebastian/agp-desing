@@ -7,19 +7,19 @@ export function About() {
         <Reveal className="lg:col-span-4">
           <p className="label-brand">Sobre AGP Desing</p>
           <h2 id="sobre-title" className="text-h2 mt-4">
-            Ingeniería visual para tus mejores recuerdos.
+            Hecho para quedarse con quien lo recibe.
           </h2>
         </Reveal>
 
         <Reveal delay={80} className="lg:col-span-6 lg:col-start-6 space-y-6 text-lead text-ink-soft">
           <p>
-            AGP Desing es un taller de diseño especializado en regalos con intención. Transformamos lo que más valoras —desde el automovilismo y la música hasta los aniversarios más significativos— en piezas tangibles de alta calidad que cuentan tu propia historia.
+            Cada cuadro o box se hace por encargo y para una sola persona; por eso no hay dos iguales. Partimos de una impresión a full color y la trabajamos a mano con los detalles que nos pides. En los cuadros 3D sumamos capas y objetos en miniatura: tienen relieve y profundidad, no son una foto enmarcada.
           </p>
           <p>
-            Unimos empatía emocional con una manufactura impecable. Cuidamos rigurosamente cada detalle técnico: desde la distribución tipográfica y la réplica exacta de interfaces digitales, hasta el ensamblaje estructurado de elementos en miniatura para lograr un acabado perfecto.
+            Aquí no hay carrito de compras. Eliges del catálogo o diseñamos desde cero, y coordinas cada pedido por WhatsApp directamente con nosotros. Trabajamos pensando en quien lo recibe: que al abrir el empaque quiera guardarlo para siempre y enseñarlo a los suyos.
           </p>
           <p className="font-display text-2xl text-ink italic">
-            Si ves tu pasión en nuestro catálogo, escríbenos. Si quieres que diseñemos una nueva historia desde cero, también.
+            Escríbenos y cuéntanos para quién es y qué ama; lo demás lo conversamos.
           </p>
         </Reveal>
       </div>
