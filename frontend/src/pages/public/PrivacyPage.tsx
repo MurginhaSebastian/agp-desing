@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { FlechaDerecha, FlechaFuera } from '@/components/ui/iconos'
 import { env } from '@/config/env'
 
 const ACTUALIZADO = '28 de septiembre de 2026'
@@ -17,13 +18,14 @@ export function PrivacyPage() {
   }, [])
 
   return (
-    <div className="container-x py-16 md:py-24">
-      <div className="max-w-[65ch]">
-        <p className="label-brand">Legal</p>
-        <h1 className="text-h2 mt-3">Política de privacidad</h1>
-        <p className="label mt-4">Actualizada el {ACTUALIZADO}</p>
+    <div className="container-x pt-20 pb-24 md:pt-28 md:pb-32">
+      {/* Un documento: una hoja de papel con su pestaña, en vez de un rótulo encima del título. */}
+      <article className="relative paspartu capa-2 max-w-[52rem] px-6 pt-12 pb-12 sm:px-10 md:px-14 md:pt-16 md:pb-14">
+        <p className="pestana absolute bottom-full left-6 sm:left-10 md:left-14">Legal</p>
+        <h1 className="text-h2">Política de privacidad</h1>
+        <p className="nota mt-4">Actualizada el {ACTUALIZADO}</p>
 
-        <div className="mt-12 space-y-10 text-ink-soft leading-relaxed">
+        <div className="mt-12 max-w-[65ch] space-y-10 text-ink-soft leading-relaxed">
           <section>
             <h2 className="text-h3 text-ink">Quién responde por tus datos</h2>
             <p className="mt-3">
@@ -135,13 +137,17 @@ export function PrivacyPage() {
           </section>
         </div>
 
-        <div className="mt-14 pt-8 border-t border-oat flex flex-wrap gap-4">
-          <Link to="/terminos" className="btn-secondary">Términos y condiciones</Link>
-          <a href={`https://wa.me/${env.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="btn-ghost">
+        <div className="mt-14 pt-6 border-t border-oat flex flex-wrap items-center gap-x-8 gap-y-2">
+          <Link to="/terminos" className="enlace-flecha">
+            Términos y condiciones
+            <FlechaDerecha size={18} />
+          </Link>
+          <a href={`https://wa.me/${env.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="enlace-flecha">
             Escríbenos
+            <FlechaFuera size={18} />
           </a>
         </div>
-      </div>
+      </article>
     </div>
   )
 }

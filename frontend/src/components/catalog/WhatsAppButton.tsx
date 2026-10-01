@@ -1,10 +1,15 @@
-import { MessageCircle } from 'lucide-react'
+import { Conversar, FlechaDerecha } from '@/components/ui/iconos'
 import { buildWhatsAppUrl } from '@/lib/whatsapp'
 import type { Product } from '@/types/product'
 
 interface Props {
   product?: Pick<Product, 'name' | 'status'>
   className?: string
+  /**
+   * primary: el botón principal (una hoja roja).
+   * secondary: enlace de texto con flecha, para acompañar a otro botón sin competir con él.
+   * on-dark: hoja clara, sobre la hoja roja de contacto.
+   */
   variant?: 'primary' | 'secondary' | 'on-dark'
 }
 
@@ -14,15 +19,24 @@ interface Props {
  */
 export function WhatsAppButton({ product, className = '', variant = 'primary' }: Props) {
   const label = product?.status === 'SOLD' ? 'Pedir uno similar' : product ? 'Cotizar esta pieza' : 'Cotizar por WhatsApp'
-  const cls = variant === 'primary' ? 'btn-primary' : variant === 'secondary' ? 'btn-secondary' : 'btn-on-dark'
+
+  if (variant === 'secondary') {
+    return (
+      <a href={buildWhatsAppUrl(product)} target="_blank" rel="noopener noreferrer" className={`enlace-flecha ${className}`}>
+        {label}
+        <FlechaDerecha size={18} />
+      </a>
+    )
+  }
+
   return (
     <a
       href={buildWhatsAppUrl(product)}
       target="_blank"
       rel="noopener noreferrer"
-      className={`${cls} ${className}`}
+      className={`boton ${variant === 'on-dark' ? 'boton-claro' : ''} ${className}`}
     >
-      <MessageCircle size={18} strokeWidth={1.75} aria-hidden="true" />
+      <Conversar size={18} />
       {label}
     </a>
   )

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useLocation, useNavigationType } from 'react-router-dom'
 
 /** Alto de la cabecera pegajosa: hay que descontarlo para no tapar el título. */
@@ -22,6 +22,19 @@ export function ScrollManager() {
   const { pathname, hash, key, state } = useLocation()
   const tipo = useNavigationType()
   const anterior = useRef<string | null>(null)
+
+  /*
+   * Dentro de la web manda este componente, no el navegador. Con el modo `auto`, al pulsar
+   * «atrás» el navegador aplicaba además su propia posición guardada, unos milisegundos después
+   * y unos píxeles distinta: la obra de la que se venía aparecía 5–9 px más arriba.
+   */
+  useEffect(() => {
+    if (!('scrollRestoration' in history)) return
+    history.scrollRestoration = 'manual'
+    return () => {
+      history.scrollRestoration = 'auto'
+    }
+  }, [])
 
   /*
    * Efecto de maquetación y no normal: tiene que colocar la página ANTES de que el navegador

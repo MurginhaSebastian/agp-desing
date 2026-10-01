@@ -23,43 +23,49 @@ function TikTokIcon({ size = 20 }: { size?: number }) {
   )
 }
 
+/**
+ * El pie es la trasera de la caja: bordeaux con grano, lo justo. Logotipo y lema, los enlaces en
+ * una fila (con la fila, el rótulo «Navegar» sobraba) y debajo, la fila legal.
+ */
 export function Footer() {
   const year = new Date().getFullYear()
+  const enlace = 'link-underline inline-flex items-center gap-2 min-h-11'
   return (
-    <footer className="bg-bordeaux text-silk">
-      <div className="container-x py-14 md:py-20 grid gap-10 md:grid-cols-12">
-        <div className="md:col-span-5">
-          <Wordmark onDark />
-          <p className="mt-5 max-w-sm text-silk/75 text-[0.9375rem]">
-            Detalles únicos, ensamblados a mano.
-          </p>
+    <footer className="bg-bordeaux con-grano text-silk">
+      <div className="container-x pt-14 pb-10 md:pt-20 md:pb-12">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <Wordmark onDark />
+            <p className="mt-4 max-w-sm font-display text-xl text-silk/80">
+              Detalles únicos, ensamblados a mano.
+            </p>
+          </div>
+
+          <nav aria-label="Pie de página">
+            <ul className="flex flex-wrap gap-x-7">
+              <li><Link className={enlace} to="/#sobre">Sobre AGP</Link></li>
+              <li><Link className={enlace} to="/#como-funciona">Cómo funciona</Link></li>
+              <li><Link className={enlace} to="/catalogo">Catálogo</Link></li>
+              <li><Link className={enlace} to="/#faq">Preguntas frecuentes</Link></li>
+            </ul>
+          </nav>
         </div>
 
-        <nav aria-label="Pie de página" className="md:col-span-3 md:col-start-7">
-          <p className="label text-silk/60 mb-4">Navegar</p>
-          <ul className="space-y-0.5">
-            <li><Link className="link-underline inline-flex items-center min-h-11" to="/#sobre">Sobre AGP</Link></li>
-            <li><Link className="link-underline inline-flex items-center min-h-11" to="/#como-funciona">Cómo funciona</Link></li>
-            <li><Link className="link-underline inline-flex items-center min-h-11" to="/catalogo">Catálogo</Link></li>
-            <li><Link className="link-underline inline-flex items-center min-h-11" to="/#faq">Preguntas frecuentes</Link></li>
-          </ul>
-        </nav>
-
-        <div className="md:col-span-3">
-          <p className="label text-silk/60 mb-4">Escríbenos</p>
-          <ul className="space-y-0.5">
+        <div className="mt-10 pt-5 border-t border-silk/15 flex flex-wrap items-center gap-x-7">
+          <p className="nota !text-silk/70 w-full sm:w-auto">Escríbenos</p>
+          <ul className="flex flex-wrap gap-x-7">
             <li>
-              <a className="link-underline inline-flex items-center min-h-11" href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
+              <a className={enlace} href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
                 WhatsApp
               </a>
             </li>
             <li>
-              <a className="inline-flex items-center gap-2 min-h-11 link-underline" href={env.instagramUrl} target="_blank" rel="noopener noreferrer">
+              <a className={enlace} href={env.instagramUrl} target="_blank" rel="noopener noreferrer">
                 <InstagramIcon size={18} /> Instagram
               </a>
             </li>
             <li>
-              <a className="inline-flex items-center gap-2 min-h-11 link-underline" href={env.tiktokUrl} target="_blank" rel="noopener noreferrer">
+              <a className={enlace} href={env.tiktokUrl} target="_blank" rel="noopener noreferrer">
                 <TikTokIcon size={18} /> TikTok
               </a>
             </li>

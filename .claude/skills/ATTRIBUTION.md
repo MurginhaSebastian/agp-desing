@@ -3,6 +3,13 @@
 Every skill in `.claude/skills/` that came from a third party: where it came from,
 what license it carries, and every byte this repo changed.
 
+## redesign-existing-projects
+
+- **Origen:** archivo `SKILL.md` aportado por el dueño del proyecto (30 de septiembre de 2026).
+  No trae repositorio ni licencia declarados.
+- **Modificaciones locales:** ninguna en `SKILL.md`. Las excepciones de este proyecto están en
+  su `NOTICE.md`.
+
 ## Emil Kowalski — animation & design engineering (8 skills)
 
 - **Upstream:** https://github.com/emilkowalski/skills

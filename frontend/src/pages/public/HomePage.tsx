@@ -1,6 +1,7 @@
-import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ProductGrid } from '@/components/catalog/ProductGrid'
+import { EsqueletoObras } from '@/components/catalog/EsqueletoObras'
+import { FlechaDerecha } from '@/components/ui/iconos'
 import { Reveal } from '@/components/ui/Reveal'
 import { useProducts } from '@/hooks/useProducts'
 import { About } from '@/pages/public/sections/About'
@@ -15,27 +16,20 @@ export function HomePage() {
 
   return (
     <>
-      <Hero />
+      <Hero obras={products} cargando={loading} />
 
-      {/* Selección del catálogo — la pared de galería es lo primero que se ve tras el titular */}
-      <section aria-labelledby="seleccion-title" className="container-x pb-24 md:pb-32">
-        <Reveal className="flex flex-wrap items-end justify-between gap-6 border-t border-ink pt-6">
-          <div>
-            <p className="label-brand">Del catálogo</p>
-            <h2 id="seleccion-title" className="text-h2 mt-3">Nuestros diseños</h2>
-          </div>
-          <Link to="/catalogo" className="btn-ghost -mr-3">
+      {/* Selección del catálogo: la pared de obras montadas es lo primero que se ve tras la portada. */}
+      <section aria-labelledby="seleccion-title" className="container-x pb-28 md:pb-40">
+        <Reveal className="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-4">
+          <h2 id="seleccion-title" className="text-h2">Nuestros diseños</h2>
+          <Link to="/catalogo" className="enlace-flecha">
             Ver todo el catálogo
-            <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" />
+            <FlechaDerecha size={18} />
           </Link>
         </Reveal>
 
         <div className="mt-12 lg:mt-16">
-          {loading ? (
-            <p className="label" role="status">Cargando diseños…</p>
-          ) : (
-            <ProductGrid products={featured} columns={2} />
-          )}
+          {loading ? <EsqueletoObras cuantas={2} columns={2} /> : <ProductGrid products={featured} columns={2} />}
         </div>
       </section>
 

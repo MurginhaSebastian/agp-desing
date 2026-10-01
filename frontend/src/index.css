@@ -27,6 +27,8 @@
 
   /* Tipografía */
   --font-display: "Cormorant Garamond", "Georgia", serif;
+  /* El logotipo va siempre en su fuente, aunque la web pública use otra para los títulos. */
+  --font-marca: "Cormorant Garamond", "Georgia", serif;
   --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Consolas", monospace;
 
@@ -139,6 +141,274 @@
   }
 }
 
+/* ==================================================================
+   «CAPAS» — el sistema visual de la web pública (septiembre de 2026)
+
+   La web se construye como un cuadro 3D de AGP: un fondo de papel,
+   planos de paspartú superpuestos y la pieza montada encima. Una sola
+   luz, arriba a la izquierda: todas las sombras caen abajo a la derecha
+   y van teñidas de bordeaux, nunca en negro.
+
+   Solo se activa con la clase `sitio` en <html>, que pone la web
+   pública al montarse (router/layouts.tsx). El panel no la tiene y se
+   queda exactamente como estaba.
+   ================================================================== */
+.sitio {
+  --font-display: "Fraunces", "Georgia", serif;
+
+  /* Sombras de papel levantado: el canto (1 px nítido) + la caída. */
+  --capa-1: 1px 1px 0 color-mix(in oklch, var(--color-bordeaux) 9%, transparent),
+            3px 5px 12px -6px color-mix(in oklch, var(--color-bordeaux) 24%, transparent);
+  --capa-2: 1px 1px 0 color-mix(in oklch, var(--color-bordeaux) 11%, transparent),
+            8px 14px 28px -12px color-mix(in oklch, var(--color-bordeaux) 32%, transparent);
+  --capa-3: 1px 1px 0 color-mix(in oklch, var(--color-bordeaux) 13%, transparent),
+            16px 26px 52px -20px color-mix(in oklch, var(--color-bordeaux) 42%, transparent);
+  --radio-papel: 3px;
+
+  /*
+   * Grano de papel: ruido generado por el propio navegador (SVG en data:, la CSP lo admite),
+   * teñido de bordeaux y casi transparente. Va como FONDO de las superficies, nunca por
+   * encima del texto, así que no toca el contraste.
+   */
+  --grano: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .1 0 0 0 0 .11 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+
+  --text-display: clamp(2.6rem, 1.2rem + 4.6vw, 5.4rem);
+  --text-display--line-height: 0.98;
+  --text-h2: clamp(2rem, 1.25rem + 2.8vw, 3.6rem);
+  --text-h2--line-height: 1.04;
+  --text-h3: clamp(1.3rem, 1.1rem + 0.9vw, 1.8rem);
+  --text-h3--line-height: 1.18;
+}
+.sitio body {
+  background-color: var(--color-silk);
+  background-image: var(--grano);
+}
+.sitio h1, .sitio h2, .sitio h3 {
+  font-weight: 460;
+  letter-spacing: -0.018em;
+  /* Fraunces con los bordes suavizados (SOFT 100, ya fijado en el archivo de la fuente):
+     parece más cortada a mano que impresa. */
+}
+.sitio h3 { font-weight: 520; letter-spacing: -0.01em; }
+
+@layer components {
+  /* Un plano de papel: la unidad de todo el sistema. */
+  .papel {
+    background-color: var(--color-silk);
+    background-image: var(--grano);
+    border-radius: var(--radio-papel);
+    box-shadow: var(--capa-1);
+  }
+  .paspartu {
+    background-color: var(--color-nude);
+    background-image: var(--grano);
+    border-radius: var(--radio-papel);
+  }
+  /*
+   * El paspartú de cada obra. Nude sobre el papel de la página; dentro de una hoja nude (el
+   * catálogo) pasa a silk, para que la obra siga destacando sobre lo que tiene detrás.
+   */
+  .mat {
+    background-color: var(--mat, var(--color-nude));
+    background-image: var(--grano);
+    border-radius: var(--radio-papel);
+  }
+  .hoja-catalogo { --mat: var(--color-silk); }
+  /* Grano para superficies de otro color (la hoja roja de contacto, el pie). */
+  .con-grano { background-image: var(--grano); }
+  .radio-papel { border-radius: var(--radio-papel); }
+  .capa-1 { box-shadow: var(--capa-1); }
+  .capa-2 { box-shadow: var(--capa-2); }
+  .capa-3 { box-shadow: var(--capa-3); }
+
+  /*
+   * Pestaña: el nombre de una sección, pegado al borde superior de su hoja como la pestaña
+   * de un separador. Sustituye a las etiquetas en mayúsculas que iban encima de cada título.
+   */
+  .pestana {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.3rem 0.9rem 0.25rem;
+    border-radius: var(--radio-papel) var(--radio-papel) 0 0;
+    /* Se mete 1 px en su hoja para que no quede una costura entre las dos. */
+    margin-bottom: -1px;
+    background-color: inherit;
+    background-image: var(--grano);
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--color-ink-soft);
+  }
+
+  /* Rótulo pequeño en minúscula, para datos (estado, medidas, número de obra). */
+  .nota {
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--color-ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * Botones de la web pública. Son hojas: se levantan un poco al pasar por encima y se
+   * aplastan al pulsar. La sombra que crece va en un ::after y se anima su opacidad, no el
+   * box-shadow, que obligaría a repintar en cada fotograma.
+   */
+  .boton {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 2.9rem;
+    padding: 0 1.5rem;
+    border-radius: var(--radio-papel);
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    background-color: var(--color-brand);
+    color: var(--color-silk);
+    box-shadow: var(--capa-1);
+    user-select: none;
+    transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out);
+  }
+  .boton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    box-shadow: var(--capa-2);
+    opacity: 0;
+    transition: opacity 160ms var(--ease-out);
+  }
+  .boton:active { transform: scale(0.97); }
+  .boton-claro { background-color: var(--color-silk); color: var(--color-bordeaux); }
+
+  /* Enlace de texto con flecha: la acción secundaria, para no poner siempre dos botones. */
+  .enlace-flecha {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.75rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklch, currentColor 35%, transparent);
+    text-underline-offset: 0.3em;
+    transition: text-decoration-color 160ms var(--ease-out), color 160ms var(--ease-out);
+  }
+  .enlace-flecha svg { transition: transform 160ms var(--ease-out); }
+  /* El de volver apunta y se mueve hacia atrás. */
+  .enlace-atras { text-decoration: none; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .boton:hover { transform: translateY(-1px); }
+    .boton:hover::after { opacity: 1; }
+    .boton:active { transform: scale(0.97); }
+    .boton:not(.boton-claro):hover { background-color: var(--color-brand-deep); }
+    .enlace-flecha:hover { text-decoration-color: currentColor; }
+    .enlace-flecha:hover svg { transform: translateX(3px); }
+    .enlace-atras:hover svg { transform: translateX(-3px); }
+    .enlace-atras:hover { color: var(--color-brand); }
+  }
+
+  /*
+   * Obra montada: la foto sobre su paspartú, con el margen de abajo más ancho (como se montan
+   * las láminas) para anotar el número y el estado. Al pasar por encima la pieza se levanta
+   * 2 px y su sombra crece; la sombra grande va en un ::after y solo se anima su opacidad.
+   */
+  .montada {
+    position: relative;
+    isolation: isolate;
+    border-radius: var(--radio-papel);
+    box-shadow: var(--capa-1);
+    transition: transform 200ms var(--ease-out);
+  }
+  .montada::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    box-shadow: var(--capa-2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms var(--ease-out);
+  }
+  .group:focus-within .montada::after { opacity: 1; }
+  @media (hover: hover) and (pointer: fine) {
+    .group:hover .montada { transform: translateY(-2px); }
+    .group:hover .montada::after { opacity: 1; }
+  }
+
+  /*
+   * Separadores de carpeta: los filtros del catálogo. La pestaña activa es la de delante, del
+   * color de la hoja y unida a ella; las demás quedan detrás, un tono más oscuras y 4 px más
+   * abajo, como las pestañas de las hojas de atrás.
+   */
+  .separador {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border-radius: var(--radio-papel) var(--radio-papel) 0 0;
+    background-color: var(--color-oat);
+    background-image: var(--grano);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-ink-soft);
+    white-space: nowrap;
+    user-select: none;
+    transform: translateY(4px);
+    transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out), color 160ms var(--ease-out);
+  }
+  .separador[aria-pressed="true"] {
+    background-color: var(--color-nude);
+    color: var(--color-ink);
+    transform: translateY(0);
+  }
+  /* El anillo de foco va por dentro: la fila de pestañas se desplaza de lado y recortaría uno de fuera. */
+  .separador:focus-visible { outline-offset: -4px; }
+  .separador:active { transform: translateY(4px) scale(0.97); }
+  .separador[aria-pressed="true"]:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    .separador:not([aria-pressed="true"]):hover { transform: translateY(2px); color: var(--color-ink); }
+  }
+
+  /* Controles del pase de fotos de la portada: discretos, en el margen del paspartú, 44 px de dedo. */
+  .control-carrusel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radio-papel);
+    color: var(--color-ink-soft);
+    transition: transform 160ms var(--ease-out), color 160ms var(--ease-out), background-color 160ms var(--ease-out);
+  }
+  .control-carrusel:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    .control-carrusel:hover { color: var(--color-ink); background-color: color-mix(in oklch, var(--color-oat) 55%, transparent); }
+  }
+
+  /* Esqueleto de carga: la forma de lo que va a llegar, respirando despacio. */
+  .esqueleto {
+    background-color: var(--color-oat);
+    border-radius: var(--radio-papel);
+    animation: respirar 1.1s var(--ease-in-out) infinite alternate;
+  }
+}
+@keyframes respirar {
+  from { opacity: 0.55; }
+  to { opacity: 1; }
+}
+
 /*
  * Transición catálogo ↔ ficha (View Transitions del navegador, pedidas por React Router).
  * La foto pulsada lleva el nombre `foto-obra` en los dos lados y el navegador la hace viajar
@@ -189,11 +459,23 @@
   color: var(--color-silk);
 }
 
-/* El marco hueso de la foto en la ficha (ver ProductDetailPage: por qué va aquí y no en la figura). */
+/*
+ * El paspartú de la foto en la ficha (ver ProductDetailPage: por qué va aquí y no en la figura).
+ * Detrás lleva otro plano, avena, desplazado abajo a la derecha: la caja de sombra de la
+ * portada, en pequeño. Es una sombra sólida y no un elemento más, para no tocar el marcado
+ * del visor de zoom. Orden: canto del paspartú, el plano, el canto del plano, la caída.
+ */
 .foto-ficha > [data-rmiz] {
   min-width: 0;
   padding: 1rem;
   background-color: var(--color-nude);
+  background-image: var(--grano);
+  border-radius: var(--radio-papel);
+  box-shadow:
+    1px 1px 0 color-mix(in oklch, var(--color-bordeaux) 13%, transparent),
+    12px 12px 0 0 var(--color-oat),
+    13px 13px 0 0 color-mix(in oklch, var(--color-bordeaux) 12%, transparent),
+    22px 34px 56px -18px color-mix(in oklch, var(--color-bordeaux) 42%, transparent);
 }
 @media (min-width: 48rem) {
   .foto-ficha > [data-rmiz] { padding: 1.5rem; }
@@ -208,6 +490,12 @@
     transition-duration: 120ms !important;
   }
   .btn:active { transform: none; }
+  /* «Capas»: sin desplazamientos al pasar ni al pulsar; se quedan los cambios de sombra y color. */
+  .boton:hover, .boton:active, .control-carrusel:active,
+  .group:hover .montada,
+  .enlace-flecha:hover svg, .enlace-atras:hover svg { transform: none; }
+  .separador:active, .separador:not([aria-pressed="true"]):hover { transform: translateY(4px); }
+  .separador[aria-pressed="true"]:active { transform: none; }
   /* La foto no viaja: aparece en su sitio con un fundido breve, igual que el resto de la página. */
   ::view-transition-group(*) { animation: none !important; }
   ::view-transition-old(*),

@@ -1,5 +1,3 @@
-import { Plus } from 'lucide-react'
-import { useId, useState } from 'react'
 import { Reveal } from '@/components/ui/Reveal'
 
 const faqs = [
@@ -25,62 +23,31 @@ const faqs = [
   },
 ]
 
+/**
+ * Preguntas frecuentes, todas a la vista. Las respuestas son de una o dos frases: esconderlas
+ * detrás de un acordeón obligaba a abrir cinco cosas para leer cinco líneas. En una hoja de
+ * papel con su pestaña, en dos columnas, con la pregunta en la tipografía de los títulos.
+ */
 export function Faq() {
-  const [open, setOpen] = useState<number | null>(0)
-  const baseId = useId()
-
   return (
-    <section id="faq" aria-labelledby="faq-title" className="bg-nude">
-      <div className="container-x section-y grid gap-10 lg:grid-cols-12">
-        <Reveal className="lg:col-span-4">
-          <p className="label-brand">Preguntas frecuentes</p>
-          <h2 id="faq-title" className="text-h2 mt-4">
-            Lo que suelen preguntar antes de escribir.
-          </h2>
-        </Reveal>
+    <section id="faq" aria-labelledby="faq-title" className="container-x pt-10 pb-24 md:pb-32">
+      <Reveal className="relative paspartu capa-2 px-6 pt-14 pb-12 sm:px-10 md:px-16 md:pt-20 md:pb-16">
+        <p className="pestana absolute bottom-full left-6 sm:left-10 md:left-16">Preguntas frecuentes</p>
 
-        <Reveal delay={80} className="lg:col-span-7 lg:col-start-6">
-          <ul className="border-t border-ink">
-            {faqs.map((f, i) => {
-              const expanded = open === i
-              const panelId = `${baseId}-panel-${i}`
-              const btnId = `${baseId}-btn-${i}`
-              return (
-                <li key={f.q} className="border-b border-oat">
-                  <h3 className="font-body text-base">
-                    <button
-                      id={btnId}
-                      type="button"
-                      aria-expanded={expanded}
-                      aria-controls={panelId}
-                      onClick={() => setOpen(expanded ? null : i)}
-                      className="w-full flex items-center justify-between gap-6 py-5 text-left font-display text-2xl text-ink"
-                    >
-                      {f.q}
-                      <Plus
-                        size={22}
-                        strokeWidth={1.5}
-                        aria-hidden="true"
-                        className={`shrink-0 text-brand transition-transform duration-200 [transition-timing-function:var(--ease-out)] ${expanded ? 'rotate-45' : ''}`}
-                      />
-                    </button>
-                  </h3>
-                  <div
-                    id={panelId}
-                    role="region"
-                    aria-labelledby={btnId}
-                    className={`grid transition-[grid-template-rows] duration-200 [transition-timing-function:var(--ease-out)] ${expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
-                  >
-                    <div className="overflow-hidden">
-                      <p className="pb-6 pr-10 text-ink-soft leading-relaxed">{f.a}</p>
-                    </div>
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        </Reveal>
-      </div>
+        <h2 id="faq-title" className="text-h2 max-w-[20ch]">
+          Lo que suelen preguntar antes de escribir.
+        </h2>
+
+        {/* Lista y no <dl>: un título no puede ir dentro de un <dt>. */}
+        <ul className="mt-12 md:mt-16 grid gap-x-16 gap-y-10 md:grid-cols-2">
+          {faqs.map((f) => (
+            <li key={f.q} className="max-w-[46ch]">
+              <h3 className="text-h3">{f.q}</h3>
+              <p className="mt-3 text-ink-soft leading-relaxed">{f.a}</p>
+            </li>
+          ))}
+        </ul>
+      </Reveal>
     </section>
   )
 }

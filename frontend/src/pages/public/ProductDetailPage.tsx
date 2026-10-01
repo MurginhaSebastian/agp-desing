@@ -1,9 +1,10 @@
-import { ArrowLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { WhatsAppButton } from '@/components/catalog/WhatsAppButton'
+import { CajaVacia } from '@/components/ui/CajaVacia'
+import { FlechaIzquierda } from '@/components/ui/iconos'
 import { Reveal } from '@/components/ui/Reveal'
 import { formatDimensions, formatPrice } from '@/lib/format'
 import { productService } from '@/services/productService'
@@ -46,32 +47,44 @@ export function ProductDetailPage() {
   }, [slug, inicial])
 
   if (state === 'loading') {
+    // La forma de la ficha mientras llega: la foto montada a un lado y la etiqueta al otro.
     return (
-      <div className="container-x py-24">
-        <p className="label" role="status">Cargando diseño…</p>
+      <div className="container-x pt-8 pb-24 md:pt-12 md:pb-32">
+        <p className="sr-only" role="status">Cargando diseño…</p>
+        <div aria-hidden="true" className="mt-19 grid gap-10 md:grid-cols-12 md:gap-10 lg:gap-16">
+          <div className="md:col-span-6 lg:col-span-7 paspartu capa-2 p-4 md:p-6">
+            <div className="esqueleto aspect-[4/3] max-h-[70vh]" />
+          </div>
+          <div className="md:col-span-6 lg:col-span-4 lg:col-start-9 space-y-4">
+            <div className="esqueleto h-11 w-4/5" />
+            <div className="esqueleto h-11 w-3/5" />
+            <div className="papel capa-2 mt-8 h-44" />
+          </div>
+        </div>
       </div>
     )
   }
 
   if (state === 'missing' || !product) {
     return (
-      <div className="container-x py-24 max-w-xl">
-        <p className="label-brand">404</p>
-        <h1 className="text-h2 mt-4">Ese diseño aún no existe. ¡Escríbenos para crearlo!</h1>
-        <p className="mt-4 text-ink-soft">Puede que ya no esté en el catálogo o que el enlace esté mal escrito.</p>
-        <Link to="/catalogo" className="btn-secondary mt-8">
-          <ArrowLeft size={18} strokeWidth={1.75} aria-hidden="true" /> Volver al catálogo
+      <CajaVacia
+        titulo="Ese diseño aún no existe. ¡Escríbenos para crearlo!"
+        texto="Puede que ya no esté en el catálogo o que el enlace esté mal escrito."
+      >
+        <Link to="/catalogo" className="boton">
+          <FlechaIzquierda size={18} /> Volver al catálogo
         </Link>
-      </div>
+      </CajaVacia>
     )
   }
 
+  const vendido = product.status === 'SOLD'
 
   return (
     <article className="container-x pt-8 pb-24 md:pt-12 md:pb-32">
       {/* Vuelta con la foto viajando a su tarjeta, y el catálogo en la posición en que se dejó. */}
-      <Link to="/catalogo" viewTransition state={{ desde: product.slug, volver: true }} className="btn-ghost -ml-3 mb-8">
-        <ArrowLeft size={18} strokeWidth={1.75} aria-hidden="true" /> Catálogo
+      <Link to="/catalogo" viewTransition state={{ desde: product.slug, volver: true }} className="enlace-flecha enlace-atras mb-8">
+        <FlechaIzquierda size={18} /> Catálogo
       </Link>
 
       <div className="grid gap-10 md:grid-cols-12 md:gap-10 lg:gap-16">
@@ -105,29 +118,41 @@ export function ProductDetailPage() {
           </Zoom>
         </figure>
 
-        {/* Ficha: la etiqueta de museo a tamaño completo, pegada al scroll en escritorio */}
+        {/*
+          Ficha, pegada al scroll en escritorio. El estado va antes del nombre, como dato y no
+          como rótulo; los datos van en una etiqueta de papel con su ojal, como la que cuelga de
+          una pieza terminada.
+        */}
         <Reveal delay={80} className="md:col-span-6 lg:col-span-4 lg:col-start-9 lg:sticky lg:top-28 lg:self-start">
-          <p className="label-brand">{PRODUCT_STATUS_LABEL[product.status]}</p>
-          <h1 className="text-h2 mt-4">{product.name}</h1>
+          <p className={`nota ${vendido ? '' : '!text-brand'}`}>{PRODUCT_STATUS_LABEL[product.status]}</p>
+          {/* Más pequeño que un h2 de sección: los nombres de las obras son largos y la columna, estrecha. */}
+          <h1 className="mt-3 text-[clamp(1.9rem,1.3rem+1.6vw,2.75rem)] leading-[1.08]">{product.name}</h1>
 
-          <dl className="mt-8 border-t border-ink">
-            <div className="flex justify-between gap-6 py-3 border-b border-oat">
-              <dt className="label">Formato</dt>
-              <dd className="text-right">{product.technique}</dd>
-            </div>
-            <div className="flex justify-between gap-6 py-3 border-b border-oat">
-              <dt className="label">Medidas</dt>
-              <dd className="text-right tabular">{formatDimensions(product.widthCm, product.heightCm)}</dd>
-            </div>
-            <div className="flex justify-between gap-6 py-3 border-b border-oat">
-              <dt className="label">Precio</dt>
-              <dd className={`text-right tabular font-semibold ${product.status === 'SOLD' ? 'line-through text-ink-soft' : ''}`}>
-                {formatPrice(product.priceCents, product.currency)}
-              </dd>
-            </div>
-          </dl>
+          <div className="papel capa-2 relative mt-8 px-6 pt-5 pb-6">
+            {/* El ojal: un agujero de verdad, con la sombra por dentro. */}
+            <span
+              aria-hidden="true"
+              className="absolute top-4 right-4 size-3 rounded-full bg-oat shadow-[inset_1px_1px_2px_color-mix(in_oklch,var(--color-bordeaux)_45%,transparent)]"
+            />
+            <dl className="divide-y divide-oat">
+              <div className="flex items-baseline justify-between gap-6 py-3 first:pt-0">
+                <dt className="nota">Formato</dt>
+                <dd className="text-right font-display text-[1.0625rem] mr-7">{product.technique}</dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-6 py-3">
+                <dt className="nota">Medidas</dt>
+                <dd className="text-right font-display text-[1.0625rem] tabular">{formatDimensions(product.widthCm, product.heightCm)}</dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-6 pt-4">
+                <dt className="nota">Precio</dt>
+                <dd className={`text-right font-display text-[1.75rem] leading-none tabular ${vendido ? 'line-through text-ink-soft' : 'text-ink'}`}>
+                  {formatPrice(product.priceCents, product.currency)}
+                </dd>
+              </div>
+            </dl>
+          </div>
 
-          <p className="mt-8 text-ink-soft leading-relaxed">{product.description}</p>
+          <p className="mt-8 text-ink-soft leading-relaxed max-w-[60ch]">{product.description}</p>
 
           <div className="mt-10">
             <WhatsAppButton product={product} className="w-full sm:w-auto" />

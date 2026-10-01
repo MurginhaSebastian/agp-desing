@@ -15,7 +15,7 @@ export function Wordmark({ onDark = false, className = '' }: { onDark?: boolean;
           "AGP Desing — inicio" no contenía "AGPDesing" (los dos trozos van en spans
           separados, sin espacio real). Así el nombre sale del propio texto. */}
       <span className="font-body font-bold tracking-[-0.03em] text-[1.35rem]">AGP</span>
-      <span className={`font-display italic text-[1.5rem] ${onDark ? 'text-rose' : 'text-brand'}`}>Desing</span>
+      <span className={`font-marca italic text-[1.5rem] ${onDark ? 'text-rose' : 'text-brand'}`}>Desing</span>
       <span className="sr-only">, ir al inicio</span>
     </Link>
   )

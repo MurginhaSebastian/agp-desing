@@ -1,9 +1,10 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { createPortal } from 'react-dom'
-import { Menu, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { Wordmark } from '@/components/layout/Wordmark'
+import { WhatsAppButton } from '@/components/catalog/WhatsAppButton'
+import { Cerrar, Menu } from '@/components/ui/iconos'
 import { buildWhatsAppUrl } from '@/lib/whatsapp'
 
 const links = [
@@ -51,18 +52,19 @@ export function Navbar() {
   }, [open])
 
   return (
-    <header className="sticky top-0 z-40 bg-silk/90 backdrop-blur-sm border-b border-oat">
+    <header className="sticky top-0 z-40 bg-silk con-grano border-b border-oat">
       <nav aria-label="Principal" className="container-x flex items-center justify-between h-16 md:h-20">
         <Wordmark />
 
-        <ul className="hidden md:flex items-center gap-5 lg:gap-7">
+        {/* Desde 1024 px: en tablet los cinco enlaces no caben en una línea y se partían en dos. */}
+        <ul className="hidden lg:flex items-center gap-7">
           {links.map((l) => (
             <li key={l.to}>
               <NavItem to={l.to}>{l.label}</NavItem>
             </li>
           ))}
           <li>
-            <a href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="btn-primary min-h-11 px-5">
+            <a href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="boton min-h-11 px-5">
               Cotizar
             </a>
           </li>
@@ -71,13 +73,13 @@ export function Navbar() {
         <button
           ref={toggleRef}
           type="button"
-          className="md:hidden inline-flex items-center justify-center size-11 -mr-2 text-ink"
+          className="lg:hidden inline-flex items-center justify-center size-11 -mr-2 text-ink"
           aria-expanded={open}
           aria-controls="menu-movil"
           aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
           onClick={() => setOpen((v) => !v)}
         >
-          {open ? <X size={24} strokeWidth={1.75} /> : <Menu size={24} strokeWidth={1.75} />}
+          {open ? <Cerrar size={24} /> : <Menu size={24} />}
         </button>
       </nav>
 
@@ -94,7 +96,7 @@ export function Navbar() {
             <>
               <motion.div
                 aria-hidden="true"
-                className="fixed inset-0 top-16 z-30 bg-bordeaux/40 md:hidden"
+                className="fixed inset-0 top-16 md:top-20 z-30 bg-bordeaux/40 lg:hidden"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -107,7 +109,7 @@ export function Navbar() {
                 role="dialog"
                 aria-modal="true"
                 aria-label="Menú"
-                className="fixed top-16 right-0 bottom-0 z-40 w-[min(85vw,22rem)] bg-silk border-l border-oat md:hidden"
+                className="fixed top-16 md:top-20 right-0 bottom-0 z-40 w-[min(85vw,22rem)] papel capa-3 !rounded-none lg:hidden"
                 initial={{ transform: 'translateX(100%)' }}
                 animate={{ transform: 'translateX(0%)' }}
                 exit={{ transform: 'translateX(100%)', transition: { duration: 0.2, ease: EASE_DRAWER } }}
@@ -121,19 +123,24 @@ export function Navbar() {
                       animate={{ opacity: 1, transform: 'translateX(0px)' }}
                       transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: 0.06 + i * 0.04 }}
                     >
-                      <Link
-                        to={l.to}
-                        onClick={close}
-                        className="flex items-center min-h-12 px-6 font-display text-2xl text-ink"
-                      >
-                        {l.label}
-                      </Link>
+                      {/* Las anclas de la portada no son páginas: solo el catálogo se marca como actual. */}
+                      {l.to.includes('#') ? (
+                        <Link to={l.to} onClick={close} className="flex items-center min-h-12 px-6 font-display text-2xl text-ink">
+                          {l.label}
+                        </Link>
+                      ) : (
+                        <NavLink
+                          to={l.to}
+                          onClick={close}
+                          className="flex items-center min-h-12 px-6 font-display text-2xl text-ink aria-[current=page]:text-brand"
+                        >
+                          {l.label}
+                        </NavLink>
+                      )}
                     </motion.li>
                   ))}
                   <li className="px-6 pt-4">
-                    <a href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="btn-primary w-full">
-                      Cotizar por WhatsApp
-                    </a>
+                    <WhatsAppButton className="w-full" />
                   </li>
                 </ul>
               </motion.div>
@@ -157,7 +164,8 @@ function NavItem({ to, children }: { to: string; children: string }) {
     )
   }
   return (
-    <NavLink to={to} className={({ isActive }) => `${className} ${isActive ? 'text-brand' : ''}`}>
+    // La página actual, en rojo y con el subrayado ya puesto.
+    <NavLink to={to} className={({ isActive }) => `${className} ${isActive ? '!text-brand bg-[length:100%_1px]' : ''}`}>
       {children}
     </NavLink>
   )
