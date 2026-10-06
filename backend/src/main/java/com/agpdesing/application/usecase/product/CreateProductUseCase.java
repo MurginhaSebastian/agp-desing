@@ -1,5 +1,6 @@
 package com.agpdesing.application.usecase.product;
 
+import com.agpdesing.application.port.out.Transacciones;
 import com.agpdesing.domain.exception.SlugAlreadyExistsException;
 import com.agpdesing.domain.model.Product;
 import com.agpdesing.domain.repository.ProductRepository;
@@ -12,18 +13,23 @@ public class CreateProductUseCase {
 
     private final ProductRepository products;
     private final Clock clock;
+    private final Transacciones transacciones;
 
-    public CreateProductUseCase(ProductRepository products, Clock clock) {
+    public CreateProductUseCase(ProductRepository products, Clock clock, Transacciones transacciones) {
         this.products = products;
         this.clock = clock;
+        this.transacciones = transacciones;
     }
 
     public Product execute(ProductCommand cmd) {
         Product product = Product.create(cmd.name(), cmd.description(), cmd.price(), cmd.widthCm(), cmd.heightCm(),
                 cmd.technique(), cmd.imageUrl(), cmd.status(), cmd.featured(), Instant.now(clock));
-        if (products.findBySlug(product.slug()).isPresent()) {
-            throw new SlugAlreadyExistsException(product.slug());
-        }
-        return products.save(product);
+        // Comprobar y guardar juntos: si no, otra alta con el mismo nombre podía colarse en medio.
+        return transacciones.enTransaccion(() -> {
+            if (products.findBySlug(product.slug()).isPresent()) {
+                throw new SlugAlreadyExistsException(product.slug());
+            }
+            return products.save(product);
+        });
     }
 }

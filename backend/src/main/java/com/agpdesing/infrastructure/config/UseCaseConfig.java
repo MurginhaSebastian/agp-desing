@@ -3,6 +3,7 @@ package com.agpdesing.infrastructure.config;
 import com.agpdesing.application.port.out.ImageStorage;
 import com.agpdesing.application.port.out.PasswordHasher;
 import com.agpdesing.application.port.out.TokenProvider;
+import com.agpdesing.application.port.out.Transacciones;
 import com.agpdesing.application.usecase.auth.AuthenticateAdminUseCase;
 import com.agpdesing.application.usecase.image.UploadImageUseCase;
 import com.agpdesing.application.usecase.product.CreateProductUseCase;
@@ -36,18 +37,18 @@ public class UseCaseConfig {
     }
 
     @Bean
-    CreateProductUseCase createProductUseCase(ProductRepository repo, Clock clock) {
-        return new CreateProductUseCase(repo, clock);
+    CreateProductUseCase createProductUseCase(ProductRepository repo, Clock clock, Transacciones tx) {
+        return new CreateProductUseCase(repo, clock, tx);
     }
 
     @Bean
-    UpdateProductUseCase updateProductUseCase(ProductRepository repo, Clock clock) {
-        return new UpdateProductUseCase(repo, clock);
+    UpdateProductUseCase updateProductUseCase(ProductRepository repo, Clock clock, Transacciones tx) {
+        return new UpdateProductUseCase(repo, clock, tx);
     }
 
     @Bean
-    DeleteProductUseCase deleteProductUseCase(ProductRepository repo) {
-        return new DeleteProductUseCase(repo);
+    DeleteProductUseCase deleteProductUseCase(ProductRepository repo, Transacciones tx) {
+        return new DeleteProductUseCase(repo, tx);
     }
 
     @Bean

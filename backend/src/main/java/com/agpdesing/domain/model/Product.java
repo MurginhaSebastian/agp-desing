@@ -16,7 +16,9 @@ public final class Product {
     public static final int NAME_MAX = 120;
     public static final int DESCRIPTION_MAX = 2000;
     public static final int TECHNIQUE_MAX = 80;
-    public static final int IMAGE_URL_MAX = 500;
+    public static final int IMAGE_URL_MAX = UrlPublica.MAX;
+    /** Un metro: más que eso no es un cuadro de taller, es un error al teclear. */
+    public static final int DIMENSION_MAX = 1000;
 
     private final ProductId id;
     private String name;
@@ -98,6 +100,8 @@ public final class Product {
     private void applyDimensions(int width, int height) {
         if (width <= 0) throw new DomainValidationException("widthCm", "El ancho debe ser mayor que cero");
         if (height <= 0) throw new DomainValidationException("heightCm", "El alto debe ser mayor que cero");
+        if (width > DIMENSION_MAX) throw new DomainValidationException("widthCm", "Máximo " + DIMENSION_MAX + " cm");
+        if (height > DIMENSION_MAX) throw new DomainValidationException("heightCm", "Máximo " + DIMENSION_MAX + " cm");
         this.widthCm = width;
         this.heightCm = height;
     }
@@ -110,11 +114,7 @@ public final class Product {
     }
 
     private void applyImageUrl(String value) {
-        String v = value == null ? "" : value.strip();
-        boolean ok = v.startsWith("https://") || v.startsWith("http://") || v.startsWith("/");
-        if (!ok) throw new DomainValidationException("imageUrl", "Debe ser una URL http(s) o una ruta que empiece por /");
-        if (v.length() > IMAGE_URL_MAX) throw new DomainValidationException("imageUrl", "Máximo " + IMAGE_URL_MAX + " caracteres");
-        this.imageUrl = v;
+        this.imageUrl = UrlPublica.validar("imageUrl", value);
     }
 
     static String slugify(String input) {

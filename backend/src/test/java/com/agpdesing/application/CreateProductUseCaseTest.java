@@ -27,7 +27,7 @@ class CreateProductUseCaseTest {
 
     private final InMemoryProducts repo = new InMemoryProducts();
     private final Clock clock = Clock.fixed(Instant.parse("2026-09-21T10:00:00Z"), ZoneOffset.UTC);
-    private final CreateProductUseCase useCase = new CreateProductUseCase(repo, clock);
+    private final CreateProductUseCase useCase = new CreateProductUseCase(repo, clock, new TransaccionesDePrueba());
 
     @Test
     void createsProductWithSlugAndTimestamps() {

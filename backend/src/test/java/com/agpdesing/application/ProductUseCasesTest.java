@@ -32,9 +32,9 @@ class ProductUseCasesTest {
     private final CreateProductUseCaseTest.InMemoryProducts repo = new CreateProductUseCaseTest.InMemoryProducts();
     private final MutableClock clock = new MutableClock(Instant.parse("2026-09-21T10:00:00Z"));
 
-    private final CreateProductUseCase create = new CreateProductUseCase(repo, clock);
-    private final UpdateProductUseCase update = new UpdateProductUseCase(repo, clock);
-    private final DeleteProductUseCase delete = new DeleteProductUseCase(repo);
+    private final CreateProductUseCase create = new CreateProductUseCase(repo, clock, new TransaccionesDePrueba());
+    private final UpdateProductUseCase update = new UpdateProductUseCase(repo, clock, new TransaccionesDePrueba());
+    private final DeleteProductUseCase delete = new DeleteProductUseCase(repo, new TransaccionesDePrueba());
     private final GetProductUseCase get = new GetProductUseCase(repo);
     private final ListProductsUseCase list = new ListProductsUseCase(repo);
 

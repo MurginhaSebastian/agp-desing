@@ -29,6 +29,11 @@ export const tokenStorage = {
       return token
     }, null)
   },
+  /** Cuándo caduca la sesión guardada (ms desde 1970), o null si no hay una válida. */
+  caducidad(): number | null {
+    if (tokenStorage.get() === null) return null
+    return safe(() => Date.parse(sessionStorage.getItem(EXP_KEY) ?? ''), null)
+  },
   set(token: string, expiresAt: string) {
     safe(() => {
       sessionStorage.setItem(KEY, token)

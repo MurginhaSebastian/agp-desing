@@ -1,5 +1,6 @@
 package com.agpdesing.presentation;
 
+import com.agpdesing.application.TransaccionesDePrueba;
 import com.agpdesing.application.port.out.ImageStorage;
 import com.agpdesing.application.port.out.PasswordHasher;
 import com.agpdesing.application.port.out.TokenProvider;
@@ -243,12 +244,23 @@ class ApiContractTest {
             mvc.perform(delete(ruta).with(admin())).andExpect(status().isNotFound());
         }
 
-        /** Comportamiento ACTUAL (fallo conocido): un método no admitido acaba en el comodín. */
+        /** Antes acababa en el comodín y respondía 500, como si el servidor se hubiera roto. */
         @Test
-        void metodoNoAdmitidoHoyDa500() throws Exception {
+        void metodoNoAdmitidoEs405() throws Exception {
             mvc.perform(patch("/api/products").with(admin()))
-                    .andExpect(status().isInternalServerError())
-                    .andExpect(jsonPath("$.title").value("Error interno"));
+                    .andExpect(status().isMethodNotAllowed())
+                    .andExpect(header().string("Allow", org.hamcrest.Matchers.containsString("GET")))
+                    .andExpect(jsonPath("$.title").value("Método no admitido"))
+                    .andExpect(jsonPath("$.status").value(405));
+        }
+
+        /** Una ruta que no existe dentro de /api/products: 404, no 500. */
+        @Test
+        void rutaInexistenteEs404() throws Exception {
+            mvc.perform(get("/api/products/a/b").with(admin()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.title").value("No encontrado"))
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 
@@ -293,6 +305,18 @@ class ApiContractTest {
                     .andExpect(jsonPath("$.expiresAt").value("2026-09-21T18:00:00Z"))
                     .andExpect(jsonPath("$.username").value("admin"))
                     .andExpect(jsonPath("$.length()").value(3));
+        }
+
+        /**
+         * El límite es de 72 BYTES (lo que mira BCrypt), no de 72 caracteres: el DTO ya no lo cuenta
+         * por su lado. Una clave demasiado larga responde igual que una equivocada.
+         */
+        @Test
+        void claveDemasiadoLargaEsComoUnaEquivocada() throws Exception {
+            String larga = "a".repeat(73);
+            mvc.perform(json(post("/api/auth/login"), "{\"username\":\"admin\",\"password\":\"" + larga + "\"}").with(desdeOtraIp()))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.title").value("No autorizado"));
         }
 
         @Test
@@ -500,9 +524,9 @@ class ApiContractTest {
 
         @Bean ListProductsUseCase list(Productos p) { return new ListProductsUseCase(p); }
         @Bean GetProductUseCase get(Productos p) { return new GetProductUseCase(p); }
-        @Bean CreateProductUseCase create(Productos p) { return new CreateProductUseCase(p, clock); }
-        @Bean UpdateProductUseCase update(Productos p) { return new UpdateProductUseCase(p, clock); }
-        @Bean DeleteProductUseCase delete(Productos p) { return new DeleteProductUseCase(p); }
+        @Bean CreateProductUseCase create(Productos p) { return new CreateProductUseCase(p, clock, new TransaccionesDePrueba()); }
+        @Bean UpdateProductUseCase update(Productos p) { return new UpdateProductUseCase(p, clock, new TransaccionesDePrueba()); }
+        @Bean DeleteProductUseCase delete(Productos p) { return new DeleteProductUseCase(p, new TransaccionesDePrueba()); }
         @Bean GetSiteSettingsUseCase getSettings(Ajustes a) { return new GetSiteSettingsUseCase(a); }
         @Bean UpdateSiteSettingsUseCase updateSettings(Ajustes a) { return new UpdateSiteSettingsUseCase(a); }
         @Bean UploadImageUseCase upload(Almacen a) { return new UploadImageUseCase(a, 5L * 1024 * 1024); }

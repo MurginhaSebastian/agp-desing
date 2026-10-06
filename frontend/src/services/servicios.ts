@@ -12,12 +12,12 @@ import { ajustesRemotos, imagenesRemotas, productosRemotos, sesionRemota } from 
  */
 export function crearServicios(demo: boolean): Servicios {
   if (demo) {
-    return {
-      productos: crearProductosDemo(),
-      ajustes: crearAjustesDemo(),
-      sesion: crearSesionDemo(),
-      imagenes: crearImagenesDemo(),
-    }
+    // Tras cada cambio en las obras o la portada, se sueltan las fotos subidas que ya nadie usa.
+    const imagenes = crearImagenesDemo()
+    const liberar = () => imagenes.liberarSinUso(new Set([...productos.fotosEnUso(), ajustes.fotoEnUso()]))
+    const productos = crearProductosDemo(liberar)
+    const ajustes = crearAjustesDemo(liberar)
+    return { productos, ajustes, sesion: crearSesionDemo(), imagenes }
   }
   return { productos: productosRemotos, ajustes: ajustesRemotos, sesion: sesionRemota, imagenes: imagenesRemotas }
 }

@@ -1,7 +1,5 @@
 package com.agpdesing.domain.model;
 
-import com.agpdesing.domain.exception.DomainValidationException;
-
 /**
  * Ajustes editables de la web. Hoy solo la imagen de la portada, pero es un
  * objeto de valor: añadir otro ajuste no cambia la forma de guardarlo.
@@ -9,7 +7,7 @@ import com.agpdesing.domain.exception.DomainValidationException;
  */
 public record SiteSettings(String heroImageUrl) {
 
-    public static final int URL_MAX = 500;
+    public static final int URL_MAX = UrlPublica.MAX;
 
     public SiteSettings {
         heroImageUrl = normalizeUrl(heroImageUrl);
@@ -24,11 +22,8 @@ public record SiteSettings(String heroImageUrl) {
     }
 
     private static String normalizeUrl(String value) {
-        String v = value == null ? "" : value.strip();
-        if (v.isEmpty()) return v;
-        boolean ok = v.startsWith("https://") || v.startsWith("http://") || v.startsWith("/");
-        if (!ok) throw new DomainValidationException("heroImageUrl", "Debe ser una URL http(s) o una ruta que empiece por /");
-        if (v.length() > URL_MAX) throw new DomainValidationException("heroImageUrl", "Máximo " + URL_MAX + " caracteres");
-        return v;
+        // Vacía es válida (sin imagen); si no, la misma regla que la foto de una obra.
+        if (value == null || value.isBlank()) return "";
+        return UrlPublica.validar("heroImageUrl", value);
     }
 }

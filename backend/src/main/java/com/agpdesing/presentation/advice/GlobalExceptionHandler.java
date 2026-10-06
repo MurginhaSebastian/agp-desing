@@ -11,8 +11,11 @@ import com.agpdesing.domain.exception.SlugAlreadyExistsException;
 import com.agpdesing.presentation.ratelimit.DemasiadasSubidasException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,6 +27,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -80,6 +84,25 @@ public class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "No existe un cuadro con ese identificador");
         pd.setTitle("No encontrado");
         return pd;
+    }
+
+    /** Una ruta que no existe (con sesión: sin ella, la seguridad responde antes). Antes caía en el 500. */
+    @ExceptionHandler(NoResourceFoundException.class)
+    ProblemDetail onNoRoute(NoResourceFoundException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "Esa dirección no existe");
+        pd.setTitle("No encontrado");
+        return pd;
+    }
+
+    /** Un método que la ruta no admite (PATCH a /api/products, por ejemplo). Antes caía en el 500. */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    ResponseEntity<ProblemDetail> onMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.METHOD_NOT_ALLOWED,
+                "Esta dirección no admite " + ex.getMethod());
+        pd.setTitle("Método no admitido");
+        HttpHeaders cabeceras = new HttpHeaders();
+        if (ex.getSupportedHttpMethods() != null) cabeceras.setAllow(ex.getSupportedHttpMethods());
+        return new ResponseEntity<>(pd, cabeceras, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler(SlugAlreadyExistsException.class)
