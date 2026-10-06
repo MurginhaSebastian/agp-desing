@@ -137,3 +137,12 @@ discutir si esa palabra era inocente.
 Al añadir Vitest (oct. 2026), «código sin usar» marcó cada `*.test.ts` como archivo que ningún otro
 importa. Es verdad y no significa nada: Vitest las encuentra por el nombre. El control ahora las
 salta por su sufijo, y solo por él; un archivo normal sin importar sigue saliendo.
+
+## «Código sin usar» no veía las clases sangradas
+
+La búsqueda de clases de `index.css` solo leía las reglas que empiezan en la columna 0. Todas las
+de `@layer components` y las de dentro de un `@media` van sangradas, así que nunca se revisaron:
+`.btn-on-dark`, `.rule` y `section-y` sobrevivieron al rediseño «Capas» sin que nadie lo dijera.
+Además comparaba por subcadena, y `.rule` contaba como usada porque existe `.rule-dark`. Ahora lee
+las sangradas, busca la clase como palabra entera y cuenta como uso un `@apply` dentro del CSS.
+Comprobado al revés: con el `index.css` anterior a la limpieza salen las tres.

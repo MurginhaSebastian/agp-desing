@@ -15,5 +15,8 @@ Thumbs.db
 .vscode/
 *.iml
 
-# Capturas de QA se versionan; el resto de PNG temporales no
+# Capturas de QA (docs/qa) se versionan
 *.log
+
+# Caché de Python de los scripts de skills
+__pycache__/

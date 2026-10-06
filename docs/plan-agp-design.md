@@ -1,6 +1,6 @@
 # Plan: Arquitectura Full-Stack para AGP desing
 
-Fuente: `docs/prompt-maestro-original.md` → reescrito como `docs/PROMPT-MAESTRO.md`. Stack: React 19 + TypeScript + Vite 8 + Tailwind v4 (frontend) · Java 21 + Spring Boot 3.3 + PostgreSQL (backend). Clean Architecture en ambos lados.
+Fuente: el encargo inicial (`docs/PROMPT-MAESTRO.md`, retirado en oct. 2026; sigue en el historial de git). Stack: React 19 + TypeScript + Vite 8 + Tailwind v4 (frontend) · Java 21 + Spring Boot 3.3 + PostgreSQL (backend). Clean Architecture en ambos lados.
 
 Dos correcciones al prompt original:
 - **Off Black `#1B1B11B`** tiene 7 dígitos y no es un hex válido. Se asume `#1B1B1B`.

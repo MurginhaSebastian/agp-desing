@@ -10,11 +10,11 @@ Idioma de trabajo: **español** con el usuario. Código y comentarios en españo
 agp-desing/
 ├── frontend/    React 19 + TypeScript + Vite 8 + Tailwind v4 + React Router 7 + Motion
 ├── backend/     Java 21 + Spring Boot 3.5 + PostgreSQL + Flyway + JWT — Clean Architecture
-├── docs/        plan-agp-design.md (arquitectura), DEPLOY.md (Render + Vercel), PROMPT-MAESTRO.md, brand/, qa/
+├── docs/        plan-agp-design.md (arquitectura), DEPLOY.md (Render + Vercel), brand/, qa/
 ├── .github/workflows/keep-alive.yml   ping diario a Supabase; ping a Render cuando exista BACKEND_URL
 └── .claude/skills/   frontend-design, ui-ux-pro-max, humanizer, emil-design-eng, animate,
                       review-animations, find-animation-opportunities, web-design-guidelines,
-                      playwright-cli, shadcn-ui, qa-suite, security-audit, redesign-existing-projects
+                      playwright-cli, qa-suite, security-audit, redesign-existing-projects
 ```
 
 Front y back **nunca se mezclan**: cada uno tiene su `package.json`/`pom.xml`, su `.env.example` y su `.gitignore`. El contrato entre ambos son `frontend/src/types/product.ts` ↔ `ProductResponse.java` y `frontend/src/types/settings.ts` ↔ `SiteSettingsResponse.java` (ambos en `backend/.../presentation/dto/response/`) — si cambia uno, cambia el otro.

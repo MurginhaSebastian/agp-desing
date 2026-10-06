@@ -70,7 +70,7 @@ Walk down; stop at the first that fits.
 
 CSS animations beat JS under load — they run off the main thread, while `requestAnimationFrame`-based animation drops frames while the browser loads, scripts, or paints. Use CSS for predetermined motion, JS for dynamic and interruptible motion.
 
-If the task needs a *component* rather than an animation — a toast, a drawer, a command menu, a dropdown — stop and add it with the bundled `shadcn-ui` skill (`npx shadcn@latest add <component> -y`), then animate that. <!-- LOCAL MODIFICATION (claude-webkit): upstream points at `pick-ui-library`, deliberately not bundled here — this repo has already committed to shadcn/ui. See ./NOTICE.md --> Hand-rolling those is how you end up with a `<div>` dropdown and no focus management.
+If the task needs a *component* rather than an animation — a toast, a drawer, a command menu, a dropdown — stop and build it from this repo's existing pieces first (web: `components/ui/`; panel: Lucide icons + the `.btn-*`/`.field-*` classes), then animate that. <!-- LOCAL MODIFICATION: upstream points at `pick-ui-library`, deliberately not bundled here — this repo uses no component library. See ./NOTICE.md --> Hand-rolling those is how you end up with a `<div>` dropdown and no focus management.
 
 ### 4. Pick the properties
 

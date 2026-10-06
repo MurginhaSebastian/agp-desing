@@ -45,8 +45,7 @@
   --text-label--line-height: 1.2;
   --text-label--letter-spacing: 0.14em;
 
-  /* Espaciado de sección */
-  --spacing-section: clamp(5rem, 4rem + 6vw, 10rem);
+  /* Margen lateral de página */
   --spacing-gutter: clamp(1.25rem, 0.5rem + 3vw, 4rem);
 
   /* Motion — tres curvas canónicas, nunca ease-in en UI */
@@ -61,12 +60,11 @@
   @apply font-mono text-label uppercase text-ink-soft;
 }
 @utility btn {
-  /* Botones — press feedback 160ms, ease-out, scale 0.97 (ver .btn:active) */
+  /* Botones del panel: base que comparten .btn-primary, .btn-secondary y .btn-ghost */
   @apply inline-flex items-center justify-center gap-2 min-h-11 px-6 font-body font-semibold text-[0.9375rem] select-none;
   transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out), color 160ms var(--ease-out), border-color 160ms var(--ease-out);
 }
 @utility container-x { padding-inline: var(--spacing-gutter); }
-@utility section-y { padding-block: var(--spacing-section); }
 @utility tabular { font-variant-numeric: tabular-nums; }
 
 @layer base {
@@ -101,17 +99,14 @@
 @layer components {
   .label-brand { @apply label text-brand; }
 
-  .btn:active { transform: scale(0.97); }
   .btn-primary { @apply btn bg-brand text-silk; }
   .btn-secondary { @apply btn bg-transparent text-ink border border-ink; }
   .btn-ghost { @apply btn bg-transparent text-ink px-3; }
-  .btn-on-dark { @apply btn bg-silk text-bordeaux; }
 
   @media (hover: hover) and (pointer: fine) {
     .btn-primary:hover { @apply bg-brand-deep; }
     .btn-secondary:hover { @apply bg-ink text-silk; }
     .btn-ghost:hover { @apply text-brand; }
-    .btn-on-dark:hover { @apply bg-nude; }
   }
 
   /* Campos de formulario */
@@ -124,8 +119,7 @@
   .field-input[aria-invalid="true"] { @apply border-brand; }
   .field-error { @apply mt-1.5 text-sm text-brand; }
 
-  /* Línea de regla editorial */
-  .rule { @apply border-t border-oat; }
+  /* Línea de regla editorial sobre fondo oscuro */
   .rule-dark { @apply border-t border-silk/20; }
 
   /* Enlace con subrayado que crece */
@@ -489,7 +483,6 @@
     animation-iteration-count: 1 !important;
     transition-duration: 120ms !important;
   }
-  .btn:active { transform: none; }
   /* «Capas»: sin desplazamientos al pasar ni al pulsar; se quedan los cambios de sombra y color. */
   .boton:hover, .boton:active, .control-carrusel:active,
   .group:hover .montada,

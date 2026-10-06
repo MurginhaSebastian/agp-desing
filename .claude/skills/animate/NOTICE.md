@@ -9,8 +9,9 @@ Vendored from [emilkowalski/skills](https://github.com/emilkowalski/skills).
 ## Local modifications
 
 **M2.** One line: upstream's "stop and invoke `pick-ui-library`" was repointed at the
-bundled `shadcn-ui` skill, because `pick-ui-library` is deliberately not bundled here
-(this repo has already committed to shadcn/ui). Same intent, working target.
+repo's own components, because `pick-ui-library` is deliberately not bundled here and the
+repo uses no component library (the `shadcn-ui` skill was removed in Oct 2026: nothing
+here used shadcn). Same intent, working target.
 Everything else is unmodified upstream text.
 
 To refresh: re-copy from upstream and update the commit SHA above.

@@ -183,14 +183,24 @@ export async function run() {
     }
   }
 
-  // 5. Clases y utilidades de index.css sin usar (por prefijo: «btn» cubre «btn-primary»)
+  /*
+   * 5. Clases y utilidades de index.css sin usar.
+   * Se buscan también las reglas sangradas (las de `@layer components` y las de dentro de un
+   * `@media`): antes solo se leían las que empezaban en la columna 0 y ninguna de esas se
+   * revisaba nunca. Y se busca la clase como palabra entera: por subcadena, «rule» contaba como
+   * usada porque existe «rule-dark». Una utilidad que solo se usa con `@apply` dentro del CSS
+   * (como `btn` en `.btn-primary`) cuenta como usada.
+   */
   const css = leer('src/index.css')
   const declaradas = new Set()
   for (const m of css.matchAll(/@utility\s+([a-z][\w-]*)/g)) declaradas.add(m[1].replace(/-\*$/, ''))
-  for (const m of css.matchAll(/^\.([a-z][\w-]*)/gm)) declaradas.add(m[1])
+  for (const m of css.matchAll(/^\s*\.([a-z][\w-]*)/gm)) declaradas.add(m[1])
+  const aplicadas = [...css.matchAll(/@apply\s+([^;]+);/g)].map((m) => ` ${m[1]} `).join('')
   for (const clase of declaradas) {
     revisados.clases++
-    const usada = [...textos].some(([archivo, texto]) => /\.(tsx|ts|html)$/.test(archivo) && texto.includes(clase))
+    const palabra = new RegExp(String.raw`(^|[^\w-])${clase}([^\w-]|$)`, 'm')
+    const usada = palabra.test(aplicadas)
+      || [...textos].some(([archivo, texto]) => /\.(tsx|ts|html)$/.test(archivo) && palabra.test(texto))
     if (!usada) hallazgos.push({ gravedad: GRAVEDAD.bajo, donde: 'src/index.css', que: `«${clase}» está definida y no se usa` })
   }
 

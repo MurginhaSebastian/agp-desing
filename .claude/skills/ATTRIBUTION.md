@@ -29,8 +29,8 @@ what license it carries, and every byte this repo changed.
 | `prototype` | `skills/prototype/` | None. `disable-model-invocation: true` preserved. |
 
 **Not bundled, on purpose:** `animate-expo` (React Native, out of scope), `ask-sonner`
-(toast library not used here), `pick-ui-library` (would contradict this repo's committed
-shadcn/ui choice).
+(toast library not used here), `pick-ui-library` (this repo builds its own components and
+uses no component library).
 
 ### Local modifications, in full
 
@@ -43,7 +43,7 @@ line of the file is changed.
 
 **M2 — `animate/SKILL.md`, one line.**
 Upstream instructs the agent to "stop and invoke `pick-ui-library`", which is deliberately
-not bundled here. Repointed at the bundled `shadcn-ui` skill. Same intent, working target.
+not bundled here. Repointed at the repo's own components. Same intent, working target.
 
 ## Anthropic — frontend-design (Apache 2.0)
 
@@ -56,7 +56,6 @@ On **motion**, this repo's authority is `animate` / `emil-design-eng`, not
 | Skill | Source | License | Local modifications |
 |---|---|---|---|
 | `ui-ux-pro-max` | Next Level Builder | MIT — `LICENSE` | **Yes.** `scripts/core.py`: restored 12 entries to `STACK_CONFIG` (the vendored copy shipped only `react-native`, which disabled `--stack` for the other 12 values). `data/stacks/`: added 12 CSVs. `data/`: removed `draft.csv` and `design.csv` (unreferenced, 212 KB; `draft.csv`'s own header states the engine does not read it). `SKILL.md`: corrected 12 script paths (`skills/` -> `.claude/skills/`), retargeted from React Native to Next.js + shadcn, removed the non-existent `--domain prompt`, restored the 13-stack table. |
-| `shadcn-ui` | provenance unrecorded | unstated | **Yes.** `npx shadcn-ui@latest` -> `npx shadcn@latest` (23 occurrences; the `shadcn-ui` package is deprecated on npm). |
 | `vercel-deploy` | Vercel | MIT — `LICENSE.txt` | None. |
 | `vercel-react-best-practices` | Vercel | MIT — frontmatter | None. |
 | `web-reader` | z-ai-web-dev-sdk Skills | MIT — `LICENSE.txt` | None. |
