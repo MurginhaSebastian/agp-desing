@@ -17,24 +17,39 @@ import {
  * `clip` / `clip-path: inset(50%)` (el que usan las librerías, como el botón de ampliar foto,
  * que solo aparece al llegar con el teclado). Cuando aparecen, sí se miden: ver TRAMPAS.
  */
-const CONTROLES_PEQUENOS = () => {
+export const MEDIR_CONTROLES = () => {
   const oculto = (e) => {
     if ((e.className || '').toString().includes('sr-only')) return true
     const cs = getComputedStyle(e)
     return cs.clipPath === 'inset(50%)' || /rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)/.test(cs.clip)
   }
+  /*
+   * Las clases de botón de cada sistema, comparadas como palabra entera: el panel usa `btn-*` y la
+   * web pública (desde el rediseño Capas) `boton`, `enlace-flecha`, `separador` y
+   * `control-carrusel`. Antes se buscaba `/btn|chip|tab/` por subcadena: `chip` y `tab` ya no
+   * existían, `tab` se colaba en `tabular`, y los botones de la web pública fuera del menú y del
+   * pie no se medían nunca.
+   */
+  const CLASE_DE_CONTROL = /^(btn(-[a-z]+)?|boton(-[a-z]+)?|enlace-flecha|separador|control-carrusel)$/
   const esControl = (e) =>
-    /btn|chip|tab/.test((e.className || '').toString()) ||
+    (e.className || '').toString().split(/\s+/).some((c) => CLASE_DE_CONTROL.test(c)) ||
     e.getAttribute('role') === 'button' ||
     e.tagName === 'BUTTON' ||
     e.closest('nav, footer') !== null
-  return [...document.querySelectorAll('a[href], button')]
+  const medidos = [...document.querySelectorAll('a[href], button')]
     .filter((e) => e.getClientRects().length > 0 && esControl(e) && !oculto(e))
-    .map((e) => ({
-      t: (e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 26),
-      alto: Math.round(e.getBoundingClientRect().height),
-    }))
-    .filter((x) => x.alto < 44)
+  return {
+    pequenos: medidos
+      .map((e) => ({
+        t: (e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 26),
+        alto: Math.round(e.getBoundingClientRect().height),
+      }))
+      .filter((x) => x.alto < 44),
+    // Para la autocomprobación: botones de la web pública medidos FUERA del menú y del pie, que
+    // son justo los que se escapaban (los de dentro ya se medían por estar en `nav`/`footer`).
+    botonesWeb: medidos.filter((e) =>
+      /(^|\s)boton(\s|$)/.test((e.className || '').toString()) && e.closest('nav, footer') === null).length,
+  }
 }
 
 /**
@@ -70,6 +85,7 @@ const CTA_FUERA = () => {
 
 export async function run() {
   const hallazgos = []
+  let botonesWebMedidos = 0
   const navegador = await abrirNavegador()
   const page = await navegador.newPage({ viewport: { width: 1440, height: 900 } })
   const ficha = await rutaDeUnProducto(page)
@@ -89,7 +105,9 @@ export async function run() {
         hallazgos.push({ gravedad: GRAVEDAD.alto, donde: `${nombre} (${tam} ${w}px)`, que: 'la página se arrastra de lado', detalle: `${desborde}px de más` })
       }
 
-      for (const c of await page.evaluate(CONTROLES_PEQUENOS)) {
+      const controles = await page.evaluate(MEDIR_CONTROLES)
+      botonesWebMedidos += controles.botonesWeb
+      for (const c of controles.pequenos) {
         hallazgos.push({ gravedad: GRAVEDAD.medio, donde: `${nombre} (${tam})`, que: `«${c.t}» mide ${c.alto}px de alto`, detalle: 'mínimo recomendado 44px para el dedo' })
       }
 
@@ -112,6 +130,15 @@ export async function run() {
     }
 
     await page.close()
+  }
+
+  /*
+   * AUTOCOMPROBACIÓN. La web pública tiene botones `.boton` fuera del menú y del pie (portada,
+   * contacto, la ficha). Si no se ha medido ninguno, el control está ciego (pasó: buscaba clases que ya no existían) y
+   * su «sin hallazgos» no vale.
+   */
+  if (botonesWebMedidos === 0) {
+    hallazgos.push({ gravedad: GRAVEDAD.critico, donde: 'el control', que: 'no ha medido ni un botón `.boton` de la web pública: la medición no vale' })
   }
 
   // Panel: solo donde más duele, en móvil y escritorio
@@ -150,11 +177,12 @@ export async function run() {
   await movil.close()
 
   await navegador.close()
-  return { titulo: 'Móvil, tablet y escritorio', hallazgos }
+  return { titulo: 'Móvil, tablet y escritorio', hallazgos, nota: `botones de la web pública medidos fuera del menú y del pie: ${botonesWebMedidos}` }
 }
 
 if (pathToFileURL(process.argv[1]).href === import.meta.url) {
   const r = await run()
   imprimir(r.titulo, r.hallazgos)
+  if (r.nota) console.log(`  (${r.nota})`)
   process.exit(r.hallazgos.some((h) => h.gravedad === GRAVEDAD.critico || h.gravedad === GRAVEDAD.alto) ? 1 : 0)
 }

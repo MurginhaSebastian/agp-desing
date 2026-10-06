@@ -129,9 +129,6 @@ aprobado:
 
 - **Los botones del panel no reaccionan al pulsarlos.** La regla `.btn:active` nunca se aplicaba
   (`@apply btn` no añade la clase `btn`) y se borró. Arreglarlo cambiaría el panel.
-- **`scripts/qa/responsive.mjs:27`** busca las clases `chip` y `tab`, que ya no existen, y no
-  comprueba `.boton`: un botón de la web pública fuera del menú o del pie no pasa el control de
-  44 px.
 - `docs/portada.png` (la del README) es anterior al rediseño Capas.
 - Si se salta de golpe hasta el fondo de una página (sin pasar por las fotos, que cargan al
   acercarse), al volver de una ficha la obra puede quedar unas decenas de píxeles corrida: esas

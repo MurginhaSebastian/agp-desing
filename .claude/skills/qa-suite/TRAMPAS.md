@@ -146,3 +146,13 @@ de `@layer components` y las de dentro de un `@media` van sangradas, así que nu
 Además comparaba por subcadena, y `.rule` contaba como usada porque existe `.rule-dark`. Ahora lee
 las sangradas, busca la clase como palabra entera y cuenta como uso un `@apply` dentro del CSS.
 Comprobado al revés: con el `index.css` anterior a la limpieza salen las tres.
+
+## «Pantallas» no medía los botones de la web pública
+
+El control de 44 px decidía qué es un botón buscando `/btn|chip|tab/` en la clase, por subcadena.
+Tras el rediseño «Capas» la web pública usa `boton`, `enlace-flecha`, `separador` y
+`control-carrusel`: ninguno encajaba, así que los botones del contenido (portada, contacto, ficha)
+no se medían nunca y el informe decía «sin hallazgos». `chip` y `tab` ya no existían, y `tab` se
+colaba en `tabular`. Ahora compara clases enteras de los dos sistemas y se comprueba a sí mismo:
+si no ha medido ningún `.boton` fuera del menú y del pie, avisa en crítico. Comprobado al revés:
+con un `.boton` encogido a 30 px salta; con la regla vieja no se medía ninguno.
