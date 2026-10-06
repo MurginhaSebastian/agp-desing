@@ -135,6 +135,8 @@ export async function run() {
   for (const archivo of listar(SRC)) {
     if (SIEMPRE_EN_USO.has(archivo)) continue
     if (!/\.(ts|tsx)$/.test(archivo)) continue
+    // Las pruebas no las importa nadie: Vitest las encuentra por el nombre (`*.test.ts[x]`).
+    if (/\.test\.tsx?$/.test(archivo)) continue
     revisados.archivos++
     const base = archivo.split('/').pop().replace(/\.tsx?$/, '')
     const sinExtension = archivo.replace(/\.tsx?$/, '').replace(/^src\//, '')

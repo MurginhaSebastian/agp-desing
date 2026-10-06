@@ -131,3 +131,9 @@ reconoce las dos. Y cuando el botón SÍ aparece, se mide y se cumple: 44 × 44.
 Una variable llamada `pintada` («ya se pintó la cuadrícula») saltó como resto del negocio de
 pintura. El control hace bien en leer el código entero: renombrar la variable costó menos que
 discutir si esa palabra era inocente.
+
+## Las pruebas no las importa nadie
+
+Al añadir Vitest (oct. 2026), «código sin usar» marcó cada `*.test.ts` como archivo que ningún otro
+importa. Es verdad y no significa nada: Vitest las encuentra por el nombre. El control ahora las
+salta por su sufijo, y solo por él; un archivo normal sin importar sigue saliendo.

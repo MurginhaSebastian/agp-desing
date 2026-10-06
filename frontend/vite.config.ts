@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import react from '@vitejs/plugin-react'
@@ -34,4 +35,11 @@ export default defineConfig({
   },
   server: { port: 5173 },
   preview: { headers: cabecerasDeVercel() },
+  test: {
+    environment: 'jsdom',
+    include: ['src/**/*.test.{ts,tsx}'],
+    // Las pruebas corren siempre en modo demo y con los contactos de ejemplo, digan lo que
+    // digan `frontend/.env` y el entorno: así no dependen del backend ni ven datos reales.
+    env: { VITE_API_URL: '', VITE_WHATSAPP_NUMBER: '', VITE_CONTACT_EMAIL: '' },
+  },
 })
