@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { env } from '@/config/env'
-import { imagenService } from '@/services/imagenService'
-import { ApiError } from '@/types/api'
+import { imagenService } from '@/services/servicios'
+import { erroresDeCampo, mensajeDe } from '@/lib/errores'
 
 /**
  * Elegir una foto del ordenador y dejarla subida.
@@ -96,13 +96,7 @@ export function SubirImagen({
       setLocal(null)
       // El backend manda el motivo en `errors.archivo` (peso, formato, almacén sin configurar);
       // si no, sirve el mensaje general.
-      setFallo(
-        e instanceof ApiError
-          ? (e.fieldErrors.archivo ?? e.message)
-          : e instanceof Error
-            ? e.message
-            : 'No se pudo subir la foto.',
-      )
+      setFallo(erroresDeCampo(e).archivo ?? mensajeDe(e, 'No se pudo subir la foto.'))
     } finally {
       setSubiendo(false)
       limpiarEntrada()

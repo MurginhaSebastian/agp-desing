@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { SubirImagen } from '@/components/admin/SubirImagen'
-import { ApiError } from '@/types/api'
+import { erroresDeCampo, mensajeDe } from '@/lib/errores'
 import type { Currency, ProductCreateDTO, ProductStatus } from '@/types/product'
 import { PRODUCT_STATUS_LABEL } from '@/types/product'
 
@@ -65,10 +65,11 @@ export function ProductForm({ initial = empty, submitLabel, onSubmit }: Props) {
     try {
       await onSubmit(next)
     } catch (err) {
-      if (err instanceof ApiError && Object.keys(err.fieldErrors).length > 0) {
-        setErrors(err.fieldErrors as Errors)
+      const porCampo = erroresDeCampo(err)
+      if (Object.keys(porCampo).length > 0) {
+        setErrors(porCampo as Errors)
       } else {
-        setErrors({ form: err instanceof Error ? err.message : 'No se pudo guardar.' })
+        setErrors({ form: mensajeDe(err, 'No se pudo guardar.') })
       }
     } finally {
       setBusy(false)

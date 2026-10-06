@@ -1,5 +1,5 @@
 import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { authService } from '@/services/authService'
+import { authService } from '@/services/servicios'
 import { unauthorizedEvent } from '@/services/http'
 import { tokenStorage } from '@/security/tokenStorage'
 import type { LoginRequest } from '@/types/auth'

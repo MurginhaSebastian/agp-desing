@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { productService } from '@/services/productService'
+import { mensajeDe } from '@/lib/errores'
+import { productService } from '@/services/servicios'
 import type { Product } from '@/types/product'
 
 interface State {
@@ -36,7 +37,7 @@ export function useProducts() {
       setState((s) =>
         s.products.length > 0
           ? { ...s, loading: false }
-          : { products: [], loading: false, error: e instanceof Error ? e.message : 'No se pudo cargar el catálogo' },
+          : { products: [], loading: false, error: mensajeDe(e, 'No se pudo cargar el catálogo') },
       )
     }
   }, [])

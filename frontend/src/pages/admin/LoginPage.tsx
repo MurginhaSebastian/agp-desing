@@ -3,6 +3,8 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Wordmark } from '@/components/layout/Wordmark'
 import { isDemoMode } from '@/config/env'
 import { useAuth } from '@/hooks/useAuth'
+import { mensajeDe } from '@/lib/errores'
+import { rutaDeVuelta } from '@/lib/navegacion'
 
 export function LoginPage() {
   const { isAuthenticated, login } = useAuth()
@@ -15,7 +17,7 @@ export function LoginPage() {
 
   if (isAuthenticated) return <Navigate to="/admin" replace />
 
-  const from = (location.state as { from?: string } | null)?.from ?? '/admin'
+  const from = rutaDeVuelta(location.state, '/admin')
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -25,7 +27,7 @@ export function LoginPage() {
       await login({ username: username.trim(), password })
       navigate(from, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo iniciar sesión')
+      setError(mensajeDe(err, 'No se pudo iniciar sesión'))
     } finally {
       setBusy(false)
     }

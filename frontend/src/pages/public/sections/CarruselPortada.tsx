@@ -2,8 +2,8 @@ import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/rea
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { FlechaDerecha, FlechaIzquierda, Pausa, Seguir } from '@/components/ui/iconos'
+import { EASE_OUT } from '@/lib/movimiento'
 
-const EASE_OUT = [0.23, 1, 0.32, 1] as const
 /** Cuánto se queda cada foto antes de pasar a la siguiente. */
 const ESPERA_MS = 5000
 /**

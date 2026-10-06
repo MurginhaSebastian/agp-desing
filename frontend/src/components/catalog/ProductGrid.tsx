@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { ProductCard } from '@/components/catalog/ProductCard'
+import { EASE_IN_OUT, EASE_OUT } from '@/lib/movimiento'
 import type { Product } from '@/types/product'
 
 interface Props {
@@ -17,10 +18,6 @@ interface Props {
  */
 const offsets3 = ['lg:mt-0', 'md:mt-12 lg:mt-16', 'lg:mt-8']
 const offsets2 = ['md:mt-0', 'md:mt-20']
-
-/* Curvas del proyecto (`--ease-out` y `--ease-in-out` de index.css), en el formato de Motion. */
-const EASE_OUT = [0.23, 1, 0.32, 1] as const
-const EASE_IN_OUT = [0.65, 0, 0.35, 1] as const
 
 /* Misma lista de funciones en todos los estados, para que Motion pueda interpolar entre ellos. */
 const REPOSO = 'translateY(0px) scale(1)'

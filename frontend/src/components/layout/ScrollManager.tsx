@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useLocation, useNavigationType } from 'react-router-dom'
+import { esVuelta } from '@/lib/navegacion'
 
 /** Alto de la cabecera pegajosa: hay que descontarlo para no tapar el título. */
 const HEADER = 80
@@ -53,7 +54,7 @@ export function ScrollManager() {
        * Siempre `instant`: con `auto` manda el `scroll-behavior: smooth` del CSS y cada cambio
        * de página se veía subir entero.
        */
-      const vuelve = tipo === 'POP' || (state as { volver?: boolean } | null)?.volver === true
+      const vuelve = tipo === 'POP' || esVuelta(state)
       window.scrollTo({ top: vuelve ? (posiciones.get(pathname) ?? 0) : 0, behavior: 'instant' })
       return
     }

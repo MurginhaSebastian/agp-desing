@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 import { Link, useLocation, useParams } from 'react-router-dom'
@@ -6,9 +5,12 @@ import { WhatsAppButton } from '@/components/catalog/WhatsAppButton'
 import { CajaVacia } from '@/components/ui/CajaVacia'
 import { FlechaIzquierda } from '@/components/ui/iconos'
 import { Reveal } from '@/components/ui/Reveal'
+import { usePageTitle } from '@/hooks/usePageTitle'
+import { useRecurso } from '@/hooks/useRecurso'
 import { formatDimensions, formatPrice } from '@/lib/format'
-import { productService } from '@/services/productService'
-import { PRODUCT_STATUS_LABEL, type Product } from '@/types/product'
+import { obraTraida, volviendoDe } from '@/lib/navegacion'
+import { productService } from '@/services/servicios'
+import { PRODUCT_STATUS_LABEL } from '@/types/product'
 
 export function ProductDetailPage() {
   const { slug = '' } = useParams()
@@ -19,32 +21,11 @@ export function ProductDetailPage() {
    * llegar. Aun así se pide al servidor, por si algo cambió desde que se cargó el catálogo.
    */
   const { state: navegacion } = useLocation()
-  const traido = (navegacion as { product?: Product } | null)?.product
+  const traido = obraTraida(navegacion)
   const inicial = traido && traido.slug === slug ? traido : null
 
-  const [product, setProduct] = useState<Product | null>(inicial)
-  const [state, setState] = useState<'loading' | 'ok' | 'missing'>(inicial ? 'ok' : 'loading')
-
-  useEffect(() => {
-    let alive = true
-    if (inicial) document.title = `${inicial.name} — AGP Desing`
-    else setState('loading')
-    productService
-      .getBySlug(slug)
-      .then((p) => {
-        if (!alive) return
-        setProduct(p)
-        setState('ok')
-        document.title = `${p.name} — AGP Desing`
-      })
-      // Si ya se está enseñando el producto que trajo la tarjeta, un fallo de red al
-      // refrescarlo no convierte la ficha en un «no existe».
-      .catch(() => alive && !inicial && setState('missing'))
-    return () => {
-      alive = false
-      document.title = 'AGP Desing - Regalos con intención'
-    }
-  }, [slug, inicial])
+  const { dato: product, estado: state } = useRecurso(slug, productService.getBySlug, inicial)
+  usePageTitle(state === 'ok' && product ? `${product.name} — AGP Desing` : null)
 
   if (state === 'loading') {
     // La forma de la ficha mientras llega: la foto montada a un lado y la etiqueta al otro.
@@ -83,7 +64,7 @@ export function ProductDetailPage() {
   return (
     <article className="container-x pt-8 pb-24 md:pt-12 md:pb-32">
       {/* Vuelta con la foto viajando a su tarjeta, y el catálogo en la posición en que se dejó. */}
-      <Link to="/catalogo" viewTransition state={{ desde: product.slug, volver: true }} className="enlace-flecha enlace-atras mb-8">
+      <Link to="/catalogo" viewTransition state={volviendoDe(product.slug)} className="enlace-flecha enlace-atras mb-8">
         <FlechaIzquierda size={18} /> Catálogo
       </Link>
 

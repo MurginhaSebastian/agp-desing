@@ -4,9 +4,9 @@ import { WhatsAppButton } from '@/components/catalog/WhatsAppButton'
 import { FlechaAbajo } from '@/components/ui/iconos'
 import { useSettings } from '@/hooks/useSettings'
 import { CarruselPortada } from '@/pages/public/sections/CarruselPortada'
+import { EASE_OUT } from '@/lib/movimiento'
 import type { Product } from '@/types/product'
 
-const EASE_OUT = [0.23, 1, 0.32, 1] as const
 /** Cuántas fotos pasan por la caja de la portada. */
 const MAX_FOTOS = 6
 

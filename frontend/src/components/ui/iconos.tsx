@@ -1,7 +1,7 @@
 /*
  * Iconos de la web pública. Un juego propio y mínimo en vez de Lucide (el que usa casi toda web
- * hecha deprisa): mismo trazo de 1.75 que los de Instagram y TikTok del pie, puntas redondas,
- * y solo los que hacen falta. El panel sigue con Lucide.
+ * hecha deprisa): trazo de 1.75, puntas redondas y solo los que hacen falta. Instagram y TikTok
+ * también son propios porque Lucide ya no trae iconos de marca. El panel sigue con Lucide.
  *
  * Todos son decorativos (aria-hidden): el texto del botón o del enlace ya dice qué hacen.
  */
@@ -74,4 +74,18 @@ export function Pausa(p: Props) {
 /** Vuelve a pasar las fotos. */
 export function Seguir(p: Props) {
   return <Svg {...p}><path d="M8 5l11 7-11 7z" /></Svg>
+}
+
+export function Instagram(p: Props) {
+  return (
+    <Svg {...p}>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="0.75" fill="currentColor" />
+    </Svg>
+  )
+}
+
+export function TikTok(p: Props) {
+  return <Svg {...p}><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></Svg>
 }

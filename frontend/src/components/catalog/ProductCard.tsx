@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useViewTransitionState } from 'react-router-dom'
 import { catalogNumber, formatDimensions, formatPrice } from '@/lib/format'
+import { fichaDeOrigen, haciaFicha } from '@/lib/navegacion'
 import { PRODUCT_STATUS_LABEL, type Product } from '@/types/product'
 
 interface Props {
@@ -41,12 +42,12 @@ export function ProductCard({ product, index }: Props) {
   const yendo = useViewTransitionState(destino)
   const volviendo = useViewTransitionState('/catalogo')
   const { state } = useLocation()
-  const desde = (state as { desde?: string } | null)?.desde
+  const desde = fichaDeOrigen(state)
   const viaja = yendo || (volviendo && desde === product.slug)
 
   // La ficha recibe el producto entero: así se pinta con la foto desde el primer instante,
   // que es cuando el navegador la fotografía para la transición.
-  const enlace = { to: destino, viewTransition: true, state: { product } } as const
+  const enlace = { to: destino, viewTransition: true, state: haciaFicha(product) } as const
 
   return (
     <article className="group">

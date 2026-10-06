@@ -2,7 +2,7 @@ import { Check } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { SubirImagen } from '@/components/admin/SubirImagen'
 import { useSettings } from '@/hooks/useSettings'
-import { ApiError } from '@/types/api'
+import { erroresDeCampo, mensajeDe } from '@/lib/errores'
 import type { SiteSettings } from '@/types/settings'
 
 /** Ajustes de la web. Hoy solo la imagen de la portada. */
@@ -42,8 +42,7 @@ function HeroImageForm({ initial, onSave }: FormProps) {
       setSaved(true)
     } catch (err) {
       setSaved(false)
-      if (err instanceof ApiError && err.fieldErrors.heroImageUrl) setError(err.fieldErrors.heroImageUrl)
-      else setError(err instanceof Error ? err.message : 'No se pudo guardar.')
+      setError(erroresDeCampo(err).heroImageUrl || mensajeDe(err, 'No se pudo guardar.'))
     } finally {
       setBusy(false)
     }

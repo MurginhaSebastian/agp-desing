@@ -1,14 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { crearProductosDemo } from '@/services/demo/productos'
 import type { ProductCreateDTO } from '@/types/product'
-
-/*
- * El almacén del modo demo vive en el módulo: se recarga en cada prueba para empezar
- * siempre con los datos de ejemplo.
- */
-async function servicio() {
-  vi.resetModules()
-  return (await import('@/services/productService')).productService
-}
 
 const nuevo: ProductCreateDTO = {
   name: 'Ñandú en Acción',
@@ -24,9 +16,10 @@ const nuevo: ProductCreateDTO = {
 }
 
 describe('productService en modo demo', () => {
-  let svc: Awaited<ReturnType<typeof servicio>>
-  beforeEach(async () => {
-    svc = await servicio()
+  // Un almacén nuevo en cada prueba: siempre se empieza con los datos de ejemplo.
+  let svc: ReturnType<typeof crearProductosDemo>
+  beforeEach(() => {
+    svc = crearProductosDemo()
   })
 
   it('empieza con las obras de ejemplo', async () => {

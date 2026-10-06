@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { settingsService } from '@/services/settingsService'
+import { mensajeDe } from '@/lib/errores'
+import { settingsService } from '@/services/servicios'
 import { EMPTY_SETTINGS, type SiteSettings } from '@/types/settings'
 
 interface State {
@@ -24,7 +25,7 @@ export function useSettings() {
       setState({
         settings: EMPTY_SETTINGS,
         loading: false,
-        error: e instanceof Error ? e.message : 'No se pudieron cargar los ajustes',
+        error: mensajeDe(e, 'No se pudieron cargar los ajustes'),
       })
     }
   }, [])

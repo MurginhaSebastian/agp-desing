@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { paraVolverA } from '@/lib/navegacion'
 
 /**
  * Guard de /admin/*. Mejora la experiencia: evita mostrar un panel vacío.
@@ -10,7 +11,7 @@ export function ProtectedRoute() {
   const { isAuthenticated } = useAuth()
   const location = useLocation()
   if (!isAuthenticated) {
-    return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />
+    return <Navigate to="/admin/login" replace state={paraVolverA(location.pathname)} />
   }
   return <Outlet />
 }

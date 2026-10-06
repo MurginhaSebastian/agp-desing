@@ -5,17 +5,9 @@ import { Link, NavLink } from 'react-router-dom'
 import { Wordmark } from '@/components/layout/Wordmark'
 import { WhatsAppButton } from '@/components/catalog/WhatsAppButton'
 import { Cerrar, Menu } from '@/components/ui/iconos'
+import { SECCIONES as links } from '@/config/enlaces'
+import { EASE_DRAWER, EASE_OUT } from '@/lib/movimiento'
 import { buildWhatsAppUrl } from '@/lib/whatsapp'
-
-const links = [
-  { to: '/#sobre', label: 'Sobre AGP' },
-  { to: '/#como-funciona', label: 'Cómo funciona' },
-  { to: '/catalogo', label: 'Catálogo' },
-  { to: '/#faq', label: 'Preguntas frecuentes' },
-  { to: '/#contacto', label: 'Contacto' },
-]
-
-const EASE_DRAWER = [0.32, 0.72, 0, 1] as const
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
@@ -121,7 +113,7 @@ export function Navbar() {
                       key={l.to}
                       initial={{ opacity: 0, transform: 'translateX(12px)' }}
                       animate={{ opacity: 1, transform: 'translateX(0px)' }}
-                      transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: 0.06 + i * 0.04 }}
+                      transition={{ duration: 0.3, ease: EASE_OUT, delay: 0.06 + i * 0.04 }}
                     >
                       {/* Las anclas de la portada no son páginas: solo el catálogo se marca como actual. */}
                       {l.to.includes('#') ? (

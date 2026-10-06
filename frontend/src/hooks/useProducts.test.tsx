@@ -8,7 +8,7 @@ import type { Product } from '@/types/product'
  */
 const list = vi.fn<() => Promise<Product[]>>()
 
-vi.mock('@/services/productService', () => ({ productService: { list: () => list() } }))
+vi.mock('@/services/servicios', () => ({ productService: { list: () => list() } }))
 
 async function hook() {
   vi.resetModules()

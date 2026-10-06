@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useProducts } from '@/hooks/useProducts'
 import { formatDimensions, formatPrice } from '@/lib/format'
-import { productService } from '@/services/productService'
+import { productService } from '@/services/servicios'
 import { PRODUCT_STATUS_LABEL, type Product } from '@/types/product'
 
 export function ProductListPage() {

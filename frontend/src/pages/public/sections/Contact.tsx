@@ -1,7 +1,7 @@
 import { WhatsAppButton } from '@/components/catalog/WhatsAppButton'
 import { FlechaFuera } from '@/components/ui/iconos'
 import { Reveal } from '@/components/ui/Reveal'
-import { env } from '@/config/env'
+import { REDES } from '@/config/enlaces'
 
 /**
  * Contacto: la hoja roja, montada sobre el papel con la sombra más honda de la página. Ya no es
@@ -30,10 +30,7 @@ export function Contact() {
           <div className="lg:col-span-4 lg:col-start-9">
             <p className="nota !text-silk/80 mb-3">Síguenos</p>
             <ul className="border-t border-silk/25">
-              {[
-                { nombre: 'Instagram', url: env.instagramUrl },
-                { nombre: 'TikTok', url: env.tiktokUrl },
-              ].map((red) => (
+              {REDES.map((red) => (
                 <li key={red.nombre} className="border-b border-silk/25">
                   <a
                     href={red.url}

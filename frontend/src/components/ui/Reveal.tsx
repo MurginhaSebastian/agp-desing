@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from 'motion/react'
 import type { ReactNode } from 'react'
+import { EASE_OUT } from '@/lib/movimiento'
 
 interface RevealProps {
   children: ReactNode
@@ -8,8 +9,6 @@ interface RevealProps {
   className?: string
   as?: 'div' | 'li' | 'figure' | 'article'
 }
-
-const EASE_OUT = [0.23, 1, 0.32, 1] as const
 
 /**
  * Revelado al hacer scroll — superficie de marketing, por eso puede durar 600ms.

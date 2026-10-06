@@ -1,7 +1,6 @@
-import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { FlechaDerecha, FlechaFuera } from '@/components/ui/iconos'
+import { PieLegal } from '@/components/layout/PieLegal'
 import { env } from '@/config/env'
+import { usePageTitle } from '@/hooks/usePageTitle'
 
 const ACTUALIZADO = '28 de septiembre de 2026'
 
@@ -10,12 +9,7 @@ const ACTUALIZADO = '28 de septiembre de 2026'
  * si mañana se añade analítica o un formulario, hay que actualizarla.
  */
 export function PrivacyPage() {
-  useEffect(() => {
-    document.title = 'Política de privacidad — AGP Desing'
-    return () => {
-      document.title = 'AGP Desing - Regalos con intención'
-    }
-  }, [])
+  usePageTitle('Política de privacidad — AGP Desing')
 
   return (
     <div className="container-x pt-20 pb-24 md:pt-28 md:pb-32">
@@ -137,16 +131,7 @@ export function PrivacyPage() {
           </section>
         </div>
 
-        <div className="mt-14 pt-6 border-t border-oat flex flex-wrap items-center gap-x-8 gap-y-2">
-          <Link to="/terminos" className="enlace-flecha">
-            Términos y condiciones
-            <FlechaDerecha size={18} />
-          </Link>
-          <a href={`https://wa.me/${env.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="enlace-flecha">
-            Escríbenos
-            <FlechaFuera size={18} />
-          </a>
-        </div>
+        <PieLegal otra={{ to: '/terminos', texto: 'Términos y condiciones' }} />
       </article>
     </div>
   )
