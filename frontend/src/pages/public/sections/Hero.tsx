@@ -57,18 +57,18 @@ export function Hero({ obras, cargando }: Props) {
           <motion.p {...linea(0)} className="flex items-stretch gap-3 font-display text-[1.0625rem] leading-snug text-brand">
             <span aria-hidden="true" className="w-px bg-brand" />
             <span>
-              <span className="block">Detalles únicos</span>
-              <span className="block">Ensamblados a mano</span>
+              <span className="block">Regalos & </span>
+              <span className="block">Decoración Corporativa</span>
             </span>
           </motion.p>
 
           <motion.h1 {...linea(1)} id="hero-title" className="text-display mt-7 max-w-[15ch]">
-            Tus recuerdos y pasiones tangibles.{' '}
-            <span className="text-ink-soft">Nosotros los estructuramos.</span>
-          </motion.h1>
+            Tú tienes la historia{' '}
+            <span className="text-ink-soft">Nosotros creamos el cuadro perfecto</span>
+          </motion.h1>  
 
           <motion.p {...linea(2)} className="text-lead mt-8 max-w-[44ch] text-ink-soft">
-            AGP Desing materializa emociones y aficiones en cuadros personalizados y boxes temáticos con precisión técnica. Eliges del catálogo o diseñamos desde cero, y coordinamos cada detalle por WhatsApp. Sin carritos automatizados. Diseño empático y trato directo.
+            Materializamos emociones, pasiones y logros empresariales. Ya sea el regalo ideal para una fecha especial o la pieza que le dará vida a tu oficina, en AGP Desing lo hacemos realidad. Diseñamos a medida, ensamblamos a mano y coordinamos cada detalle contigo por WhatsApp.
           </motion.p>
 
           <motion.div {...linea(3)} className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
@@ -120,7 +120,7 @@ export function Hero({ obras, cargando }: Props) {
                 </div>
                 <div>
                   <dt className="nota">Elaboración</dt>
-                  <dd className="font-display text-[1.0625rem] leading-snug mt-0.5">Manufactura meticulosa (Bajo pedido)</dd>
+                  <dd className="font-display text-[1.0625rem] leading-snug mt-0.5">Bajo pedido</dd>
                 </div>
               </dl>
             </motion.aside>
