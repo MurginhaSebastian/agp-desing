@@ -132,9 +132,7 @@ aprobado:
 - **`scripts/qa/responsive.mjs:27`** busca las clases `chip` y `tab`, que ya no existen, y no
   comprueba `.boton`: un botón de la web pública fuera del menú o del pie no pasa el control de
   44 px.
-- **Textos viejos** tras el cambio de la portada: `Footer.tsx` («Detalles únicos, ensamblados a
-  mano.») y la meta description de `index.html`. `docs/portada.png` (la del README) es anterior
-  al rediseño Capas.
+- `docs/portada.png` (la del README) es anterior al rediseño Capas.
 - Si se salta de golpe hasta el fondo de una página (sin pasar por las fotos, que cargan al
   acercarse), al volver de una ficha la obra puede quedar unas decenas de píxeles corrida: esas
   fotos cargan entonces y cambian el alto de lo que hay encima. El scroll se restaura exacto; lo

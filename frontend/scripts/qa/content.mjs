@@ -24,15 +24,15 @@ const MARCA_MAL = ['AGP desing', 'AGP DESING', 'AGP Design', 'Agp Desing']
 
 /** Textos que el dueño fijó y no pueden desaparecer. */
 const OBLIGATORIOS = [
-  { donde: '/', texto: 'Detalles únicos' },
+  { donde: '/', texto: 'Tú tienes la historia' },
   { donde: '/', texto: 'Nuestros diseños' },
-  { donde: '/', texto: 'Detalles únicos, ensamblados a mano.' },
+  { donde: '/', texto: 'Tú tienes la historia. Nosotros, el cuadro.' },
   { donde: '/catalogo', texto: 'El Catálogo.' },
   { donde: '/catalogo', texto: 'Explora nuestras piezas o inspírate para crear la tuya desde cero.' },
   { donde: '/catalogo/no-existe-xyz', texto: 'Ese diseño aún no existe' },
 ]
 
-const TITULO_ESPERADO = 'AGP Desing - Regalos con intención'
+const TITULO_ESPERADO = 'AGP Desing - Regalos y decoración corporativa'
 
 function archivosFuente(dir, salida = []) {
   for (const n of readdirSync(dir)) {

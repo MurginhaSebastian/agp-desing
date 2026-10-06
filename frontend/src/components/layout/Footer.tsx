@@ -20,7 +20,7 @@ export function Footer() {
           <div>
             <Wordmark onDark />
             <p className="mt-4 max-w-sm font-display text-xl text-silk/80">
-              Detalles únicos, ensamblados a mano.
+              Tú tienes la historia. Nosotros, el cuadro.
             </p>
           </div>
 
@@ -57,7 +57,7 @@ export function Footer() {
 
       <div className="rule-dark">
         <div className="container-x py-5 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between text-xs text-silk/55">
-          <p>© {year} AGP Desing. Regalos con intención y diseño estructurado.</p>
+          <p>© {year} AGP Desing. Regalos y decoración corporativa.</p>
           <nav aria-label="Legal" className="flex flex-wrap items-center gap-x-6">
             <Link to="/privacidad" className="link-underline inline-flex items-center min-h-11">Privacidad</Link>
             <Link to="/terminos" className="link-underline inline-flex items-center min-h-11">Términos</Link>
