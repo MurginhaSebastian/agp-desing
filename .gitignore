@@ -15,7 +15,10 @@ Thumbs.db
 .vscode/
 *.iml
 
-# Capturas de QA (docs/qa) se versionan
+# Capturas de QA: se versionan solo las de escritorio. Con el grano de papel del diseño Capas
+# cada PNG pesa varios MB; las de móvil y tablet se generan con `npm run qa:shots` cuando hacen falta.
+docs/qa/*-mobile.png
+docs/qa/*-tablet.png
 *.log
 
 # Caché de Python de los scripts de skills

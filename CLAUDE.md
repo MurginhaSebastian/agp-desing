@@ -10,7 +10,7 @@ Idioma de trabajo: **español** con el usuario. Código y comentarios en españo
 agp-desing/
 ├── frontend/    React 19 + TypeScript + Vite 8 + Tailwind v4 + React Router 7 + Motion
 ├── backend/     Java 21 + Spring Boot 3.5 + PostgreSQL + Flyway + JWT — Clean Architecture
-├── docs/        plan-agp-design.md (arquitectura), DEPLOY.md (Render + Vercel), brand/, qa/
+├── docs/        ARQUITECTURA.md (capas, patrones, recetas), plan-agp-design.md (plan original), DEPLOY.md, brand/, qa/
 ├── .github/workflows/keep-alive.yml   ping diario a Supabase; ping a Render cuando exista BACKEND_URL
 └── .claude/skills/   frontend-design, ui-ux-pro-max, humanizer, emil-design-eng, animate,
                       review-animations, find-animation-opportunities, web-design-guidelines,
@@ -27,7 +27,8 @@ cd frontend && npm install
 npm run dev          # http://localhost:5173 — sin VITE_API_URL arranca en MODO DEMO (datos locales, admin/demo)
 npm run build        # tsc -b && vite build — debe pasar antes de cualquier entrega
 npm run lint         # oxlint
-npm run qa:shots     # capturas a 375/768/1440 en docs/qa/ (necesita dev server y Edge/Chrome)
+npm test             # Vitest: modo demo, caché del catálogo, sesión, navegación (siempre en modo demo)
+npm run qa:shots     # capturas a 375/768/1440 en docs/qa/ (necesita dev server y Edge/Chrome); git solo guarda las de escritorio
 npm run qa           # suite de calidad: accesibilidad, contraste, pantallas, enlaces, textos, Lighthouse
 npm run qa:rapido    # lo mismo sin Lighthouse (~90 s)
 npm run qa:muerto    # archivos, exports, dependencias y estilos que ya no usa nadie
@@ -37,7 +38,7 @@ npm run seg:rapido   # lo mismo sin el control de librerías (que compila con Ma
 # Backend (requiere JDK 21 y Docker; Maven NO: ./mvnw lo descarga solo la primera vez)
 cd backend && docker compose up -d       # Postgres local (puerto 5432, BD/usuario "agp")
 cp .env.example .env                     # rellenar JWT_SECRET y ADMIN_PASSWORD_HASH
-.\mvnw.cmd test                          # ArchUnit (capas) + tests de casos de uso, sin BD
+.\mvnw.cmd test                          # ArchUnit + casos de uso + contrato HTTP (ApiContractTest), sin BD
 .\run-dev.ps1                            # carga .env y hace mvnw spring-boot:run → http://localhost:8080
 .\mvnw.cmd test -Dtest=CreateProductUseCaseTest # un solo test
 ```
@@ -74,10 +75,28 @@ La base de datos real está en **Supabase** (Session pooler, ver `docs/DEPLOY.md
 - Tipografías servidas desde `/fonts` (ver `src/fonts.css`). No volver a enlazar Google Fonts: metería un tercero más. El único servidor ajeno que toca el navegador del visitante es el almacén de fotos de Supabase, y está declarado en la política de privacidad; cualquier otro hay que declararlo antes de añadirlo.
 - Copy en español, tono de taller pequeño. Pasar por `humanizer`: sin "vibrante", "innovador", "único en su tipo", tríadas ni guiones largos decorativos.
 
+## Reglas de arquitectura (frontend)
+
+Mapa completo, patrones y recetas en `docs/ARQUITECTURA.md`.
+
+- Los datos pasan por `services/contratos.ts`: cada recurso tiene su contrato y dos implementaciones,
+  `services/demo/` (en memoria) y `services/remoto/api.ts` (una línea por endpoint, sin lógica).
+  `crearServicios` (en `services/servicios.ts`) elige **una sola vez, al cargar el módulo**; nunca
+  llamarla desde un componente o un hook: crearía otro almacén demo y se perderían las obras del panel.
+- Pedir una cosa al servidor: `useRecurso`. Lo que una página le pasa a otra al navegar: `lib/navegacion.ts`
+  (nunca `state as {...}` suelto). Errores: `lib/errores.ts`. Título de la pestaña: `usePageTitle`.
+- Escritos una sola vez: enlaces del menú, pie y redes en `config/enlaces.ts`; curvas de Motion en
+  `lib/movimiento.ts` (son las de `index.css`: si cambia una, cambia la otra).
+- Pruebas con Vitest junto a lo que prueban (`*.test.ts[x]`). Las rutas de `scripts/qa/*` están
+  escritas a mano: mover archivos exige revisar esos scripts.
+
 ## Reglas de arquitectura (backend)
 
-- `domain/` y `application/` **sin imports de Spring, JPA, Jackson ni JJWT**. `CleanArchitectureTest` lo verifica; si falla, no se mergea.
-- Los casos de uso son POJOs cableados en `infrastructure/config/UseCaseConfig`.
+- `domain/` y `application/` **sin imports de Spring, JPA, validación, Jackson, JJWT, servlets ni bucket4j**. `CleanArchitectureTest` lo verifica; si falla, no se mergea.
+- Los casos de uso son POJOs cableados en `infrastructure/config/UseCaseConfig`. Si comprueban algo y luego guardan (nombre repetido + guardar), van dentro de `Transacciones` (puerto de `application/port/out`, implementado en `infrastructure/persistence/SpringTransacciones`).
+- Errores por capa: los del negocio heredan de `DomainException` (`domain/exception`), los de los casos de uso de `ApplicationException` (`application/exception`). Ninguno sabe de HTTP; la traducción a códigos vive solo en `GlobalExceptionHandler`. ArchUnit comprueba la herencia.
+- Cada regla de un dato vive en el dominio (`UrlPublica`, `Product.DIMENSION_MAX`…) y los DTO toman sus límites de esas constantes, no de números repetidos. El paso JSON ↔ núcleo, en `presentation/mapper/`.
+- Un formato de imagen nuevo = una clase `Limpiador<Formato>` (Strategy); el `switch` de `LimpiadorDeMetadatos` no compila sin ella.
 - JPA vive solo en `infrastructure/persistence/`. `ProductJpaEntity` ≠ `domain.model.Product`; el mapper los traduce.
 - Esquema con Flyway (`ddl-auto: validate`). Nueva columna = nueva migración `V<n>__*.sql`, nunca editar una aplicada.
 - Secretos solo por variables de entorno (`application.yml` únicamente tiene `${VARS}`). `VITE_*` es público, no secreto.

@@ -1,5 +1,8 @@
 # Plan: Arquitectura Full-Stack para AGP desing
 
+> **Plan original (sept. 2026).** La estructura actual, los patrones y cómo añadir un recurso
+> nuevo están en [`ARQUITECTURA.md`](ARQUITECTURA.md); los árboles de abajo son el punto de partida.
+
 Fuente: el encargo inicial (`docs/PROMPT-MAESTRO.md`, retirado en oct. 2026; sigue en el historial de git). Stack: React 19 + TypeScript + Vite 8 + Tailwind v4 (frontend) · Java 21 + Spring Boot 3.3 + PostgreSQL (backend). Clean Architecture en ambos lados.
 
 Dos correcciones al prompt original:
@@ -49,8 +52,9 @@ agp-frontend/
     │
     ├── services/                        # única capa que habla HTTP
     │   ├── http.ts                      # fetch wrapper: baseURL + header Authorization + manejo 401
-    │   ├── productService.ts            # list, getById, create, update, remove
-    │   └── authService.ts               # login, logout
+    │   ├── contratos.ts                 # (oct. 2026) un contrato por recurso: obras, ajustes, sesión, fotos
+    │   ├── demo/  ·  remoto/            # (oct. 2026) las dos implementaciones de cada contrato
+    │   └── servicios.ts                 # (oct. 2026) crearServicios: demo o API, una vez al cargar
     │
     ├── security/                        # todo lo relacionado con sesión y sanitización
     │   ├── tokenStorage.ts              # get/set/clear del JWT (ver sección 5)

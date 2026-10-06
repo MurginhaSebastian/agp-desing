@@ -15,7 +15,9 @@ const viewports = [
 const pages = [
   { name: 'home', path: '/' },
   { name: 'catalogo', path: '/catalogo' },
-  { name: 'obra', path: '/catalogo/tarde-en-bordeaux' },
+  // La ficha se busca en el catálogo: con una dirección fija, al cambiar las obras de ejemplo la
+  // captura salía en «ese diseño no existe» y nadie lo notaba.
+  { name: 'obra', path: null },
   { name: 'admin-login', path: '/admin/login' },
 ]
 
@@ -27,7 +29,12 @@ for (const vp of viewports) {
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
   page.on('pageerror', (e) => errors.push(e.message))
   for (const p of pages) {
-    await page.goto(BASE + p.path, { waitUntil: 'networkidle' })
+    let ruta = p.path
+    if (ruta === null) {
+      await page.goto(BASE + '/catalogo', { waitUntil: 'networkidle' })
+      ruta = await page.getAttribute('a[href^="/catalogo/"]', 'href')
+    }
+    await page.goto(BASE + ruta, { waitUntil: 'networkidle' })
     await page.evaluate(async () => {
       await document.fonts.ready
       const step = window.innerHeight * 0.4
