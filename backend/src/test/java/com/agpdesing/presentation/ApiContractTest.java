@@ -23,7 +23,9 @@ import com.agpdesing.domain.repository.SiteSettingsRepository;
 import com.agpdesing.infrastructure.security.CorsConfig;
 import com.agpdesing.infrastructure.security.SecurityConfig;
 import com.agpdesing.infrastructure.security.jwt.JwtAuthenticationFilter;
+import com.agpdesing.presentation.mapper.AuthDtoMapper;
 import com.agpdesing.presentation.mapper.ProductDtoMapper;
+import com.agpdesing.presentation.mapper.SettingsDtoMapper;
 import com.agpdesing.presentation.ratelimit.ClientIpResolver;
 import com.agpdesing.presentation.ratelimit.LoginRateLimiter;
 import com.agpdesing.presentation.ratelimit.SubidaRateLimiter;
@@ -86,7 +88,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         controllers = { ProductController.class, SettingsController.class, AuthController.class, ImageController.class },
         properties = { "app.cors.allowed-origin=http://localhost:5173", "app.ratelimit.trusted-proxy-hops=0" })
 @Import({ SecurityConfig.class, CorsConfig.class, JwtAuthenticationFilter.class, ClientIpResolver.class,
-        LoginRateLimiter.class, SubidaRateLimiter.class, ProductDtoMapper.class, ApiContractTest.Puertos.class })
+        LoginRateLimiter.class, SubidaRateLimiter.class, ProductDtoMapper.class, SettingsDtoMapper.class,
+        AuthDtoMapper.class, ApiContractTest.Puertos.class })
 class ApiContractTest {
 
     static final Instant AHORA = Instant.parse("2026-09-21T10:00:00Z");
@@ -466,8 +469,8 @@ class ApiContractTest {
 
         @Override public String guardar(String nombre, String tipoMime, byte[] contenido) {
             return switch (modo.get()) {
-                case "sin-configurar" -> throw new NotConfiguredException("La subida de fotos no está configurada.");
-                case "caido" -> throw new StorageFailedException("El almacén no respondió.", null);
+                case "sin-configurar" -> throw new com.agpdesing.application.exception.StorageNotConfiguredException("La subida de fotos no está configurada.");
+                case "caido" -> throw new com.agpdesing.application.exception.StorageFailedException("El almacén no respondió.", null);
                 default -> "https://almacen.example/" + nombre;
             };
         }

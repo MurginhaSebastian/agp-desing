@@ -1,5 +1,7 @@
 package com.agpdesing.infrastructure.storage;
 
+import com.agpdesing.application.exception.StorageFailedException;
+import com.agpdesing.application.exception.StorageNotConfiguredException;
 import com.agpdesing.application.port.out.ImageStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,7 @@ public class SupabaseStorageAdapter implements ImageStorage {
     @Override
     public String guardar(String nombre, String tipoMime, byte[] contenido) {
         if (!props.configurado()) {
-            throw new NotConfiguredException(
+            throw new StorageNotConfiguredException(
                     "Subir fotos todavía no está configurado: faltan SUPABASE_URL, SUPABASE_SERVICE_KEY o SUPABASE_BUCKET.");
         }
 

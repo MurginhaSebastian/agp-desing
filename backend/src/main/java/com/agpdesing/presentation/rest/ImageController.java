@@ -2,6 +2,7 @@ package com.agpdesing.presentation.rest;
 
 import com.agpdesing.application.usecase.image.UploadImageUseCase;
 import com.agpdesing.presentation.dto.response.ImageResponse;
+import com.agpdesing.presentation.ratelimit.DemasiadasSubidasException;
 import com.agpdesing.presentation.ratelimit.SubidaRateLimiter;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -37,7 +38,7 @@ public class ImageController {
     public ImageResponse subirUna(@RequestPart("archivo") MultipartFile archivo) {
         // Se cuenta antes de leer el archivo: si se pasa del freno, no se llega a mover nada.
         if (!freno.tryConsume(usuarioActual())) {
-            throw new SubidaRateLimiter.DemasiadasSubidasException(
+            throw new DemasiadasSubidasException(
                     "Has subido muchas fotos seguidas. Espera un minuto y continúa.");
         }
         byte[] contenido;

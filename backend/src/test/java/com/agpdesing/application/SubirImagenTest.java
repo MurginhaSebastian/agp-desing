@@ -1,6 +1,8 @@
 package com.agpdesing.application;
 
 import com.agpdesing.application.port.out.ImageStorage;
+import com.agpdesing.application.exception.FormatoNoAdmitidoException;
+import com.agpdesing.application.exception.NoSePudoLimpiarException;
 import com.agpdesing.application.usecase.image.DetectorDeImagen;
 import com.agpdesing.application.usecase.image.ImageFormat;
 import com.agpdesing.application.usecase.image.LimpiadorDeMetadatos;
@@ -177,7 +179,7 @@ class SubirImagenTest {
         void imagenDanadaSeRechaza() {
             byte[] jpegCortado = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1, 0x40 };
             assertThatThrownBy(() -> LimpiadorDeMetadatos.limpiar(jpegCortado, ImageFormat.JPEG))
-                    .isInstanceOf(LimpiadorDeMetadatos.NoSePudoLimpiarException.class);
+                    .isInstanceOf(NoSePudoLimpiarException.class);
         }
     }
 
@@ -242,7 +244,7 @@ class SubirImagenTest {
         @DisplayName("un HEIC de iPhone se rechaza explicando cómo arreglarlo")
         void heicConAyuda() {
             assertThatThrownBy(() -> subir.execute(new UploadImageUseCase.ImagenNueva(ImagenesDePrueba.heic(), "image/heic", "IMG_0001.HEIC")))
-                    .isInstanceOf(UploadImageUseCase.FormatoNoAdmitidoException.class)
+                    .isInstanceOf(FormatoNoAdmitidoException.class)
                     .hasMessageContaining("HEIC")
                     .hasMessageContaining("Más compatible");
         }
@@ -251,7 +253,7 @@ class SubirImagenTest {
         @DisplayName("un SVG se rechaza aunque diga que es una imagen")
         void svgSeRechaza() {
             assertThatThrownBy(() -> subir.execute(new UploadImageUseCase.ImagenNueva(ImagenesDePrueba.svg(), "image/svg+xml", "logo.svg")))
-                    .isInstanceOf(UploadImageUseCase.FormatoNoAdmitidoException.class)
+                    .isInstanceOf(FormatoNoAdmitidoException.class)
                     .hasMessageContaining("SVG");
             assertThat(almacen.nombre).isNull(); // no llegó a guardarse nada
         }

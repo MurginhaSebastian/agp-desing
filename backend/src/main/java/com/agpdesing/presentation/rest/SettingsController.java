@@ -2,9 +2,9 @@ package com.agpdesing.presentation.rest;
 
 import com.agpdesing.application.usecase.settings.GetSiteSettingsUseCase;
 import com.agpdesing.application.usecase.settings.UpdateSiteSettingsUseCase;
-import com.agpdesing.domain.model.SiteSettings;
 import com.agpdesing.presentation.dto.request.SiteSettingsRequest;
 import com.agpdesing.presentation.dto.response.SiteSettingsResponse;
+import com.agpdesing.presentation.mapper.SettingsDtoMapper;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,23 +22,21 @@ public class SettingsController {
 
     private final GetSiteSettingsUseCase get;
     private final UpdateSiteSettingsUseCase update;
+    private final SettingsDtoMapper mapper;
 
-    public SettingsController(GetSiteSettingsUseCase get, UpdateSiteSettingsUseCase update) {
+    public SettingsController(GetSiteSettingsUseCase get, UpdateSiteSettingsUseCase update, SettingsDtoMapper mapper) {
         this.get = get;
         this.update = update;
+        this.mapper = mapper;
     }
 
     @GetMapping
     public SiteSettingsResponse current() {
-        return toResponse(get.execute());
+        return mapper.toResponse(get.execute());
     }
 
     @PutMapping
     public SiteSettingsResponse replace(@Valid @RequestBody SiteSettingsRequest body) {
-        return toResponse(update.execute(body.heroImageUrl()));
-    }
-
-    private SiteSettingsResponse toResponse(SiteSettings s) {
-        return new SiteSettingsResponse(s.heroImageUrl());
+        return mapper.toResponse(update.execute(body.heroImageUrl()));
     }
 }

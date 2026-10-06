@@ -15,10 +15,7 @@ import com.agpdesing.application.usecase.settings.UpdateSiteSettingsUseCase;
 import com.agpdesing.domain.repository.AdminUserRepository;
 import com.agpdesing.domain.repository.ProductRepository;
 import com.agpdesing.domain.repository.SiteSettingsRepository;
-import com.agpdesing.infrastructure.security.jwt.JwtProperties;
-import com.agpdesing.infrastructure.storage.SupabaseStorageProperties;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.util.unit.DataSize;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +28,6 @@ import java.time.Clock;
  * quedan sin una sola anotación de Spring.
  */
 @Configuration
-@EnableConfigurationProperties({ JwtProperties.class, SupabaseStorageProperties.class })
 public class UseCaseConfig {
 
     @Bean

@@ -1,13 +1,14 @@
 package com.agpdesing.presentation.advice;
 
-import com.agpdesing.application.port.out.ImageStorage;
-import com.agpdesing.application.usecase.image.LimpiadorDeMetadatos;
-import com.agpdesing.application.usecase.image.UploadImageUseCase;
+import com.agpdesing.application.exception.FormatoNoAdmitidoException;
+import com.agpdesing.application.exception.NoSePudoLimpiarException;
+import com.agpdesing.application.exception.StorageFailedException;
+import com.agpdesing.application.exception.StorageNotConfiguredException;
 import com.agpdesing.domain.exception.DomainValidationException;
-import com.agpdesing.presentation.ratelimit.SubidaRateLimiter;
 import com.agpdesing.domain.exception.InvalidCredentialsException;
 import com.agpdesing.domain.exception.ProductNotFoundException;
 import com.agpdesing.domain.exception.SlugAlreadyExistsException;
+import com.agpdesing.presentation.ratelimit.DemasiadasSubidasException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -137,8 +138,8 @@ public class GlobalExceptionHandler {
     }
 
     /** El archivo no es una imagen de las que se aceptan (se mira por sus bytes, no por su nombre). */
-    @ExceptionHandler(UploadImageUseCase.FormatoNoAdmitidoException.class)
-    ProblemDetail onFormatoNoAdmitido(UploadImageUseCase.FormatoNoAdmitidoException ex) {
+    @ExceptionHandler(FormatoNoAdmitidoException.class)
+    ProblemDetail onFormatoNoAdmitido(FormatoNoAdmitidoException ex) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNSUPPORTED_MEDIA_TYPE, ex.getMessage());
         pd.setTitle("Formato no admitido");
         pd.setProperty("errors", Map.of("archivo", ex.getMessage()));
@@ -146,8 +147,8 @@ public class GlobalExceptionHandler {
     }
 
     /** La imagen está mal formada y no se le pudieron quitar los datos escondidos: no se sube. */
-    @ExceptionHandler(LimpiadorDeMetadatos.NoSePudoLimpiarException.class)
-    ProblemDetail onNoSePudoLimpiar(LimpiadorDeMetadatos.NoSePudoLimpiarException ex) {
+    @ExceptionHandler(NoSePudoLimpiarException.class)
+    ProblemDetail onNoSePudoLimpiar(NoSePudoLimpiarException ex) {
         log.warn("Imagen que no se pudo procesar: {}", ex.getMessage());
         String detalle = "Esa imagen está dañada o incompleta y no se pudo procesar. Prueba a abrirla y "
                 + "volver a guardarla, o sube otra.";
@@ -158,8 +159,8 @@ public class GlobalExceptionHandler {
     }
 
     /** Demasiadas fotos seguidas: el freno de la subida. */
-    @ExceptionHandler(SubidaRateLimiter.DemasiadasSubidasException.class)
-    ProblemDetail onDemasiadasSubidas(SubidaRateLimiter.DemasiadasSubidasException ex) {
+    @ExceptionHandler(DemasiadasSubidasException.class)
+    ProblemDetail onDemasiadasSubidas(DemasiadasSubidasException ex) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
         pd.setTitle("Demasiadas subidas");
         pd.setProperty("errors", Map.of("archivo", ex.getMessage()));
@@ -167,8 +168,8 @@ public class GlobalExceptionHandler {
     }
 
     /** Falta configurar el almacenamiento de fotos. */
-    @ExceptionHandler(ImageStorage.NotConfiguredException.class)
-    ProblemDetail onAlmacenSinConfigurar(ImageStorage.NotConfiguredException ex) {
+    @ExceptionHandler(StorageNotConfiguredException.class)
+    ProblemDetail onAlmacenSinConfigurar(StorageNotConfiguredException ex) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
         pd.setTitle("Subida no disponible");
         pd.setProperty("errors", Map.of("archivo", ex.getMessage()));
@@ -176,8 +177,8 @@ public class GlobalExceptionHandler {
     }
 
     /** El almacenamiento respondió mal o no respondió. */
-    @ExceptionHandler(ImageStorage.StorageFailedException.class)
-    ProblemDetail onAlmacenFallo(ImageStorage.StorageFailedException ex) {
+    @ExceptionHandler(StorageFailedException.class)
+    ProblemDetail onAlmacenFallo(StorageFailedException ex) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, ex.getMessage());
         pd.setTitle("No se pudo guardar la foto");
         pd.setProperty("errors", Map.of("archivo", ex.getMessage()));

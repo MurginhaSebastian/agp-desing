@@ -1,5 +1,6 @@
 package com.agpdesing.application.usecase.image;
 
+import com.agpdesing.application.exception.FormatoNoAdmitidoException;
 import com.agpdesing.application.port.out.ImageStorage;
 import com.agpdesing.domain.exception.DomainValidationException;
 
@@ -49,13 +50,6 @@ public class UploadImageUseCase {
         // arrastrar el nombre original, que a veces dice más de lo que uno cree.
         String nombre = UUID.randomUUID() + formato.extension();
         return almacen.guardar(nombre, formato.tipoMime(), limpio);
-    }
-
-    /** El archivo no es una imagen de las que se aceptan. */
-    public static class FormatoNoAdmitidoException extends RuntimeException {
-        public FormatoNoAdmitidoException(String message) {
-            super(message);
-        }
     }
 
     private static String mensajeDeFormato(byte[] contenido) {

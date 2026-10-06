@@ -69,7 +69,7 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<ProductResponse> createOne(@Valid @RequestBody ProductRequest body) {
-        Product created = create.execute(body.toCommand());
+        Product created = create.execute(mapper.toCommand(body));
         return ResponseEntity
                 .created(URI.create("/api/products/" + created.id().value()))
                 .body(mapper.toResponse(created));
@@ -77,7 +77,7 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ProductResponse updateOne(@PathVariable UUID id, @Valid @RequestBody ProductRequest body) {
-        return mapper.toResponse(update.execute(new ProductId(id), body.toCommand()));
+        return mapper.toResponse(update.execute(new ProductId(id), mapper.toCommand(body)));
     }
 
     @DeleteMapping("/{id}")

@@ -5,7 +5,7 @@ import com.agpdesing.application.usecase.auth.AuthenticateAdminUseCase;
 import com.agpdesing.presentation.ratelimit.ClientIpResolver;
 import com.agpdesing.presentation.ratelimit.LoginRateLimiter;
 import com.agpdesing.presentation.dto.request.LoginRequest;
-import com.agpdesing.presentation.dto.response.AuthResponse;
+import com.agpdesing.presentation.mapper.AuthDtoMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,12 +23,14 @@ public class AuthController {
     private final AuthenticateAdminUseCase authenticate;
     private final LoginRateLimiter rateLimiter;
     private final ClientIpResolver clientIp;
+    private final AuthDtoMapper mapper;
 
     public AuthController(AuthenticateAdminUseCase authenticate, LoginRateLimiter rateLimiter,
-                          ClientIpResolver clientIp) {
+                          ClientIpResolver clientIp, AuthDtoMapper mapper) {
         this.authenticate = authenticate;
         this.rateLimiter = rateLimiter;
         this.clientIp = clientIp;
+        this.mapper = mapper;
     }
 
     @PostMapping("/login")
@@ -39,6 +41,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(pd);
         }
         TokenProvider.IssuedToken token = authenticate.execute(body.username(), body.password());
-        return ResponseEntity.ok(new AuthResponse(token.value(), token.expiresAt(), body.username()));
+        return ResponseEntity.ok(mapper.toResponse(token, body.username()));
     }
 }
