@@ -16,13 +16,14 @@ const CORRECCION_MS = 2500
  * no basta con medir una vez: se salta enseguida y se sigue corrigiendo un par de segundos
  * mientras el contenido termina de colocarse.
  */
-/** Dónde se quedó cada página la última vez que se salió de ella. */
+/** Dónde se quedó cada página la última vez que se estuvo en ella. */
 const posiciones = new Map<string, number>()
 
 export function ScrollManager() {
   const { pathname, hash, key, state } = useLocation()
   const tipo = useNavigationType()
-  const anterior = useRef<string | null>(null)
+  /** La página que se está viendo, para apuntar su scroll en cada movimiento. */
+  const rutaActual = useRef(pathname)
 
   /*
    * Dentro de la web manda este componente, no el navegador. Con el modo `auto`, al pulsar
@@ -38,14 +39,28 @@ export function ScrollManager() {
   }, [])
 
   /*
+   * La posición de cada página se apunta mientras se mueve, no al salir de ella. Al salir ya es
+   * tarde: cuando React avisa del cambio de ruta, la página nueva ya está puesta y, si es más
+   * corta (la ficha mide 1500 px y el catálogo 2800), el navegador ya ha recortado el scroll al
+   * máximo que admite la nueva. Antes se guardaba ese valor recortado y, al volver, la obra
+   * aparecía 244 px más abajo de donde se dejó.
+   *
+   * El recorte también dispara un `scroll`, pero llega después del efecto de abajo, cuando
+   * `rutaActual` ya es la página nueva: se apunta a la nueva y no estropea la de antes.
+   */
+  useEffect(() => {
+    const apuntar = () => posiciones.set(rutaActual.current, window.scrollY)
+    window.addEventListener('scroll', apuntar, { passive: true })
+    return () => window.removeEventListener('scroll', apuntar)
+  }, [])
+
+  /*
    * Efecto de maquetación y no normal: tiene que colocar la página ANTES de que el navegador
    * la dibuje. Si no, en la transición catálogo ↔ ficha el navegador fotografiaría la página
    * en la posición equivocada y la foto viajaría a un sitio que ya no está en pantalla.
    */
   useLayoutEffect(() => {
-    // Todavía no se ha movido nada: lo que marca el scroll es la página de la que se sale.
-    if (anterior.current !== null) posiciones.set(anterior.current, window.scrollY)
-    anterior.current = pathname
+    rutaActual.current = pathname
 
     if (!hash) {
       /*

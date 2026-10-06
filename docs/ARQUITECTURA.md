@@ -127,9 +127,6 @@ src/
 Se vio durante la reestructuración y no se arregló porque cambia comportamiento y no estaba
 aprobado:
 
-- **Volver al catálogo deja la obra unos 244 px más abajo** de donde estaba (medido con Playwright
-  en escritorio, con el enlace «Catálogo» de la ficha y con «atrás»). Ya pasaba antes de la
-  reestructuración. `CLAUDE.md` dice que la posición se recupera exacta: conviene investigarlo.
 - **Los botones del panel no reaccionan al pulsarlos.** La regla `.btn:active` nunca se aplicaba
   (`@apply btn` no añade la clase `btn`) y se borró. Arreglarlo cambiaría el panel.
 - **`scripts/qa/responsive.mjs:27`** busca las clases `chip` y `tab`, que ya no existen, y no
@@ -138,5 +135,10 @@ aprobado:
 - **Textos viejos** tras el cambio de la portada: `Footer.tsx` («Detalles únicos, ensamblados a
   mano.») y la meta description de `index.html`. `docs/portada.png` (la del README) es anterior
   al rediseño Capas.
+- Si se salta de golpe hasta el fondo de una página (sin pasar por las fotos, que cargan al
+  acercarse), al volver de una ficha la obra puede quedar unas decenas de píxeles corrida: esas
+  fotos cargan entonces y cambian el alto de lo que hay encima. El scroll se restaura exacto; lo
+  que se mueve es el contenido. Bajando con normalidad no pasa (comprobado en móvil y escritorio).
+  Arreglarlo del todo exigiría guardar las medidas en píxeles de cada foto en la base de datos.
 - Cuando la base de datos rechaza un nombre repetido, Hibernate escribe una línea `ERROR` en el log
   aunque la respuesta sea un 409 correcto.
