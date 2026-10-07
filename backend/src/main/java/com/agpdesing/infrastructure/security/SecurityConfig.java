@@ -39,6 +39,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/settings").permitAll()
                         .requestMatchers("/api/settings").hasRole("ADMIN")
                         .requestMatchers("/api/products/**").hasRole("ADMIN")
+                        // Ventas: nombres y teléfonos de clientes. Todo con sesión, también leer.
+                        .requestMatchers("/api/sales", "/api/sales/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/imagenes").hasRole("ADMIN")
                         .requestMatchers("/error").permitAll()
                         .anyRequest().denyAll())

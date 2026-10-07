@@ -33,7 +33,17 @@ import com.agpdesing.presentation.ratelimit.SubidaRateLimiter;
 import com.agpdesing.presentation.rest.AuthController;
 import com.agpdesing.presentation.rest.ImageController;
 import com.agpdesing.presentation.rest.ProductController;
+import com.agpdesing.presentation.rest.SaleController;
 import com.agpdesing.presentation.rest.SettingsController;
+import com.agpdesing.presentation.mapper.SaleDtoMapper;
+import com.agpdesing.application.usecase.sale.QuerySalesUseCase;
+import com.agpdesing.application.usecase.sale.SaveSaleUseCase;
+import com.agpdesing.application.usecase.sale.SalesSummaryUseCase;
+import com.agpdesing.domain.model.Sale;
+import com.agpdesing.domain.model.SaleId;
+import com.agpdesing.domain.repository.SaleRepository;
+import java.time.LocalDate;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -86,11 +96,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * el backend por dentro y demostrar que por fuera responde exactamente igual.
  */
 @WebMvcTest(
-        controllers = { ProductController.class, SettingsController.class, AuthController.class, ImageController.class },
+        controllers = { ProductController.class, SettingsController.class, AuthController.class, ImageController.class,
+                SaleController.class },
         properties = { "app.cors.allowed-origin=http://localhost:5173", "app.ratelimit.trusted-proxy-hops=0" })
 @Import({ SecurityConfig.class, CorsConfig.class, JwtAuthenticationFilter.class, ClientIpResolver.class,
         LoginRateLimiter.class, SubidaRateLimiter.class, ProductDtoMapper.class, SettingsDtoMapper.class,
-        AuthDtoMapper.class, ApiContractTest.Puertos.class })
+        AuthDtoMapper.class, SaleDtoMapper.class, ApiContractTest.Puertos.class })
 class ApiContractTest {
 
     static final Instant AHORA = Instant.parse("2026-09-21T10:00:00Z");
@@ -99,6 +110,7 @@ class ApiContractTest {
     @Autowired Productos productos;
     @Autowired Ajustes ajustes;
     @Autowired Almacen almacen;
+    @Autowired Ventas ventas;
 
     /** Cada test entra con un usuario distinto para no compartir el cupo de subidas. */
     private static final AtomicInteger usuarios = new AtomicInteger();
@@ -110,6 +122,7 @@ class ApiContractTest {
         productos.store.clear();
         ajustes.actual = SiteSettings.empty();
         almacen.modo.set("ok");
+        ventas.store.clear();
     }
 
     private static RequestPostProcessor admin() {
@@ -432,6 +445,166 @@ class ApiContractTest {
         }
     }
 
+
+    /** Ventas: nombres y teléfonos de clientes. Nada de esto puede salir sin sesión. */
+    @Nested
+    class Ventas_ {
+
+        private static final String VENTA = """
+                {"item":"Cuadro de la promo 2010","detail":"  Fotos del viaje  ","quantity":2,"totalCents":15050,
+                 "advanceCents":5000,"paymentMethod":"YAPE","status":"PENDING","customerName":"Ana Torres",
+                 "customerPhone":"+51 987 654 321","saleDate":"2026-09-20","deliveryDate":"2026-09-27"}""";
+
+        private String conObra(Product p, boolean marcar) {
+            return "{\"productId\":\"" + p.id().value() + "\",\"quantity\":1,\"totalCents\":9500,\"advanceCents\":0,"
+                    + "\"paymentMethod\":\"TRANSFER\",\"status\":\"DELIVERED\",\"customerName\":\"Luis\","
+                    + "\"customerPhone\":\"912345678\",\"saleDate\":\"2026-09-10\",\"markProductSold\":" + marcar + "}";
+        }
+
+        @Test
+        void sinSesionNadaResponde() throws Exception {
+            String id = "/api/sales/" + UUID.randomUUID();
+            mvc.perform(get("/api/sales")).andExpect(status().isUnauthorized());
+            mvc.perform(get(id)).andExpect(status().isUnauthorized());
+            mvc.perform(get("/api/sales/resumen")).andExpect(status().isUnauthorized());
+            mvc.perform(get("/api/sales/export.csv")).andExpect(status().isUnauthorized());
+            mvc.perform(json(post("/api/sales"), VENTA)).andExpect(status().isUnauthorized());
+            mvc.perform(json(put(id), VENTA)).andExpect(status().isUnauthorized());
+            mvc.perform(delete(id)).andExpect(status().isUnauthorized());
+            mvc.perform(get("/api/sales").header("Authorization", "Bearer token-falso")).andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void altaDeUnEncargoAMedidaConElCuerpoCompleto() throws Exception {
+            mvc.perform(json(post("/api/sales"), VENTA).with(admin()))
+                    .andExpect(status().isCreated())
+                    .andExpect(header().string("Location", startsWith("/api/sales/")))
+                    .andExpect(jsonPath("$.id").exists())
+                    .andExpect(jsonPath("$.productId").value(org.hamcrest.Matchers.nullValue()))
+                    .andExpect(jsonPath("$.item").value("Cuadro de la promo 2010"))
+                    .andExpect(jsonPath("$.detail").value("Fotos del viaje"))
+                    .andExpect(jsonPath("$.quantity").value(2))
+                    .andExpect(jsonPath("$.totalCents").value(15050))
+                    .andExpect(jsonPath("$.advanceCents").value(5000))
+                    .andExpect(jsonPath("$.balanceCents").value(10050))
+                    .andExpect(jsonPath("$.paymentMethod").value("YAPE"))
+                    .andExpect(jsonPath("$.status").value("PENDING"))
+                    .andExpect(jsonPath("$.customerName").value("Ana Torres"))
+                    .andExpect(jsonPath("$.customerPhone").value("51987654321"))
+                    .andExpect(jsonPath("$.saleDate").value("2026-09-20"))
+                    .andExpect(jsonPath("$.deliveryDate").value("2026-09-27"))
+                    .andExpect(jsonPath("$.createdAt").value("2026-09-21T10:00:00Z"))
+                    .andExpect(jsonPath("$.updatedAt").value("2026-09-21T10:00:00Z"))
+                    .andExpect(jsonPath("$.length()").value(16));
+        }
+
+        @Test
+        void ventaDeUnaObraLaMarcaVendidaSoloSiSePide() throws Exception {
+            Product a = guardado("Seda I", false);
+            Product b = guardado("Bruma", false);
+            mvc.perform(json(post("/api/sales"), conObra(a, true)).with(admin()))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.item").value("Seda I"))
+                    .andExpect(jsonPath("$.productId").value(a.id().value().toString()));
+            mvc.perform(json(post("/api/sales"), conObra(b, false)).with(admin())).andExpect(status().isCreated());
+            mvc.perform(get("/api/products/slug/seda-i")).andExpect(jsonPath("$.status").value("SOLD"));
+            mvc.perform(get("/api/products/slug/bruma")).andExpect(jsonPath("$.status").value("AVAILABLE"));
+        }
+
+        @Test
+        void obraQueNoExisteEs404() throws Exception {
+            Product fantasma = Product.create("Fantasma", "", new Money(100, Money.Currency.PEN), 1, 1, "x", "/a.jpg",
+                    ProductStatus.AVAILABLE, false, AHORA);
+            mvc.perform(json(post("/api/sales"), conObra(fantasma, true)).with(admin()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.title").value("No encontrado"));
+        }
+
+        @Test
+        void datosInvalidosMarcanElCampo() throws Exception {
+            mvc.perform(json(post("/api/sales"), VENTA.replace("\"advanceCents\":5000", "\"advanceCents\":99999")).with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.advanceCents").value("El adelanto no puede ser mayor que el total"));
+            mvc.perform(json(post("/api/sales"), VENTA.replace("+51 987 654 321", "abc")).with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.customerPhone").exists());
+            mvc.perform(json(post("/api/sales"), VENTA.replace("\"paymentMethod\":\"YAPE\",", "")).with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.paymentMethod").exists());
+            mvc.perform(json(post("/api/sales"), VENTA.replace("\"YAPE\"", "\"PLIN\"")).with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Petición malformada"));
+        }
+
+        @Test
+        void listaDelMesFiltrosYErroresDeFechas() throws Exception {
+            mvc.perform(json(post("/api/sales"), VENTA).with(admin())).andExpect(status().isCreated());
+            mvc.perform(json(post("/api/sales"), VENTA.replace("2026-09-20", "2026-08-05").replace("2026-09-27", "2026-08-06")).with(admin()))
+                    .andExpect(status().isCreated());
+            // Sin fechas: el mes en curso (el reloj del test está en septiembre de 2026).
+            mvc.perform(get("/api/sales").with(admin()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(1)))
+                    .andExpect(jsonPath("$[0].saleDate").value("2026-09-20"));
+            mvc.perform(get("/api/sales?desde=2026-08-01&hasta=2026-09-30").with(admin()))
+                    .andExpect(jsonPath("$", hasSize(2)));
+            mvc.perform(get("/api/sales?desde=2026-09-30&hasta=2026-09-01").with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.hasta").exists());
+            mvc.perform(get("/api/sales?desde=ayer").with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.detail").value("Revisa las fechas de la búsqueda"));
+            mvc.perform(get("/api/sales/no-es-uuid").with(admin()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.detail").value("No existe una venta con ese identificador"));
+        }
+
+        @Test
+        void edicionYBorrado() throws Exception {
+            String location = mvc.perform(json(post("/api/sales"), VENTA).with(admin()))
+                    .andReturn().getResponse().getHeader("Location");
+            mvc.perform(json(put(location), VENTA.replace("PENDING", "DELIVERED").replace("\"advanceCents\":5000", "\"advanceCents\":15050")).with(admin()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value("DELIVERED"))
+                    .andExpect(jsonPath("$.balanceCents").value(0));
+            mvc.perform(json(put("/api/sales/" + UUID.randomUUID()), VENTA).with(admin())).andExpect(status().isNotFound());
+            mvc.perform(delete(location).with(admin())).andExpect(status().isNoContent());
+            mvc.perform(delete(location).with(admin())).andExpect(status().isNotFound());
+        }
+
+        @Test
+        void resumenDelMes() throws Exception {
+            Product a = guardado("Seda I", false);
+            mvc.perform(json(post("/api/sales"), VENTA).with(admin()));
+            mvc.perform(json(post("/api/sales"), conObra(a, false)).with(admin()));
+            mvc.perform(get("/api/sales/resumen?mes=2026-09").with(admin()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.month").value("2026-09"))
+                    .andExpect(jsonPath("$.totalCents").value(15050 + 9500))
+                    .andExpect(jsonPath("$.previousMonthTotalCents").value(0))
+                    .andExpect(jsonPath("$.pendingCents").value(10050 + 9500)) // entregada sin cobrar: sigue por cobrar
+                    .andExpect(jsonPath("$.salesCount").value(2))
+                    .andExpect(jsonPath("$.topItems[0].item").value("Cuadro de la promo 2010"))
+                    .andExpect(jsonPath("$.topItems[0].quantity").value(2))
+                    .andExpect(jsonPath("$.topItems[1].productId").value(a.id().value().toString()));
+            mvc.perform(get("/api/sales/resumen").with(admin())).andExpect(jsonPath("$.month").value("2026-09"));
+        }
+
+        @Test
+        void exportarParaExcel() throws Exception {
+            mvc.perform(json(post("/api/sales"), VENTA.replace("Ana Torres", "=HYPERLINK(\\\"http://x\\\")")).with(admin()))
+                    .andExpect(status().isCreated());
+            var r = mvc.perform(get("/api/sales/export.csv?desde=2026-09-01&hasta=2026-09-30").with(admin()))
+                    .andExpect(status().isOk())
+                    .andExpect(header().string("Content-Type", startsWith("text/csv")))
+                    .andExpect(header().string("Content-Disposition", "attachment; filename=\"ventas-2026-09-01-a-2026-09-30.csv\""))
+                    .andReturn().getResponse();
+            String csv = new String(r.getContentAsByteArray(), StandardCharsets.UTF_8);
+            org.junit.jupiter.api.Assertions.assertTrue(csv.startsWith("\uFEFFFecha;Cliente;"), csv.substring(0, 20));
+            org.junit.jupiter.api.Assertions.assertTrue(csv.contains(";\"'=HYPERLINK(\"\"http://x\"\")\";"), "la fórmula va neutralizada: " + csv);
+        }
+    }
+
     @Nested
     class Seguridad {
 
@@ -500,6 +673,17 @@ class ApiContractTest {
         }
     }
 
+    static final class Ventas implements SaleRepository {
+        final Map<SaleId, Sale> store = new ConcurrentHashMap<>();
+
+        @Override public Sale save(Sale s) { store.put(s.id(), s); return s; }
+        @Override public Optional<Sale> findById(SaleId id) { return Optional.ofNullable(store.get(id)); }
+        @Override public List<Sale> findBetween(LocalDate desde, LocalDate hasta) {
+            return store.values().stream().filter(s -> !s.saleDate().isBefore(desde) && !s.saleDate().isAfter(hasta)).toList();
+        }
+        @Override public void deleteById(SaleId id) { store.remove(id); }
+    }
+
     @TestConfiguration
     static class Puertos {
         final Clock clock = Clock.fixed(AHORA, ZoneOffset.UTC);
@@ -510,6 +694,8 @@ class ApiContractTest {
         @Bean Productos productos() { return new Productos(); }
         @Bean Ajustes ajustes() { return new Ajustes(); }
         @Bean Almacen almacen() { return new Almacen(); }
+        @Bean Ventas ventas() { return new Ventas(); }
+        @Bean Clock clock() { return clock; }
 
         @Bean TokenProvider tokenProvider() {
             return new TokenProvider() {
@@ -530,6 +716,9 @@ class ApiContractTest {
         @Bean GetSiteSettingsUseCase getSettings(Ajustes a) { return new GetSiteSettingsUseCase(a); }
         @Bean UpdateSiteSettingsUseCase updateSettings(Ajustes a) { return new UpdateSiteSettingsUseCase(a); }
         @Bean UploadImageUseCase upload(Almacen a) { return new UploadImageUseCase(a, 5L * 1024 * 1024); }
+        @Bean SaveSaleUseCase saveSale(Ventas v, Productos p) { return new SaveSaleUseCase(v, p, clock, new TransaccionesDePrueba()); }
+        @Bean QuerySalesUseCase querySales(Ventas v) { return new QuerySalesUseCase(v, new TransaccionesDePrueba()); }
+        @Bean SalesSummaryUseCase salesSummary(Ventas v) { return new SalesSummaryUseCase(v); }
 
         @Bean AuthenticateAdminUseCase authenticate(TokenProvider tokens, PasswordHasher hasher) {
             return new AuthenticateAdminUseCase(

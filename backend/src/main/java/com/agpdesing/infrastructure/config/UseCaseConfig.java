@@ -11,10 +11,14 @@ import com.agpdesing.application.usecase.product.DeleteProductUseCase;
 import com.agpdesing.application.usecase.product.GetProductUseCase;
 import com.agpdesing.application.usecase.product.ListProductsUseCase;
 import com.agpdesing.application.usecase.product.UpdateProductUseCase;
+import com.agpdesing.application.usecase.sale.QuerySalesUseCase;
+import com.agpdesing.application.usecase.sale.SalesSummaryUseCase;
+import com.agpdesing.application.usecase.sale.SaveSaleUseCase;
 import com.agpdesing.application.usecase.settings.GetSiteSettingsUseCase;
 import com.agpdesing.application.usecase.settings.UpdateSiteSettingsUseCase;
 import com.agpdesing.domain.repository.AdminUserRepository;
 import com.agpdesing.domain.repository.ProductRepository;
+import com.agpdesing.domain.repository.SaleRepository;
 import com.agpdesing.domain.repository.SiteSettingsRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.unit.DataSize;
@@ -59,6 +63,21 @@ public class UseCaseConfig {
     @Bean
     ListProductsUseCase listProductsUseCase(ProductRepository repo) {
         return new ListProductsUseCase(repo);
+    }
+
+    @Bean
+    SaveSaleUseCase saveSaleUseCase(SaleRepository sales, ProductRepository products, Clock clock, Transacciones tx) {
+        return new SaveSaleUseCase(sales, products, clock, tx);
+    }
+
+    @Bean
+    QuerySalesUseCase querySalesUseCase(SaleRepository sales, Transacciones tx) {
+        return new QuerySalesUseCase(sales, tx);
+    }
+
+    @Bean
+    SalesSummaryUseCase salesSummaryUseCase(SaleRepository sales) {
+        return new SalesSummaryUseCase(sales);
     }
 
     @Bean

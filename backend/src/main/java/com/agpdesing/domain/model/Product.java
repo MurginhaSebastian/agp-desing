@@ -81,6 +81,12 @@ public final class Product {
         this.updatedAt = Objects.requireNonNull(now);
     }
 
+    /** Cambiar solo el estado (por ejemplo, al registrar su venta), sin tocar el resto de la ficha. */
+    public void changeStatus(ProductStatus status, Instant now) {
+        this.status = Objects.requireNonNull(status);
+        this.updatedAt = Objects.requireNonNull(now);
+    }
+
     // --- invariantes ---
 
     private void applyName(String value) {

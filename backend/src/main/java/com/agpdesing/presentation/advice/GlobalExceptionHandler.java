@@ -7,8 +7,10 @@ import com.agpdesing.application.exception.StorageNotConfiguredException;
 import com.agpdesing.domain.exception.DomainValidationException;
 import com.agpdesing.domain.exception.InvalidCredentialsException;
 import com.agpdesing.domain.exception.ProductNotFoundException;
+import com.agpdesing.domain.exception.SaleNotFoundException;
 import com.agpdesing.domain.exception.SlugAlreadyExistsException;
 import com.agpdesing.presentation.ratelimit.DemasiadasSubidasException;
+import com.agpdesing.presentation.rest.SaleController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +27,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -68,8 +71,8 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
-    @ExceptionHandler(ProductNotFoundException.class)
-    ProblemDetail onNotFound(ProductNotFoundException ex) {
+    @ExceptionHandler({ ProductNotFoundException.class, SaleNotFoundException.class })
+    ProblemDetail onNotFound(RuntimeException ex) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         pd.setTitle("No encontrado");
         return pd;
@@ -81,7 +84,15 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ProblemDetail onBadPathVariable(MethodArgumentTypeMismatchException ex) {
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "No existe un cuadro con ese identificador");
+        // Un filtro mal escrito (`?mes=octubre`) no es «no existe»: es una búsqueda mal hecha.
+        if (!ex.getParameter().hasParameterAnnotation(PathVariable.class)) {
+            ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Revisa las fechas de la búsqueda");
+            pd.setTitle("Datos inválidos");
+            pd.setProperty("errors", Map.of(ex.getName(), "Formato no válido"));
+            return pd;
+        }
+        String que = ex.getParameter().getContainingClass() == SaleController.class ? "una venta" : "un cuadro";
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "No existe " + que + " con ese identificador");
         pd.setTitle("No encontrado");
         return pd;
     }
