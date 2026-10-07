@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { productService, crearServicios } from '@/services/servicios'
-import { ajustesRemotos, imagenesRemotas, productosRemotos, sesionRemota } from '@/services/remoto/api'
+import { ajustesRemotos, imagenesRemotas, productosRemotos, sesionRemota, ventasRemotas } from '@/services/remoto/api'
 
 describe('crearServicios', () => {
   it('con backend usa la API para todo', () => {
@@ -9,6 +9,7 @@ describe('crearServicios', () => {
       ajustes: ajustesRemotos,
       sesion: sesionRemota,
       imagenes: imagenesRemotas,
+      ventas: ventasRemotas,
     })
   })
 

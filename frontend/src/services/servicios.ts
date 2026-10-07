@@ -4,7 +4,8 @@ import { crearAjustesDemo } from '@/services/demo/ajustes'
 import { crearImagenesDemo } from '@/services/demo/imagenes'
 import { crearProductosDemo } from '@/services/demo/productos'
 import { crearSesionDemo } from '@/services/demo/sesion'
-import { ajustesRemotos, imagenesRemotas, productosRemotos, sesionRemota } from '@/services/remoto/api'
+import { crearVentasDemo } from '@/services/demo/ventas'
+import { ajustesRemotos, imagenesRemotas, productosRemotos, sesionRemota, ventasRemotas } from '@/services/remoto/api'
 
 /**
  * El único sitio que decide si la web habla con el backend o con los datos de ejemplo
@@ -17,9 +18,15 @@ export function crearServicios(demo: boolean): Servicios {
     const liberar = () => imagenes.liberarSinUso(new Set([...productos.fotosEnUso(), ajustes.fotoEnUso()]))
     const productos = crearProductosDemo(liberar)
     const ajustes = crearAjustesDemo(liberar)
-    return { productos, ajustes, sesion: crearSesionDemo(), imagenes }
+    return { productos, ajustes, sesion: crearSesionDemo(), imagenes, ventas: crearVentasDemo(productos) }
   }
-  return { productos: productosRemotos, ajustes: ajustesRemotos, sesion: sesionRemota, imagenes: imagenesRemotas }
+  return {
+    productos: productosRemotos,
+    ajustes: ajustesRemotos,
+    sesion: sesionRemota,
+    imagenes: imagenesRemotas,
+    ventas: ventasRemotas,
+  }
 }
 
 /*
@@ -33,3 +40,4 @@ export const productService = servicios.productos
 export const settingsService = servicios.ajustes
 export const authService = servicios.sesion
 export const imagenService = servicios.imagenes
+export const ventasService = servicios.ventas

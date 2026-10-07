@@ -46,6 +46,12 @@ export function AdminLayout() {
               Productos
             </NavLink>
             <NavLink
+              to="/admin/ventas"
+              className={({ isActive }) => `btn-ghost text-sm ${isActive ? 'text-brand' : ''}`}
+            >
+              Ventas
+            </NavLink>
+            <NavLink
               to="/admin/portada"
               className={({ isActive }) => `btn-ghost text-sm ${isActive ? 'text-brand' : ''}`}
             >

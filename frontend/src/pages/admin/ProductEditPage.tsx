@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ProductForm } from '@/components/admin/ProductForm'
 import { useRecurso } from '@/hooks/useRecurso'
+import { aDtoDeProducto } from '@/lib/productos'
 import { productService } from '@/services/servicios'
 import type { ProductCreateDTO } from '@/types/product'
 
@@ -28,20 +29,7 @@ export function ProductEditPage() {
     )
   }
 
-  const initial: ProductCreateDTO | undefined = product
-    ? {
-        name: product.name,
-        description: product.description,
-        priceCents: product.priceCents,
-        currency: product.currency,
-        widthCm: product.widthCm,
-        heightCm: product.heightCm,
-        technique: product.technique,
-        imageUrl: product.imageUrl,
-        status: product.status,
-        featured: product.featured,
-      }
-    : undefined
+  const initial: ProductCreateDTO | undefined = product ? aDtoDeProducto(product) : undefined
 
   return (
     <>

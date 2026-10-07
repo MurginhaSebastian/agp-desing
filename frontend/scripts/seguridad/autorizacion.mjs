@@ -37,6 +37,15 @@ const PRIVADAS = [
   // Subir una foto: sin token no debe poder ni empezar. Se manda vacío a propósito, así que
   // aunque el permiso fallara no se subiría nada.
   { metodo: 'POST', ruta: '/api/imagenes' },
+  // Ventas: nombres y teléfonos de clientes. Ni leerlas sin sesión, ni la lista, ni el resumen,
+  // ni el archivo para Excel.
+  { metodo: 'GET', ruta: '/api/sales' },
+  { metodo: 'GET', ruta: `/api/sales/${UUID_CUALQUIERA}` },
+  { metodo: 'GET', ruta: '/api/sales/resumen' },
+  { metodo: 'GET', ruta: '/api/sales/export.csv' },
+  { metodo: 'POST', ruta: '/api/sales', cuerpo: '{}' },
+  { metodo: 'PUT', ruta: `/api/sales/${UUID_CUALQUIERA}`, cuerpo: '{}' },
+  { metodo: 'DELETE', ruta: `/api/sales/${UUID_CUALQUIERA}` },
 ]
 
 /** Cambia el último trozo del token (la firma) dejando el resto igual. */
@@ -131,6 +140,8 @@ export async function run() {
       // Sin archivo: 400 o 415 según lo pille el servidor antes o después de mirar el tipo.
       // Lo que importa es que NO sea 401: eso probaría que la ruta existe y está protegida.
       { nombre: 'POST /api/imagenes con token', peticion: { metodo: 'POST', ruta: '/api/imagenes' }, espera: [400, 415] },
+      { nombre: 'GET /api/sales/{id} con token', peticion: { metodo: 'GET', ruta: `/api/sales/${UUID_CUALQUIERA}` }, espera: [404] },
+      { nombre: 'POST /api/sales con token', peticion: { metodo: 'POST', ruta: '/api/sales', cuerpo: '{}' }, espera: [400] },
     ]
     for (const c of controles) {
       const r = await llamar(c.peticion, tokenReal)

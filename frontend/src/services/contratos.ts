@@ -1,5 +1,6 @@
 import type { AuthResponse, LoginRequest } from '@/types/auth'
 import type { Product, ProductCreateDTO, ProductUpdateDTO } from '@/types/product'
+import type { Sale, SaleInput, SalesSummary } from '@/types/sale'
 import type { SiteSettings } from '@/types/settings'
 
 /*
@@ -40,9 +41,29 @@ export interface ImageUploader {
   subir(archivo: File): Promise<string>
 }
 
+/** Un periodo de fechas, ambas incluidas, en formato «2026-10-07». */
+export interface Periodo {
+  desde: string
+  hasta: string
+}
+
+/** /api/sales — solo con sesión de administrador. */
+export interface SalesRepository {
+  list(periodo: Periodo): Promise<Sale[]>
+  get(id: string): Promise<Sale>
+  create(input: SaleInput): Promise<Sale>
+  update(id: string, input: SaleInput): Promise<Sale>
+  remove(id: string): Promise<void>
+  /** `mes` como «2026-10». */
+  resumen(mes: string): Promise<SalesSummary>
+  /** El CSV para Excel del periodo, listo para descargar. */
+  exportar(periodo: Periodo): Promise<Blob>
+}
+
 export interface Servicios {
   productos: ProductRepository
   ajustes: SettingsRepository
   sesion: AuthGateway
   imagenes: ImageUploader
+  ventas: SalesRepository
 }

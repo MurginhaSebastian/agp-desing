@@ -17,7 +17,7 @@ agp-desing/
                       playwright-cli, qa-suite, security-audit, redesign-existing-projects
 ```
 
-Front y back **nunca se mezclan**: cada uno tiene su `package.json`/`pom.xml`, su `.env.example` y su `.gitignore`. El contrato entre ambos son `frontend/src/types/product.ts` ↔ `ProductResponse.java` y `frontend/src/types/settings.ts` ↔ `SiteSettingsResponse.java` (ambos en `backend/.../presentation/dto/response/`) — si cambia uno, cambia el otro.
+Front y back **nunca se mezclan**: cada uno tiene su `package.json`/`pom.xml`, su `.env.example` y su `.gitignore`. El contrato entre ambos son `frontend/src/types/product.ts` ↔ `ProductResponse.java`, `frontend/src/types/settings.ts` ↔ `SiteSettingsResponse.java` y `frontend/src/types/sale.ts` ↔ `SaleResponse.java` + `SalesSummaryResponse.java` (todos en `backend/.../presentation/dto/response/`) — si cambia uno, cambia el otro.
 
 ## Comandos
 
@@ -100,6 +100,7 @@ Mapa completo, patrones y recetas en `docs/ARQUITECTURA.md`.
 - JPA vive solo en `infrastructure/persistence/`. `ProductJpaEntity` ≠ `domain.model.Product`; el mapper los traduce.
 - Esquema con Flyway (`ddl-auto: validate`). Nueva columna = nueva migración `V<n>__*.sql`, nunca editar una aplicada.
 - Secretos solo por variables de entorno (`application.yml` únicamente tiene `${VARS}`). `VITE_*` es público, no secreto.
+- **Las ventas nunca son públicas**: nombres y teléfonos de clientes. `/api/sales/**` exige `ROLE_ADMIN` para todo, también GET; ninguna página pública las lee. Ver «Módulo de ventas» en `docs/ARQUITECTURA.md`.
 - Seguridad: stateless + JWT en header Bearer; CSRF deshabilitado por eso mismo; CORS a un solo origen exacto con `allowCredentials(false)`; login con rate limit 5/min/IP.
 
 ## Reglas de seguridad

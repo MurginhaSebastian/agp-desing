@@ -19,6 +19,8 @@ const LoginPage = lazy(() => import('@/pages/admin/LoginPage').then((m) => ({ de
 const ProductEditPage = lazy(() => import('@/pages/admin/ProductEditPage').then((m) => ({ default: m.ProductEditPage })))
 const ProductListPage = lazy(() => import('@/pages/admin/ProductListPage').then((m) => ({ default: m.ProductListPage })))
 const SettingsPage = lazy(() => import('@/pages/admin/SettingsPage').then((m) => ({ default: m.SettingsPage })))
+const VentasPage = lazy(() => import('@/pages/admin/VentasPage').then((m) => ({ default: m.VentasPage })))
+const VentaEditPage = lazy(() => import('@/pages/admin/VentaEditPage').then((m) => ({ default: m.VentaEditPage })))
 const PrivacyPage = lazy(() => import('@/pages/public/PrivacyPage').then((m) => ({ default: m.PrivacyPage })))
 const TermsPage = lazy(() => import('@/pages/public/TermsPage').then((m) => ({ default: m.TermsPage })))
 
@@ -52,6 +54,9 @@ export const router = createBrowserRouter([
                   { index: true, element: <ProductListPage /> },
                   { path: 'cuadros/nuevo', element: <ProductEditPage /> },
                   { path: 'cuadros/:id', element: <ProductEditPage /> },
+                  { path: 'ventas', element: <VentasPage /> },
+                  { path: 'ventas/nueva', element: <VentaEditPage /> },
+                  { path: 'ventas/:id', element: <VentaEditPage /> },
                   { path: 'portada', element: <SettingsPage /> },
                 ],
               },

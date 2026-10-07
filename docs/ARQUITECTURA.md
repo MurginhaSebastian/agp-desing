@@ -110,6 +110,32 @@ src/
 
 ---
 
+## Módulo de ventas (oct. 2026)
+
+El registro interno de las ventas que se cierran por WhatsApp. Es el primer recurso hecho con las
+recetas de arriba, de punta a punta.
+
+- **Solo en el panel.** `/api/sales/**` exige sesión para todo, también para leer
+  (`SecurityConfig`), y `scripts/seguridad/autorizacion.mjs` comprueba que sin token cada ruta da
+  401. Ni una venta, ni un nombre, ni un teléfono se pinta nunca en la web pública.
+- **Dominio** (`Sale`): con o sin obra del catálogo (encargo a medida), cliente (nombre y teléfono,
+  solo dígitos), total y adelanto en céntimos de sol (el saldo se calcula), medio de pago (Yape,
+  transferencia, contraentrega) y estado (pendiente, en producción, entregada, cancelada).
+- **Con obra**, la venta copia su nombre al registrarse y lo conserva aunque la obra cambie o se
+  borre (`ON DELETE SET NULL`). Si se marca la casilla, la obra pasa a «Vendido» en la misma
+  transacción (`SaveSaleUseCase` + `Transacciones`). Al cancelar o borrar esa venta, el panel
+  ofrece devolverla a «Disponible»; no lo hace solo.
+- **Resumen del mes** (`SalesSummaryUseCase`): vendido, mes anterior, por cobrar, número de ventas y
+  lo más vendido (por obra, o por nombre si no la hay). Las canceladas no cuentan. Se calcula en
+  memoria: un taller vende decenas al mes.
+- **CSV para Excel** (`VentasCsv`): `;`, punto decimal, UTF-8 con BOM y sin `sep=;`, teléfonos
+  agrupados y fórmulas neutralizadas (una celda que empieza por `=`, `+`, `-` o `@` lleva `'`
+  delante). Comprobado abriéndolo en Excel con Windows en es-PE.
+- **Frontend**: `types/sale.ts` (contrato), `SalesRepository` con su demo (`services/demo/ventas.ts`,
+  mismas reglas y mismo CSV que el servidor) y su versión remota; pantallas `VentasPage`,
+  `VentaEditPage` y `VentaForm`. Importes con `formatSoles` (céntimos incluidos, a diferencia de
+  `formatPrice`, que redondea al sol) y fechas con `lib/fechas.ts` (siempre hora de Lima).
+
 ## Cómo se comprueba que nada se rompe
 
 | Qué | Comando | Qué mira |
@@ -130,6 +156,13 @@ aprobado:
 - **Los botones del panel no reaccionan al pulsarlos.** La regla `.btn:active` nunca se aplicaba
   (`@apply btn` no añade la clase `btn`) y se borró. Arreglarlo cambiaría el panel.
 - `docs/portada.png` (la del README) es anterior al rediseño Capas.
+- **La política de privacidad no menciona el registro de ventas.** Dice que el nombre y el teléfono
+  del cliente solo quedan en WhatsApp y en el teléfono; desde el módulo de ventas también quedan en
+  la base de datos (solo para el panel). El dueño decidió no tocarla por ahora (7 oct. 2026); la Ley
+  29733 pide que diga qué datos se guardan. Texto propuesto: «Si nos compras, lo apuntamos también
+  en nuestro registro de ventas: tu nombre, tu teléfono, lo que pediste, el precio, cuánto
+  adelantaste y cómo pagaste. Ese registro está en nuestra base de datos, solo lo ve el taller desde
+  su panel y no aparece en la web.»
 - Si se salta de golpe hasta el fondo de una página (sin pasar por las fotos, que cargan al
   acercarse), al volver de una ficha la obra puede quedar unas decenas de píxeles corrida: esas
   fotos cargan entonces y cambian el alto de lo que hay encima. El scroll se restaura exacto; lo

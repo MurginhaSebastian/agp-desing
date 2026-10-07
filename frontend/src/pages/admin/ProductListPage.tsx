@@ -1,15 +1,33 @@
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { HandCoins, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useProducts } from '@/hooks/useProducts'
+import { mensajeDe } from '@/lib/errores'
 import { formatDimensions, formatPrice } from '@/lib/format'
+import { aDtoDeProducto } from '@/lib/productos'
 import { productService } from '@/services/servicios'
-import { PRODUCT_STATUS_LABEL, type Product } from '@/types/product'
+import { PRODUCT_STATUS_LABEL, type Product, type ProductStatus } from '@/types/product'
 
 export function ProductListPage() {
   const { products, loading, error, reload } = useProducts()
   const [pending, setPending] = useState<Product | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [cambiando, setCambiando] = useState<string | null>(null)
+  const [fallo, setFallo] = useState<string | null>(null)
+
+  /** El «vendido o no» rápido: cambiar el estado sin abrir la ficha (el servidor pide la ficha entera). */
+  async function cambiarEstado(p: Product, status: ProductStatus) {
+    setCambiando(p.id)
+    setFallo(null)
+    try {
+      await productService.update(p.id, { ...aDtoDeProducto(p), status })
+      await reload()
+    } catch (e) {
+      setFallo(mensajeDe(e, `No se pudo cambiar el estado de «${p.name}».`))
+    } finally {
+      setCambiando(null)
+    }
+  }
 
   async function confirmDelete() {
     if (!pending) return
@@ -38,6 +56,7 @@ export function ProductListPage() {
       <div className="mt-10">
         {loading && <p className="label" role="status">Cargando…</p>}
         {error && <p role="alert" className="field-error">{error}</p>}
+        {fallo && <p role="alert" className="field-error mb-4">{fallo}</p>}
 
         {!loading && !error && products.length === 0 && (
           <div className="border-t border-ink pt-8 max-w-md">
@@ -74,9 +93,25 @@ export function ProductListPage() {
                     <td className="py-3 pr-4">{p.technique}</td>
                     <td className="py-3 pr-4 tabular">{formatDimensions(p.widthCm, p.heightCm)}</td>
                     <td className="py-3 pr-4 tabular">{formatPrice(p.priceCents, p.currency)}</td>
-                    <td className="py-3 pr-4">{PRODUCT_STATUS_LABEL[p.status]}</td>
+                    <td className="py-3 pr-4">
+                      <label className="sr-only" htmlFor={`estado-${p.id}`}>Estado de {p.name}</label>
+                      <select
+                        id={`estado-${p.id}`}
+                        className="field-input min-h-11 w-40 py-1"
+                        value={p.status}
+                        disabled={cambiando === p.id}
+                        onChange={(e) => void cambiarEstado(p, e.target.value as ProductStatus)}
+                      >
+                        {(Object.keys(PRODUCT_STATUS_LABEL) as ProductStatus[]).map((s) => (
+                          <option key={s} value={s}>{PRODUCT_STATUS_LABEL[s]}</option>
+                        ))}
+                      </select>
+                    </td>
                     <td className="py-3">
                       <div className="flex justify-end gap-1">
+                        <Link to={`/admin/ventas/nueva?obra=${p.id}`} className="btn-ghost size-11 px-0" aria-label={`Registrar una venta de ${p.name}`} title="Registrar venta">
+                          <HandCoins size={18} strokeWidth={1.75} aria-hidden="true" />
+                        </Link>
                         <Link to={`/admin/cuadros/${p.id}`} className="btn-ghost size-11 px-0" aria-label={`Editar ${p.name}`}>
                           <Pencil size={18} strokeWidth={1.75} aria-hidden="true" />
                         </Link>

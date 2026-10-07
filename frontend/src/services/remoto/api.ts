@@ -1,7 +1,8 @@
-import type { AuthGateway, ImageUploader, ProductRepository, SettingsRepository } from '@/services/contratos'
+import type { AuthGateway, ImageUploader, Periodo, ProductRepository, SalesRepository, SettingsRepository } from '@/services/contratos'
 import { http } from '@/services/http'
 import type { AuthResponse } from '@/types/auth'
 import type { Product } from '@/types/product'
+import type { Sale, SalesSummary } from '@/types/sale'
 import type { SiteSettings } from '@/types/settings'
 
 /*
@@ -39,4 +40,18 @@ export const imagenesRemotas: ImageUploader = {
     const { url } = await http<{ url: string }>('/api/imagenes', { method: 'POST', body: cuerpo, auth: true })
     return url
   },
+}
+
+const enPeriodo = ({ desde, hasta }: Periodo) =>
+  `desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`
+
+/** Ventas: todo con sesión, también leer. */
+export const ventasRemotas: SalesRepository = {
+  list: (periodo) => http<Sale[]>(`/api/sales?${enPeriodo(periodo)}`, { auth: true }),
+  get: (id) => http<Sale>(`/api/sales/${encodeURIComponent(id)}`, { auth: true }),
+  create: (input) => http<Sale>('/api/sales', { method: 'POST', body: input, auth: true }),
+  update: (id, input) => http<Sale>(`/api/sales/${encodeURIComponent(id)}`, { method: 'PUT', body: input, auth: true }),
+  remove: (id) => http<void>(`/api/sales/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }),
+  resumen: (mes) => http<SalesSummary>(`/api/sales/resumen?mes=${encodeURIComponent(mes)}`, { auth: true }),
+  exportar: (periodo) => http<Blob>(`/api/sales/export.csv?${enPeriodo(periodo)}`, { auth: true, archivo: true }),
 }

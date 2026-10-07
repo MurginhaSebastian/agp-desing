@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { SubirImagen } from '@/components/admin/SubirImagen'
+import { aCentimos, aTextoDeSoles } from '@/lib/dinero'
 import { erroresDeCampo, mensajeDe } from '@/lib/errores'
 import type { Currency, ProductCreateDTO, ProductStatus } from '@/types/product'
 import { PRODUCT_STATUS_LABEL } from '@/types/product'
@@ -43,7 +44,7 @@ function validate(dto: ProductCreateDTO): Errors {
 
 export function ProductForm({ initial = empty, submitLabel, onSubmit }: Props) {
   const [dto, setDto] = useState<ProductCreateDTO>(initial)
-  const [price, setPrice] = useState(initial.priceCents ? String(initial.priceCents / 100) : '')
+  const [price, setPrice] = useState(initial.priceCents ? aTextoDeSoles(initial.priceCents) : '')
   const [errors, setErrors] = useState<Errors>({})
   const [busy, setBusy] = useState(false)
 
@@ -53,7 +54,7 @@ export function ProductForm({ initial = empty, submitLabel, onSubmit }: Props) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    const next = { ...dto, priceCents: Math.round(Number(price.replace(/[^\d.]/g, '')) * 100) }
+    const next = { ...dto, priceCents: aCentimos(price) }
     const errs = validate(next)
     setErrors(errs)
     if (Object.keys(errs).length > 0) {

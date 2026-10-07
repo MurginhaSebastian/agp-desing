@@ -109,6 +109,8 @@ export const RUTAS_PANEL = [
   { ruta: '/admin', nombre: 'lista de productos' },
   { ruta: '/admin/cuadros/nuevo', nombre: 'nuevo producto' },
   { ruta: '/admin/portada', nombre: 'portada (panel)' },
+  { ruta: '/admin/ventas', nombre: 'ventas' },
+  { ruta: '/admin/ventas/nueva', nombre: 'registrar una venta' },
 ]
 
 export const GRAVEDAD = { critico: 'CRÍTICO', alto: 'ALTO', medio: 'MEDIO', bajo: 'BAJO' }
