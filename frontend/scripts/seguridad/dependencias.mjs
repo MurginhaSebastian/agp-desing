@@ -19,13 +19,36 @@ const OSV = 'https://api.osv.dev/v1/querybatch'
 
 const PESO = { critical: GRAVEDAD.critico, high: GRAVEDAD.alto, moderate: GRAVEDAD.medio, low: GRAVEDAD.bajo, info: GRAVEDAD.bajo }
 
+/*
+ * Avisos sin parche en la rama que usamos y que esta app no puede disparar. Se degradan de ALTO
+ * a BAJO: siguen saliendo en el informe, pero no bloquean. Reaparecen solos en cuanto haya un
+ * paquete fuera de esta lista. Cada entrada dice por qué no expone y cuándo revisarla.
+ * Verificado el 9 oct. 2026 y anotado en .claude/skills/security-audit/TRAMPAS.md (nº 17).
+ *   spring-webmvc 6.2.19: GHSA-j9f9-w8pj-32f8 (SSE con fragmentos de vista) y
+ *   GHSA-pc63-qcmh-9cmg (XsltView → SSRF/RCE con un mapeo /** que renderiza vistas). Ambos exigen
+ *   renderizado de vistas de servidor; esta API es solo @RestController, sin vistas, SSE ni
+ *   XsltView (comprobado en los controladores y en `mvnw dependency:tree`: ningún motor de
+ *   vistas). Sin parche en la línea 6.2 (solo Spring 7.0.9 / Boot 4). Revisar al subir a Boot 4.
+ */
+const MOTIVO_SPRING_VISTAS = 'API solo @RestController, sin vistas de servidor/SSE/XsltView; sin parche en 6.2, revisar al subir a Spring Boot 4'
+const EXCEPCIONES = {
+  'GHSA-j9f9-w8pj-32f8': MOTIVO_SPRING_VISTAS,
+  'GHSA-pc63-qcmh-9cmg': MOTIVO_SPRING_VISTAS,
+}
+
 function auditarNpm(soloProduccion) {
   const args = ['audit', '--json']
   if (soloProduccion) args.push('--omit=dev')
-  // npm audit sale con código 1 cuando encuentra algo: la salida sigue siendo válida.
+  // npm audit sale con código 1 cuando encuentra algo: la salida sigue siendo válida. Al fallar,
+  // `ejecutar` pega stderr (avisos de npm, el DEP0190 de Node en Windows) a stdout, así que se
+  // recorta al objeto JSON —del primer «{» al último «}»— antes de parsear.
   const r = ejecutar('npm', args, { cwd: rutaRepo('frontend') })
+  const texto = r.salida ?? ''
+  const ini = texto.indexOf('{')
+  const fin = texto.lastIndexOf('}')
+  if (ini < 0 || fin <= ini) return null
   try {
-    return JSON.parse(r.salida)
+    return JSON.parse(texto.slice(ini, fin + 1))
   } catch {
     return null
   }
@@ -128,12 +151,23 @@ export async function run() {
     try {
       const afectados = await preguntarAOsv(maven.paquetes)
       for (const a of afectados) {
-        hallazgos.push({
-          gravedad: GRAVEDAD.alto,
-          donde: 'backend',
-          que: `${a.nombre} ${a.version} tiene fallos conocidos`,
-          detalle: a.avisos.slice(0, 4).join(', '),
-        })
+        const sinExcusar = a.avisos.filter((id) => !EXCEPCIONES[id])
+        if (sinExcusar.length) {
+          hallazgos.push({
+            gravedad: GRAVEDAD.alto,
+            donde: 'backend',
+            que: `${a.nombre} ${a.version} tiene fallos conocidos`,
+            detalle: sinExcusar.slice(0, 4).join(', '),
+          })
+        } else {
+          const motivos = [...new Set(a.avisos.map((id) => EXCEPCIONES[id]))].join(' · ')
+          hallazgos.push({
+            gravedad: GRAVEDAD.bajo,
+            donde: 'backend',
+            que: `${a.nombre} ${a.version}: ${a.avisos.join(', ')} — excepción documentada`,
+            detalle: motivos,
+          })
+        }
       }
       if (afectados.length === 0) {
         hallazgos.push({ gravedad: GRAVEDAD.bajo, donde: 'backend', que: `${maven.paquetes.length} librerías revisadas contra osv.dev, ninguna con fallos conocidos`, detalle: 'informativo' })

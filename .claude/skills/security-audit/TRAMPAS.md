@@ -183,3 +183,33 @@ salía en verde sin haberlo comprobado.
 Los valores por defecto tienen que estar en los dos lados o en ninguno. Y un control que no puede
 medir debe **decirlo como hallazgo**, nunca devolver una lista vacía, que se lee igual que «todo
 bien».
+
+## 17. Un aviso sin parche en la rama que usas no es «aflojar el control» si no te expone
+
+El 9 oct. 2026, antes de publicar, `dependencias.mjs` marcó `spring-webmvc 6.2.19` como ALTO por
+dos avisos: `GHSA-j9f9-w8pj-32f8` (corrupción de stream en SSE con fragmentos de vista) y
+`GHSA-pc63-qcmh-9cmg` (XsltView → SSRF/RCE con un mapeo `/**` que renderiza vistas). Los dos
+exigen **renderizado de vistas de servidor**. Esta API es solo `@RestController` (sin vistas, SSE
+ni XsltView; comprobado en los controladores y en `mvnw dependency:tree`, donde no entra ningún
+motor de vistas). Y **no hay parche en la línea 6.2**: lo último en Central es 6.2.19 y Boot
+3.5.16 (lo que usamos); el arreglo solo está en Spring 7.0.9 / Boot 4, que es una migración mayor.
+
+La tentación fácil es subir la versión a ciegas (rompería Boot 3.5) o bajarle la gravedad al
+control a secas. Lo correcto fue una **excepción acotada**: solo esos dos IDs, en `EXCEPCIONES`
+de `dependencias.mjs`, cada uno con su motivo y su gatillo de revisión («al subir a Boot 4»). El
+hallazgo **sigue saliendo**, degradado a BAJO, para que nadie lo olvide; y en cuanto aparezca un
+paquete con un aviso que no esté en la lista, vuelve a ser ALTO y a bloquear. Un aviso que no
+puedes disparar con el código que tienes no es lo mismo que un aviso que no existe: por eso no se
+borra, se documenta y se revisa al tocar las vistas o al migrar.
+
+## 18. stderr pegado a stdout rompe un control que parsea JSON
+
+El mismo día, el control de `npm audit` salía como MEDIO «no se pudo ejecutar». No era verdad:
+`npm audit --omit=dev --json` devolvía JSON válido con **cero** vulnerabilidades en producción.
+El problema era el control: `npm` sale con código 1 cuando encuentra algo (o por un aviso), y
+entonces `ejecutar` devuelve **stdout + stderr concatenados**; los avisos de npm (y el `DEP0190`
+de Node en Windows) iban detrás del JSON y `JSON.parse` se atragantaba con la cola. Un control que
+no puede parsear se lee igual que uno que no encuentra nada —o peor, que da un falso MEDIO que
+tapa lo demás—. Ahora `auditarNpm` recorta al objeto JSON (del primer `{` al último `}`) antes de
+parsear. Lección repetida: cuando un control depende de la salida de un comando, tiene que separar
+lo que mide de lo que el sistema le mete por el mismo tubo.
