@@ -7,10 +7,27 @@ import { FlechaIzquierda } from '@/components/ui/iconos'
 import { Reveal } from '@/components/ui/Reveal'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useRecurso } from '@/hooks/useRecurso'
+import { resumen, useSeo } from '@/hooks/useSeo'
 import { formatDimensions, formatPrice } from '@/lib/format'
 import { obraTraida, volviendoDe } from '@/lib/navegacion'
 import { productService } from '@/services/servicios'
-import { PRODUCT_STATUS_LABEL } from '@/types/product'
+import { PRODUCT_STATUS_LABEL, type Product } from '@/types/product'
+
+/**
+ * La obra para Google: nombre, foto y formato. Sin precio a propósito: los términos dicen que
+ * los del catálogo son referenciales y Google los enseñaría como precio cerrado.
+ */
+function datosDeObra(p: Product) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: p.name,
+    description: p.description,
+    image: new URL(p.imageUrl, window.location.origin).href,
+    category: p.technique,
+    brand: { '@type': 'Brand', name: 'AGP Desing' },
+  }
+}
 
 export function ProductDetailPage() {
   const { slug = '' } = useParams()
@@ -26,6 +43,14 @@ export function ProductDetailPage() {
 
   const { dato: product, estado: state } = useRecurso(slug, productService.getBySlug, inicial)
   usePageTitle(state === 'ok' && product ? `${product.name} — AGP Desing` : null)
+  const lista = state === 'ok' && product !== null
+  useSeo({
+    description: lista
+      ? resumen(`${product.technique}, ${formatDimensions(product.widthCm, product.heightCm)}. ${product.description}`)
+      : undefined,
+    noindex: state === 'missing',
+    jsonLd: lista ? datosDeObra(product) : undefined,
+  })
 
   if (state === 'loading') {
     // La forma de la ficha mientras llega: la foto montada a un lado y la etiqueta al otro.

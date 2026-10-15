@@ -3,5 +3,6 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-# Sustituir por el dominio real al publicar
-# Sitemap: https://agpdesing.com/sitemap.xml
+# Lo genera api/sitemap.ts con las obras de la base de datos.
+# Con dominio propio, cambiar aquí la dirección (robots.txt exige la dirección completa).
+Sitemap: https://agp-desing.vercel.app/sitemap.xml

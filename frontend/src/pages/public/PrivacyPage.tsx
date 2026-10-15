@@ -1,6 +1,7 @@
 import { PieLegal } from '@/components/layout/PieLegal'
 import { env } from '@/config/env'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { useSeo } from '@/hooks/useSeo'
 
 const ACTUALIZADO = '28 de septiembre de 2026'
 
@@ -10,6 +11,7 @@ const ACTUALIZADO = '28 de septiembre de 2026'
  */
 export function PrivacyPage() {
   usePageTitle('Política de privacidad — AGP Desing')
+  useSeo({ description: 'Qué datos guarda AGP Desing, con quién los comparte y cuáles son tus derechos.' })
 
   return (
     <div className="container-x pt-20 pb-24 md:pt-28 md:pb-32">
