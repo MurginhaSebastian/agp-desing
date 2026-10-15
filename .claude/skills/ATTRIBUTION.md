@@ -59,6 +59,7 @@ On **motion**, this repo's authority is `animate` / `emil-design-eng`, not
 | `vercel-deploy` | Vercel | MIT — `LICENSE.txt` | None. |
 | `vercel-react-best-practices` | Vercel | MIT — frontmatter | None. |
 | `web-reader` | z-ai-web-dev-sdk Skills | MIT — `LICENSE.txt` | None. |
+| `all-deploy` | https://github.com/Hainrixz/all-deploy, commit `42600c412c2188885c68e19a1e704bb7b0b130b5` (2026-09-19) | MIT — `LICENSE` | None in the files copied. Only `SKILL.md`, `LICENSE`, `references/`, `assets/templates/` and the three runtime scripts (`audit.py`, `env_extract.py`, `static_check.py`); left out tests, CI, images, `cowork-plugin/` and the packaging scripts. `assets/templates/.env.example.template` is not committed: the repo's `.gitignore` excludes `.env.*`. |
 
 ## Updating the Emil skills
 
