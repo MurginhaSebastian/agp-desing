@@ -3,7 +3,9 @@ import { EsqueletoObras } from '@/components/catalog/EsqueletoObras'
 import { ProductGrid } from '@/components/catalog/ProductGrid'
 import { WhatsAppButton } from '@/components/catalog/WhatsAppButton'
 import { Reveal } from '@/components/ui/Reveal'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import { useProducts } from '@/hooks/useProducts'
+import { useSeo } from '@/hooks/useSeo'
 import type { ProductStatus } from '@/types/product'
 
 type Filter = 'ALL' | ProductStatus
@@ -23,6 +25,10 @@ export function CatalogPage() {
   const { products, loading, error, reload } = useProducts()
   const [filter, setFilter] = useState<Filter>('ALL')
   const visible = filter === 'ALL' ? products : products.filter((p) => p.status === filter)
+  usePageTitle('Catálogo de cuadros 3D y boxes — AGP Desing')
+  useSeo({
+    description: 'Cuadros 3D y boxes temáticos hechos a mano en Trujillo: piezas disponibles, por encargo y vendidas. Cotiza por WhatsApp.',
+  })
 
   return (
     <div className="container-x pt-12 pb-24 md:pt-20 md:pb-32">

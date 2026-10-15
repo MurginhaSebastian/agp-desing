@@ -2,11 +2,13 @@ import { Link } from 'react-router-dom'
 import { PieLegal } from '@/components/layout/PieLegal'
 import { env } from '@/config/env'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { useSeo } from '@/hooks/useSeo'
 
 const ACTUALIZADO = '25 de septiembre de 2026'
 
 export function TermsPage() {
   usePageTitle('Términos y condiciones — AGP Desing')
+  useSeo({ description: 'Cómo se cotiza, se encarga y se paga en AGP Desing, y cómo funcionan los plazos y las entregas.' })
 
   return (
     <div className="container-x pt-20 pb-24 md:pt-28 md:pb-32">
