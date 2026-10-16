@@ -15,7 +15,7 @@ export function enlaceWhatsApp(): string {
  */
 export function buildWhatsAppUrl(product?: Pick<Product, 'name' | 'slug'>): string {
   const text = product
-    ? `Hola, vengo de la web. Me interesa cotizar «${product.name}».\n${window.location.origin}/catalogo/${encodeURIComponent(product.slug)}`
-    : 'Hola, vengo de la web. Quiero cotizar un diseño.'
+    ? `¡Hola! Vi el diseño «${product.name}» en su web y me encantó. ¿Podrían darme información para personalizar uno?\n${window.location.origin}/catalogo/${encodeURIComponent(product.slug)}`
+    : '¡Hola! Estuve viendo su catálogo en la web y me gustaría cotizar un diseño personalizado.'
   return `${enlaceWhatsApp()}?text=${encodeURIComponent(text)}`
 }
