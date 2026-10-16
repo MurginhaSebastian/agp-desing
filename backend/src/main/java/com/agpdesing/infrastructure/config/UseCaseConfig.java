@@ -2,6 +2,7 @@ package com.agpdesing.infrastructure.config;
 
 import com.agpdesing.application.port.out.ImageStorage;
 import com.agpdesing.application.port.out.PasswordHasher;
+import com.agpdesing.application.port.out.ReductorDeImagen;
 import com.agpdesing.application.port.out.TokenProvider;
 import com.agpdesing.application.port.out.Transacciones;
 import com.agpdesing.application.usecase.auth.AuthenticateAdminUseCase;
@@ -96,9 +97,9 @@ public class UseCaseConfig {
      * mensajes de error mentiría.
      */
     @Bean
-    UploadImageUseCase uploadImageUseCase(ImageStorage almacen,
+    UploadImageUseCase uploadImageUseCase(ImageStorage almacen, ReductorDeImagen reductor,
                                           @Value("${spring.servlet.multipart.max-file-size}") DataSize maxArchivo) {
-        return new UploadImageUseCase(almacen, maxArchivo.toBytes());
+        return new UploadImageUseCase(almacen, reductor, maxArchivo.toBytes());
     }
 
     @Bean

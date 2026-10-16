@@ -1,6 +1,8 @@
 package com.agpdesing.application;
 
 import com.agpdesing.application.port.out.ImageStorage;
+import com.agpdesing.application.port.out.ReductorDeImagen;
+import com.agpdesing.application.exception.StorageFailedException;
 import com.agpdesing.application.exception.FormatoNoAdmitidoException;
 import com.agpdesing.application.exception.NoSePudoLimpiarException;
 import com.agpdesing.application.usecase.image.DetectorDeImagen;
@@ -17,6 +19,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,18 +32,41 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class SubirImagenTest {
 
-    /** Almacén de mentira: se queda con lo último que le pidieron guardar. */
+    /**
+     * Almacén de mentira. `nombre`, `tipoMime` y `contenido` son los de la ORIGINAL (lo primero
+     * que se guarda); `guardados` lleva todos los nombres, copia incluida.
+     */
     private static final class AlmacenFalso implements ImageStorage {
         String nombre;
         String tipoMime;
         byte[] contenido;
+        final List<String> guardados = new ArrayList<>();
+        boolean fallarCopias;
 
         @Override
         public String guardar(String nombre, String tipoMime, byte[] contenido) {
-            this.nombre = nombre;
-            this.tipoMime = tipoMime;
-            this.contenido = contenido;
+            if (fallarCopias && nombre.endsWith(UploadImageUseCase.SUFIJO_COPIA)) {
+                throw new StorageFailedException("caído", null);
+            }
+            if (guardados.isEmpty() || !nombre.endsWith(UploadImageUseCase.SUFIJO_COPIA)) {
+                this.nombre = nombre;
+                this.tipoMime = tipoMime;
+                this.contenido = contenido;
+            }
+            guardados.add(nombre);
             return "https://ejemplo.supabase.co/storage/v1/object/public/productos/" + nombre;
+        }
+    }
+
+    /** Reductor de mentira: devuelve unos bytes fijos y apunta con qué orientación lo llamaron. */
+    private static final class ReductorFalso implements ReductorDeImagen {
+        Integer orientacion;
+        boolean puede = true;
+
+        @Override
+        public Optional<byte[]> reducir(byte[] imagen, int orientacion, int anchoMax) {
+            this.orientacion = orientacion;
+            return puede ? Optional.of(new byte[] { 1, 2, 3 }) : Optional.empty();
         }
     }
 
@@ -188,7 +216,43 @@ class SubirImagenTest {
     class CasoDeUso {
 
         private final AlmacenFalso almacen = new AlmacenFalso();
-        private final UploadImageUseCase subir = new UploadImageUseCase(almacen, 5 * 1024 * 1024);
+        private final ReductorFalso reductor = new ReductorFalso();
+        private final UploadImageUseCase subir = new UploadImageUseCase(almacen, reductor, 5 * 1024 * 1024);
+
+        @Test
+        @DisplayName("guarda al lado una copia reducida en JPEG con el mismo nombre y «.min.jpg»")
+        void guardaLaCopia() {
+            String url = subir.execute(new UploadImageUseCase.ImagenNueva(ImagenesDePrueba.png(16, 16), "image/png", "a.png"));
+
+            assertThat(almacen.guardados).hasSize(2);
+            String uuid = almacen.nombre.replace(".png", "");
+            assertThat(almacen.guardados.get(1)).isEqualTo(uuid + ".min.jpg");
+            assertThat(url).endsWith(uuid + ".png"); // la web sigue recibiendo la original
+        }
+
+        @Test
+        @DisplayName("la copia recibe la orientación del celular que conserva el JPEG limpio")
+        void pasaLaOrientacion() {
+            subir.execute(new UploadImageUseCase.ImagenNueva(ImagenesDePrueba.jpegDeCelular(20, 10, 6), "image/jpeg", "a.jpg"));
+            assertThat(reductor.orientacion).isEqualTo(6);
+        }
+
+        @Test
+        @DisplayName("si no se puede hacer la copia, la subida sigue y solo se guarda la original")
+        void sinCopia() {
+            reductor.puede = false;
+            String url = subir.execute(new UploadImageUseCase.ImagenNueva(ImagenesDePrueba.jpeg(10, 10), "image/jpeg", "a.jpg"));
+            assertThat(almacen.guardados).hasSize(1);
+            assertThat(url).endsWith(".jpg");
+        }
+
+        @Test
+        @DisplayName("si falla guardar la copia, la subida no falla")
+        void copiaQueFalla() {
+            almacen.fallarCopias = true;
+            String url = subir.execute(new UploadImageUseCase.ImagenNueva(ImagenesDePrueba.jpeg(10, 10), "image/jpeg", "a.jpg"));
+            assertThat(url).endsWith(almacen.nombre);
+        }
 
         @Test
         @DisplayName("guarda con nombre nuevo, extensión del formato real y devuelve la dirección")

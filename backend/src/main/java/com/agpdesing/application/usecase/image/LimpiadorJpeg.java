@@ -76,7 +76,7 @@ final class LimpiadorJpeg implements LimpiadorDeFormato {
      * APP1 del JPEG. Devuelve 1 (sin giro) si no la encuentra o si algo no cuadra: ante la duda,
      * no se inventa una rotación.
      */
-    private static int orientacionDe(byte[] b) {
+    static int orientacionDe(byte[] b) {
         int i = 2;
         while (i + 3 < b.length) {
             if ((b[i] & 0xFF) != 0xFF) return 1;
