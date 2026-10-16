@@ -49,7 +49,7 @@ Para conectar el front al back: `frontend/.env` con `VITE_API_URL=http://localho
 
 Las fotos del panel se suben a **Supabase Storage** (`POST /api/imagenes`), no al disco: en Render se borraría en cada despliegue. Hace falta el bucket público `productos` y `SUPABASE_URL`/`SUPABASE_SERVICE_KEY` en `backend/.env` (ver `docs/DEPLOY.md`). Sin eso la web funciona igual y solo la subida responde «no está configurado».
 
-La base de datos real está en **Supabase** (Session pooler, ver `docs/DEPLOY.md`); el Postgres de `docker compose` es solo respaldo local. Producción (Render + Vercel) está preparada pero **no desplegada**: no proponer deploy salvo que el usuario lo pida.
+La base de datos real está en **Supabase** (Session pooler, ver `docs/DEPLOY.md`); el Postgres de `docker compose` es solo respaldo local. **Producción está publicada**: la web en Vercel (`https://agp-desing.vercel.app`, desde `main`) y el backend en Render, con datos reales de Supabase. Un ping externo cada 5 min mantiene despierto a Render (la variable `BACKEND_URL` del workflow no está puesta). Los cambios van a la rama `produccion` y llegan a `main` por pull request, que fusiona el usuario: fusionar es publicar.
 
 ## Reglas de diseño (frontend)
 
@@ -85,6 +85,12 @@ Mapa completo, patrones y recetas en `docs/ARQUITECTURA.md`.
   llamarla desde un componente o un hook: crearía otro almacén demo y se perderían las obras del panel.
 - Pedir una cosa al servidor: `useRecurso`. Lo que una página le pasa a otra al navegar: `lib/navegacion.ts`
   (nunca `state as {...}` suelto). Errores: `lib/errores.ts`. Título de la pestaña: `usePageTitle`.
+- **Google:** cada página pública llama a `useSeo` (descripción, canónica, `noindex`, datos schema.org; el título sigue en
+  `usePageTitle`). La ficha no lleva precio en sus datos: los términos dicen que son referenciales. El sitemap lo arma
+  `frontend/api/sitemap.ts` (función de Vercel, lee `VITE_API_URL`) y `vercel.json` le reescribe `/sitemap.xml`; la
+  propiedad está verificada en Search Console con `public/google*.html` (no borrarlo). La tarjeta al compartir
+  (`og:image` → `public/og.jpg`) está en `index.html`, con la dirección completa. Con dominio propio, cambiar el
+  dominio en `robots.txt` y en esas etiquetas de `index.html`.
 - Escritos una sola vez: enlaces del menú, pie y redes en `config/enlaces.ts`; curvas de Motion en
   `lib/movimiento.ts` (son las de `index.css`: si cambia una, cambia la otra).
 - Pruebas con Vitest junto a lo que prueban (`*.test.ts[x]`). Las rutas de `scripts/qa/*` están
