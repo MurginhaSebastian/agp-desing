@@ -8,7 +8,7 @@ describe('mensajeDePedido', () => {
     const p: Pedido = { ...PEDIDO_VACIO, ocasion: 'Aniversario', pieza: 'Cuadro 3D' }
     expect(mensajeDePedido(p, ORIGEN)).toBe(
       [
-        'Hola, vengo de la web. Quiero hacer un pedido:',
+        '¡Hola! Armé mi pedido en su web:',
         '• Ocasión: Aniversario',
         '• Pieza: Cuadro 3D',
         '• Diseño: desde cero',

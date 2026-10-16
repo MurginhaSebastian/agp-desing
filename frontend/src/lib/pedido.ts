@@ -62,7 +62,7 @@ function fechaPeruana(iso: string): string {
 }
 
 export function mensajeDePedido(p: Pedido, origen: string): string {
-  const lineas = ['Hola, vengo de la web. Quiero hacer un pedido:']
+  const lineas = ['¡Hola! Armé mi pedido en su web:']
   const dato = (nombre: string, valor: string) => {
     const v = valor.replace(/\s+/g, ' ').trim()
     if (v) lineas.push(`• ${nombre}: ${v}`)
