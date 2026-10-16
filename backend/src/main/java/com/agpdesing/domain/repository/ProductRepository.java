@@ -14,7 +14,6 @@ public interface ProductRepository {
     Product save(Product product);
     Optional<Product> findById(ProductId id);
     Optional<Product> findBySlug(String slug);
-    boolean existsBySlugAndIdNot(String slug, ProductId id);
     List<Product> findAll();
     void deleteById(ProductId id);
 }

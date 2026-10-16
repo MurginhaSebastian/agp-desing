@@ -28,8 +28,11 @@ public class UpdateProductUseCase {
             Product product = products.findById(id).orElseThrow(() -> new ProductNotFoundException(id.value().toString()));
             product.update(cmd.name(), cmd.description(), cmd.price(), cmd.widthCm(), cmd.heightCm(),
                     cmd.technique(), cmd.imageUrl(), cmd.status(), cmd.featured(), Instant.now(clock));
-            if (products.existsBySlugAndIdNot(product.slug(), id)) {
-                throw new SlugAlreadyExistsException(product.slug());
+            // El slug no cambia al renombrar (ver Product.update), pero dos obras con el mismo
+            // nombre se confundirían en el panel y en el catálogo: el nombre nuevo no puede ser el de otra.
+            boolean repetido = products.findAll().stream().anyMatch(o -> !o.id().equals(id) && o.seLlamaComo(product));
+            if (repetido) {
+                throw new SlugAlreadyExistsException(Product.slugify(product.name()));
             }
             return products.save(product);
         });

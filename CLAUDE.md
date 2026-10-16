@@ -89,7 +89,9 @@ Mapa completo, patrones y recetas en `docs/ARQUITECTURA.md`.
   `usePageTitle`). La ficha no lleva precio en sus datos: los términos dicen que son referenciales. El sitemap lo arma
   `frontend/api/sitemap.ts` (función de Vercel, lee `VITE_API_URL`) y `vercel.json` le reescribe `/sitemap.xml`; la
   propiedad está verificada en Search Console con `public/google*.html` (no borrarlo). La tarjeta al compartir
-  (`og:image` → `public/og.jpg`) está en `index.html`, con la dirección completa. Con dominio propio, cambiar el
+  (`og:image` → `public/og.jpg`) está en `index.html`, con la dirección completa. Al compartir una obra, los robots de
+  vista previa (WhatsApp, Facebook, Telegram…; nunca Google) van por su user-agent a `frontend/api/obra.ts`, que les da
+  la foto y el nombre de esa obra (regla con `has` en `vercel.json`). El slug de una obra no cambia al renombrarla. Con dominio propio, cambiar el
   dominio en `robots.txt` y en esas etiquetas de `index.html`.
 - Escritos una sola vez: enlaces del menú, pie y redes en `config/enlaces.ts`; curvas de Motion en
   `lib/movimiento.ts` (son las de `index.css`: si cambia una, cambia la otra).

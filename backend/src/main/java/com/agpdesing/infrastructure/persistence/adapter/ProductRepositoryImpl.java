@@ -68,12 +68,6 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean existsBySlugAndIdNot(String slug, ProductId id) {
-        return jpa.existsBySlugAndIdNot(slug, id.value());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public List<Product> findAll() {
         return jpa.findAll().stream().map(mapper::toDomain).toList();
     }

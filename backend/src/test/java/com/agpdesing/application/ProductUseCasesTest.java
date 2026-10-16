@@ -39,13 +39,16 @@ class ProductUseCasesTest {
     private final ListProductsUseCase list = new ListProductsUseCase(repo);
 
     @Test
-    void updateRegeneratesSlugAndTouchesOnlyUpdatedAt() {
+    void updateKeepsTheSlugAndTouchesOnlyUpdatedAt() {
         Product p = create.execute(command("Seda I", false));
         clock.now = Instant.parse("2026-09-22T08:00:00Z");
 
         Product updated = update.execute(p.id(), command("Seda Dos", true));
 
-        assertEquals("seda-dos", updated.slug());
+        // Renombrar no mueve la obra de dirección: los enlaces viejos siguen llevando a ella.
+        assertEquals("Seda Dos", updated.name());
+        assertEquals("seda-i", updated.slug());
+        assertEquals(p.id(), get.bySlug("seda-i").id());
         assertEquals(Instant.parse("2026-09-21T10:00:00Z"), updated.createdAt());
         assertEquals(Instant.parse("2026-09-22T08:00:00Z"), updated.updatedAt());
         assertTrue(updated.featured());
@@ -63,6 +66,30 @@ class ProductUseCasesTest {
         create.execute(command("Seda I", false));
         Product other = create.execute(command("Bruma", false));
         assertThrows(SlugAlreadyExistsException.class, () -> update.execute(other.id(), command("Seda i", false)));
+    }
+
+    @Test
+    void aNewProductWithTheOldNameOfARenamedOneGetsAFreeSlug() {
+        Product renombrada = create.execute(command("Seda I", false));
+        update.execute(renombrada.id(), command("Bruma", false));
+
+        // «Seda I» ya no la usa nadie como nombre, pero su dirección sigue siendo de la renombrada.
+        Product nueva = create.execute(command("Seda I", false));
+
+        assertEquals("seda-i-2", nueva.slug());
+        assertEquals(renombrada.id(), get.bySlug("seda-i").id());
+    }
+
+    @Test
+    void theOldNameOfARenamedProductIsFreeForAnotherRename() {
+        Product renombrada = create.execute(command("Seda I", false));
+        update.execute(renombrada.id(), command("Bruma", false));
+        Product otra = create.execute(command("Avena", false));
+
+        Product updated = update.execute(otra.id(), command("Seda I", false));
+
+        assertEquals("Seda I", updated.name());
+        assertEquals("avena", updated.slug());
     }
 
     @Test

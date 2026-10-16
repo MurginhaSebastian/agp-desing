@@ -62,9 +62,6 @@ class CreateProductUseCaseTest {
         @Override public Optional<Product> findBySlug(String slug) {
             return store.values().stream().filter(p -> p.slug().equals(slug)).findFirst();
         }
-        @Override public boolean existsBySlugAndIdNot(String slug, ProductId id) {
-            return store.values().stream().anyMatch(p -> p.slug().equals(slug) && !p.id().equals(id));
-        }
         @Override public List<Product> findAll() { return List.copyOf(store.values()); }
         @Override public void deleteById(ProductId id) { store.remove(id); }
     }

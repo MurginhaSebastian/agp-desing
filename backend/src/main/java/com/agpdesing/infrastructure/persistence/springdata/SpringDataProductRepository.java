@@ -12,5 +12,4 @@ import java.util.UUID;
  */
 public interface SpringDataProductRepository extends JpaRepository<ProductJpaEntity, UUID> {
     Optional<ProductJpaEntity> findBySlug(String slug);
-    boolean existsBySlugAndIdNot(String slug, UUID id);
 }
