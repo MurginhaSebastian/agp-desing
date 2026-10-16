@@ -2,6 +2,8 @@ import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/rea
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { FlechaDerecha, FlechaIzquierda, Pausa, Seguir } from '@/components/ui/iconos'
+import { useFotoReducida } from '@/hooks/useFotoReducida'
+import { fotoReducida, marcarSinCopia } from '@/lib/fotos'
 import { EASE_OUT } from '@/lib/movimiento'
 
 /** Cuánto se queda cada foto antes de pasar a la siguiente. */
@@ -59,6 +61,8 @@ export function CarruselPortada({ fotos, cargando }: Props) {
 
   const n = fotos.length
   const actual = n > 0 ? indice % n : 0
+  // La copia reducida: el escenario mide unos 600 px y la original puede pesar varios MB.
+  const foto = useFotoReducida(fotos[actual] ?? '')
   const pasaSola = n > 1 && enVista && !enPausa && !encima && reduce !== true
   const ir = (paso: number) => {
     setCambio({ dir: Math.sign(paso), manual: true })
@@ -78,8 +82,11 @@ export function CarruselPortada({ fotos, cargando }: Props) {
   // La siguiente foto, ya descargada cuando le toque.
   useEffect(() => {
     if (n < 2) return
+    const siguiente = fotos[(actual + 1) % n]
     const img = new Image()
-    img.src = fotos[(actual + 1) % n]
+    // Si su copia reducida no existe, se apunta ya y al llegar su turno se pinta la original.
+    img.onerror = () => marcarSinCopia(siguiente)
+    img.src = fotoReducida(siguiente)
   }, [actual, n, fotos])
 
   const alTocar = (e: PointerEvent) => {
@@ -137,7 +144,8 @@ export function CarruselPortada({ fotos, cargando }: Props) {
             <AnimatePresence initial={false} custom={cambio}>
               <motion.img
                 key={fotos[actual]}
-                src={fotos[actual]}
+                src={foto.src}
+                onError={foto.alFallar}
                 alt=""
                 draggable={false}
                 decoding="async"
