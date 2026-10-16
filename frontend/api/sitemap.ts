@@ -17,7 +17,7 @@ interface ObraPublica {
 }
 
 /** Páginas fijas de la web pública. El panel (/admin) no va: robots.txt lo excluye. */
-const PAGINAS_FIJAS = ['/', '/catalogo', '/privacidad', '/terminos']
+const PAGINAS_FIJAS = ['/', '/catalogo', '/pedido', '/privacidad', '/terminos']
 
 /** Render gratis tarda hasta ~50 s en despertar; más que eso, mejor que Google reintente. */
 const ESPERA_MAXIMA_MS = 25_000

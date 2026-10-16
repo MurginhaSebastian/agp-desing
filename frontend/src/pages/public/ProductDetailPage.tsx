@@ -3,7 +3,7 @@ import 'react-medium-image-zoom/dist/styles.css'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { WhatsAppButton } from '@/components/catalog/WhatsAppButton'
 import { CajaVacia } from '@/components/ui/CajaVacia'
-import { FlechaIzquierda } from '@/components/ui/iconos'
+import { FlechaDerecha, FlechaIzquierda } from '@/components/ui/iconos'
 import { Reveal } from '@/components/ui/Reveal'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useRecurso } from '@/hooks/useRecurso'
@@ -160,8 +160,12 @@ export function ProductDetailPage() {
 
           <p className="mt-8 text-ink-soft leading-relaxed max-w-[60ch]">{product.description}</p>
 
-          <div className="mt-10">
+          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
             <WhatsAppButton product={product} className="w-full sm:w-auto" />
+            <Link to={`/pedido?obra=${encodeURIComponent(product.slug)}`} className="enlace-flecha">
+              Personalizar este diseño
+              <FlechaDerecha size={18} />
+            </Link>
           </div>
           <p className="mt-4 text-sm text-ink-soft">
             Se abre WhatsApp con el nombre del cuadro ya escrito. Tú solo envías.

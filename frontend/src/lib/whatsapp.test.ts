@@ -8,9 +8,11 @@ describe('buildWhatsAppUrl', () => {
     expect(url.searchParams.get('text')).toBe('Hola, vengo de la web. Quiero cotizar un diseño.')
   })
 
-  it('con obra, la nombra entre comillas latinas', () => {
-    const url = new URL(buildWhatsAppUrl({ name: 'Tarde & noche' }))
-    expect(url.searchParams.get('text')).toBe('Hola, vengo de la web. Me interesa cotizar «Tarde & noche».')
+  it('con obra, la nombra entre comillas latinas y enlaza su ficha', () => {
+    const url = new URL(buildWhatsAppUrl({ name: 'Tarde & noche', slug: 'tarde-noche' }))
+    expect(url.searchParams.get('text')).toBe(
+      `Hola, vengo de la web. Me interesa cotizar «Tarde & noche».\n${window.location.origin}/catalogo/tarde-noche`,
+    )
   })
 })
 

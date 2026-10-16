@@ -3,7 +3,7 @@ import { env } from '@/config/env'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useSeo } from '@/hooks/useSeo'
 
-const ACTUALIZADO = '28 de septiembre de 2026'
+const ACTUALIZADO = '16 de octubre de 2026'
 
 /**
  * Política de privacidad. Está escrita a partir de lo que la web hace de verdad:
@@ -38,6 +38,11 @@ export function PrivacyPage() {
               ni herramientas de analítica: no medimos por dónde navegas ni cuánto te quedas. Lo único que
               guardamos en tu navegador es la sesión del panel de administración, y eso solo ocurre si
               entras con usuario y contraseña, que es cosa nuestra, no tuya.
+            </p>
+            <p className="mt-3">
+              La página «Arma tu pedido» tiene preguntas, pero no es un formulario que nos llegue: con tus
+              respuestas escribe un mensaje de WhatsApp en tu propio navegador. No se guarda ni se envía
+              nada hasta que tú lo mandas desde WhatsApp.
             </p>
             <p className="mt-3">
               Como todo servidor, el que aloja esta web registra las peticiones que recibe, y ahí queda tu

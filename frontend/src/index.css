@@ -391,6 +391,70 @@
     .control-carrusel:hover { color: var(--color-ink); background-color: color-mix(in oklch, var(--color-oat) 55%, transparent); }
   }
 
+  /*
+   * «Arma tu pedido». Cada opción es una hojita de papel levantada sobre la hoja del pedido;
+   * la elegida se hunde (sin sombra) y toma el rojo, como un sello. El radio va escondido dentro
+   * (sr-only) y el foco se pinta en la hojita con :has().
+   */
+  .opcion {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border-radius: var(--radio-papel);
+    background-color: var(--color-silk);
+    background-image: var(--grano);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out), color 160ms var(--ease-out);
+  }
+  /* La sombra va en un ::after y solo se anima su opacidad: animar box-shadow repinta en cada fotograma. */
+  .opcion::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    box-shadow: var(--capa-1);
+    pointer-events: none;
+    transition: opacity 160ms var(--ease-out);
+  }
+  .opcion:has(:checked) {
+    background-color: var(--color-brand);
+    color: var(--color-silk);
+  }
+  .opcion:has(:checked)::after { opacity: 0; }
+  .opcion:has(:focus-visible) { outline: 2px solid var(--color-brand); outline-offset: 3px; }
+  .opcion:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    .opcion:not(:has(:checked)):hover { transform: translateY(-1px); }
+    /* Repetido aquí y con la misma especificidad que el hover: si no, al pulsar ganaba el hover y no se aplastaba. */
+    .opcion:not(:has(:checked)):active { transform: scale(0.97); }
+  }
+
+  /* Un renglón para escribir: papel claro con la línea de abajo marcada, que se vuelve roja al escribir. */
+  .campo {
+    display: block;
+    width: 100%;
+    min-height: 2.9rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--radio-papel) var(--radio-papel) 0 0;
+    border-bottom: 1px solid var(--color-ink-soft);
+    background-color: var(--color-silk);
+    background-image: var(--grano);
+    font-size: 1rem;
+    color: var(--color-ink);
+  }
+  /* El foco aparece al instante, sin transición: es la respuesta al teclado. */
+  .campo::placeholder { color: var(--color-ink-soft); opacity: 0.8; }
+  .campo:focus { border-color: var(--color-brand); box-shadow: inset 0 -2px 0 var(--color-brand); }
+  textarea.campo { min-height: 6.5rem; resize: vertical; line-height: 1.5; }
+
   /* Esqueleto de carga: la forma de lo que va a llegar, respirando despacio. */
   .esqueleto {
     background-color: var(--color-oat);
@@ -484,7 +548,7 @@
     transition-duration: 120ms !important;
   }
   /* «Capas»: sin desplazamientos al pasar ni al pulsar; se quedan los cambios de sombra y color. */
-  .boton:hover, .boton:active, .control-carrusel:active,
+  .boton:hover, .boton:active, .control-carrusel:active, .opcion:not(:has(:checked)):hover, .opcion:active,
   .group:hover .montada,
   .enlace-flecha:hover svg, .enlace-atras:hover svg { transform: none; }
   .separador:active, .separador:not([aria-pressed="true"]):hover { transform: translateY(4px); }

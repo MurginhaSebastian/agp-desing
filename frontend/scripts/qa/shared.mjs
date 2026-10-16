@@ -99,6 +99,7 @@ export const ANCHOS = [
 export const RUTAS_PUBLICAS = [
   { ruta: '/', nombre: 'portada' },
   { ruta: '/catalogo', nombre: 'catálogo' },
+  { ruta: '/pedido', nombre: 'arma tu pedido' },
   { ruta: '/privacidad', nombre: 'privacidad' },
   { ruta: '/terminos', nombre: 'términos' },
   { ruta: '/no-existe-esta-pagina', nombre: 'página no encontrada' },
