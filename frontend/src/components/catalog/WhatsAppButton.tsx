@@ -3,7 +3,7 @@ import { buildWhatsAppUrl } from '@/lib/whatsapp'
 import type { Product } from '@/types/product'
 
 interface Props {
-  product?: Pick<Product, 'name' | 'status'>
+  product?: Pick<Product, 'name' | 'slug' | 'status'>
   className?: string
   /**
    * primary: el botón principal (una hoja roja).
@@ -15,7 +15,7 @@ interface Props {
 
 /**
  * El "botón inteligente": no hay carrito. Abre WhatsApp con el mensaje
- * pre-llenado con el nombre de la pieza.
+ * pre-llenado con el nombre de la pieza y la dirección de su ficha.
  */
 export function WhatsAppButton({ product, className = '', variant = 'primary' }: Props) {
   const label = product?.status === 'SOLD' ? 'Pedir uno similar' : product ? 'Cotizar esta pieza' : 'Cotizar por WhatsApp'
