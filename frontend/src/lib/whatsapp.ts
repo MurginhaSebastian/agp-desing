@@ -10,8 +10,8 @@ export function enlaceWhatsApp(): string {
  * Enlace wa.me con el mensaje pre-llenado. El número es config pública.
  *
  * Con obra, el mensaje lleva la dirección de su ficha. En WhatsApp sirve de referencia: se abre
- * la obra exacta con un toque y se buscan todas sus consultas por esa dirección. Ojo: renombrar
- * la obra en el panel cambia su slug, y los mensajes viejos apuntan a la dirección anterior.
+ * la obra exacta con un toque y se buscan todas sus consultas por esa dirección. La dirección no
+ * cambia aunque se renombre la obra en el panel, así que los mensajes viejos siguen valiendo.
  */
 export function buildWhatsAppUrl(product?: Pick<Product, 'name' | 'slug'>): string {
   const text = product

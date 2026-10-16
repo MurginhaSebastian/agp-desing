@@ -7,6 +7,7 @@ import com.agpdesing.domain.repository.ProductRepository;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 
 /** POJO puro: se instancia en UseCaseConfig, no lleva @Service. */
 public class CreateProductUseCase {
@@ -26,9 +27,11 @@ public class CreateProductUseCase {
                 cmd.technique(), cmd.imageUrl(), cmd.status(), cmd.featured(), Instant.now(clock));
         // Comprobar y guardar juntos: si no, otra alta con el mismo nombre podía colarse en medio.
         return transacciones.enTransaccion(() -> {
-            if (products.findBySlug(product.slug()).isPresent()) {
-                throw new SlugAlreadyExistsException(product.slug());
+            List<Product> todas = products.findAll();
+            if (todas.stream().anyMatch(product::seLlamaComo)) {
+                throw new SlugAlreadyExistsException(Product.slugify(product.name()));
             }
+            product.elegirSlugLibre(slug -> todas.stream().anyMatch(o -> o.slug().equals(slug)));
             return products.save(product);
         });
     }

@@ -6,6 +6,7 @@ import java.text.Normalizer;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Entidad de dominio. Sin anotaciones de JPA ni Spring: las invariantes viven aquí
@@ -41,6 +42,7 @@ public final class Product {
         this.createdAt = Objects.requireNonNull(createdAt);
         this.updatedAt = Objects.requireNonNull(updatedAt);
         applyName(name);
+        this.slug = slugify(this.name);
         applyDescription(description);
         this.price = Objects.requireNonNull(price);
         applyDimensions(widthCm, heightCm);
@@ -68,6 +70,11 @@ public final class Product {
         return p;
     }
 
+    /**
+     * Cambia la ficha. El slug NO cambia aunque cambie el nombre: es la dirección pública de la obra
+     * (/catalogo/{slug}), y Google y los mensajes de WhatsApp ya la tienen guardada. Renombrar
+     * dejaba esos enlaces rotos.
+     */
     public void update(String name, String description, Money price, int widthCm, int heightCm,
                        String technique, String imageUrl, ProductStatus status, boolean featured, Instant now) {
         applyName(name);
@@ -79,6 +86,25 @@ public final class Product {
         this.status = Objects.requireNonNull(status);
         this.featured = featured;
         this.updatedAt = Objects.requireNonNull(now);
+    }
+
+    /**
+     * Mismo nombre a efectos del catálogo: iguales salvo mayúsculas, tildes y signos
+     * («Seda I» y «seda i» son la misma obra para quien las busca).
+     */
+    public boolean seLlamaComo(Product otra) {
+        return slugify(name).equals(slugify(otra.name));
+    }
+
+    /**
+     * Antes de guardar una obra nueva. Como el slug no cambia al renombrar, una obra renombrada
+     * conserva el de su nombre antiguo; si la nueva necesita ese mismo, toma «-2», «-3»…
+     */
+    public void elegirSlugLibre(Predicate<String> ocupado) {
+        String base = slugify(name);
+        String candidato = base;
+        for (int n = 2; ocupado.test(candidato); n++) candidato = base + "-" + n;
+        this.slug = candidato;
     }
 
     /** Cambiar solo el estado (por ejemplo, al registrar su venta), sin tocar el resto de la ficha. */
@@ -94,7 +120,6 @@ public final class Product {
         if (v.length() < 2) throw new DomainValidationException("name", "El nombre necesita al menos 2 caracteres");
         if (v.length() > NAME_MAX) throw new DomainValidationException("name", "Máximo " + NAME_MAX + " caracteres");
         this.name = v;
-        this.slug = slugify(v);
     }
 
     private void applyDescription(String value) {
@@ -123,7 +148,8 @@ public final class Product {
         this.imageUrl = UrlPublica.validar("imageUrl", value);
     }
 
-    static String slugify(String input) {
+    /** El slug que tendría una obra nueva con ese nombre. */
+    public static String slugify(String input) {
         String ascii = Normalizer.normalize(input, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
         String slug = ascii.toLowerCase(Locale.ROOT)
                 .replaceAll("[^a-z0-9]+", "-")

@@ -42,7 +42,11 @@ export function crearProductosDemo(alCambiar: () => void = () => {}): ProductosD
     },
     async create(dto) {
       const now = new Date().toISOString()
-      const p: Product = { ...dto, id: crypto.randomUUID(), slug: slugify(dto.name), createdAt: now, updatedAt: now }
+      // Igual que el backend: si el slug lo conserva una obra renombrada, se usa «-2», «-3»…
+      const base = slugify(dto.name)
+      let slug = base
+      for (let n = 2; almacen.some((x) => x.slug === slug); n++) slug = `${base}-${n}`
+      const p: Product = { ...dto, id: crypto.randomUUID(), slug, createdAt: now, updatedAt: now }
       almacen = [p, ...almacen]
       alCambiar()
       return structuredClone(p)
@@ -50,8 +54,8 @@ export function crearProductosDemo(alCambiar: () => void = () => {}): ProductosD
     async update(id, dto) {
       const i = almacen.findIndex((x) => x.id === id)
       if (i < 0) throw new Error('No encontrado')
-      const updated: Product = { ...almacen[i], ...dto, updatedAt: new Date().toISOString() }
-      if (dto.name) updated.slug = slugify(dto.name)
+      // El slug no cambia al renombrar: es la dirección pública de la obra (igual que en el backend).
+      const updated: Product = { ...almacen[i], ...dto, slug: almacen[i].slug, updatedAt: new Date().toISOString() }
       almacen[i] = updated
       alCambiar()
       return structuredClone(updated)

@@ -35,7 +35,7 @@ class AtomicidadTest {
     void altaEnUnaSolaTransaccion() {
         new CreateProductUseCase(repo, clock, tx).execute(command("Seda I"));
         assertEquals(1, tx.abiertas);
-        assertEquals(List.of("findBySlug", "save"), repo.llamadas);
+        assertEquals(List.of("findAll", "save"), repo.llamadas);
         assertTrue(repo.todoDentro, "cada llamada al repositorio dentro de la transacción");
     }
 
@@ -45,7 +45,7 @@ class AtomicidadTest {
                 "/a.jpg", ProductStatus.AVAILABLE, false, Instant.EPOCH));
         new UpdateProductUseCase(repo, clock, tx).execute(p.id(), command("Seda II"));
         assertEquals(1, tx.abiertas);
-        assertEquals(List.of("findById", "existsBySlugAndIdNot", "save"), repo.llamadas);
+        assertEquals(List.of("findById", "findAll", "save"), repo.llamadas);
         assertTrue(repo.todoDentro);
     }
 
@@ -80,7 +80,6 @@ class AtomicidadTest {
         @Override public Product save(Product p) { anotar("save"); return inner.save(p); }
         @Override public Optional<Product> findById(ProductId id) { anotar("findById"); return inner.findById(id); }
         @Override public Optional<Product> findBySlug(String slug) { anotar("findBySlug"); return inner.findBySlug(slug); }
-        @Override public boolean existsBySlugAndIdNot(String slug, ProductId id) { anotar("existsBySlugAndIdNot"); return inner.existsBySlugAndIdNot(slug, id); }
         @Override public List<Product> findAll() { anotar("findAll"); return inner.findAll(); }
         @Override public void deleteById(ProductId id) { anotar("deleteById"); inner.deleteById(id); }
     }

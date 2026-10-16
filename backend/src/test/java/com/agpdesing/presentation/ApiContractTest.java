@@ -248,7 +248,9 @@ class ApiContractTest {
             mvc.perform(json(put(ruta), CUERPO_VALIDO)).andExpect(status().isUnauthorized());
             mvc.perform(json(put(ruta), CUERPO_VALIDO).with(admin()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.slug").value("tarde-en-bordeaux"))
+                    // Renombrar no cambia la dirección pública: los enlaces viejos siguen valiendo.
+                    .andExpect(jsonPath("$.name").value("Tarde en Bordeaux"))
+                    .andExpect(jsonPath("$.slug").value("seda-i"))
                     .andExpect(jsonPath("$.createdAt").value("2026-09-21T10:00:00Z"));
             mvc.perform(json(put("/api/products/" + UUID.randomUUID()), CUERPO_VALIDO).with(admin()))
                     .andExpect(status().isNotFound());
@@ -646,9 +648,6 @@ class ApiContractTest {
         @Override public Optional<Product> findById(ProductId id) { return Optional.ofNullable(store.get(id)); }
         @Override public Optional<Product> findBySlug(String slug) {
             return store.values().stream().filter(p -> p.slug().equals(slug)).findFirst();
-        }
-        @Override public boolean existsBySlugAndIdNot(String slug, ProductId id) {
-            return store.values().stream().anyMatch(p -> p.slug().equals(slug) && !p.id().equals(id));
         }
         @Override public List<Product> findAll() { return new ArrayList<>(store.values()); }
         @Override public void deleteById(ProductId id) { store.remove(id); }

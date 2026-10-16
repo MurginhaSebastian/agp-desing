@@ -49,12 +49,15 @@ describe('productService en modo demo', () => {
     expect((await svc.list())[0].id).toBe(creada.id)
   })
 
-  it('editar el nombre rehace el slug; editar otra cosa lo deja', async () => {
+  it('editar no cambia el slug, ni siquiera al renombrar (los enlaces viejos siguen valiendo)', async () => {
     const creada = await svc.create(nuevo)
     expect((await svc.update(creada.id, { priceCents: 100 })).slug).toBe('nandu-en-accion')
     const renombrada = await svc.update(creada.id, { name: 'Otra Cosa' })
-    expect(renombrada.slug).toBe('otra-cosa')
+    expect(renombrada.name).toBe('Otra Cosa')
+    expect(renombrada.slug).toBe('nandu-en-accion')
     expect(renombrada.priceCents).toBe(100)
+    // Una obra nueva con el nombre antiguo no puede quitarle la dirección a la renombrada.
+    expect((await svc.create(nuevo)).slug).toBe('nandu-en-accion-2')
     await expect(svc.update('no-existe', {})).rejects.toThrow('No encontrado')
   })
 
