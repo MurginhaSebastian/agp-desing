@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useViewTransitionState } from 'react-router-dom'
+import { useFotoReducida } from '@/hooks/useFotoReducida'
 import { catalogNumber, formatDimensions, formatPrice } from '@/lib/format'
 import { fichaDeOrigen, haciaFicha } from '@/lib/navegacion'
 import { PRODUCT_STATUS_LABEL, type Product } from '@/types/product'
@@ -30,6 +31,8 @@ export function ProductCard({ product, index }: Props) {
    * como estimación, así el hueco ya está reservado y la página no da un salto.
    */
   const [ratio, setRatio] = useState(() => proporciones.get(product.id) ?? product.widthCm / product.heightCm)
+  // La copia reducida: la tarjeta se ve a unos cientos de píxeles y la original puede pesar MB.
+  const foto = useFotoReducida(product.imageUrl)
 
   /*
    * La foto viaja de esta tarjeta a la ficha (y de vuelta) con la transición del navegador.
@@ -58,10 +61,11 @@ export function ProductCard({ product, index }: Props) {
         <Link {...enlace} className="block mat p-[5%] pb-10" tabIndex={-1} aria-hidden="true">
           <figure className="relative bg-silk overflow-hidden" style={{ aspectRatio: String(ratio) }}>
             <img
-              src={product.imageUrl}
+              src={foto.src}
               alt={`${product.name} — ${product.technique}`}
               loading="lazy"
               decoding="async"
+              onError={foto.alFallar}
               onLoad={(e) => {
                 const img = e.currentTarget
                 if (img.naturalWidth > 0) {

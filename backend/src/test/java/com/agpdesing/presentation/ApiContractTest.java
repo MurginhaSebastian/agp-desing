@@ -714,7 +714,7 @@ class ApiContractTest {
         @Bean DeleteProductUseCase delete(Productos p) { return new DeleteProductUseCase(p, new TransaccionesDePrueba()); }
         @Bean GetSiteSettingsUseCase getSettings(Ajustes a) { return new GetSiteSettingsUseCase(a); }
         @Bean UpdateSiteSettingsUseCase updateSettings(Ajustes a) { return new UpdateSiteSettingsUseCase(a); }
-        @Bean UploadImageUseCase upload(Almacen a) { return new UploadImageUseCase(a, 5L * 1024 * 1024); }
+        @Bean UploadImageUseCase upload(Almacen a) { return new UploadImageUseCase(a, (img, o, ancho) -> Optional.empty(), 5L * 1024 * 1024); }
         @Bean SaveSaleUseCase saveSale(Ventas v, Productos p) { return new SaveSaleUseCase(v, p, clock, new TransaccionesDePrueba()); }
         @Bean QuerySalesUseCase querySales(Ventas v) { return new QuerySalesUseCase(v, new TransaccionesDePrueba()); }
         @Bean SalesSummaryUseCase salesSummary(Ventas v) { return new SalesSummaryUseCase(v); }
