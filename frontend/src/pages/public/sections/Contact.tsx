@@ -1,5 +1,6 @@
+import { Link } from 'react-router-dom'
 import { WhatsAppButton } from '@/components/catalog/WhatsAppButton'
-import { FlechaFuera } from '@/components/ui/iconos'
+import { FlechaDerecha, FlechaFuera } from '@/components/ui/iconos'
 import { Reveal } from '@/components/ui/Reveal'
 import { REDES } from '@/config/enlaces'
 
@@ -22,8 +23,12 @@ export function Contact() {
             <p className="text-lead mt-6 max-w-[42ch] text-silk/85">
               Escríbenos por WhatsApp con los detalles de tu idea, la pasión que quieres homenajear o el producto de nuestro catálogo que te interesó. Respondemos el mismo día para empezar a estructurar tu diseño.
             </p>
-            <div className="mt-10">
+            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
               <WhatsAppButton variant="on-dark" />
+              <Link to="/pedido" className="enlace-flecha !text-silk">
+                Armar mi pedido paso a paso
+                <FlechaDerecha size={18} />
+              </Link>
             </div>
           </div>
 

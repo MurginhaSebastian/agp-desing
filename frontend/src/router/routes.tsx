@@ -7,6 +7,7 @@ import { AdminSuspense, PublicLayout, Root } from '@/router/layouts'
 import { CatalogPage } from '@/pages/public/CatalogPage'
 import { HomePage } from '@/pages/public/HomePage'
 import { NotFoundPage } from '@/pages/public/NotFoundPage'
+import { PedidoPage } from '@/pages/public/PedidoPage'
 import { ProductDetailPage } from '@/pages/public/ProductDetailPage'
 import { ProtectedRoute } from '@/security/ProtectedRoute'
 
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
           { path: '/', element: <HomePage /> },
           { path: '/catalogo', element: <CatalogPage /> },
           { path: '/catalogo/:slug', element: <ProductDetailPage /> },
+          { path: '/pedido', element: <PedidoPage /> },
           { path: '/privacidad', element: <PrivacyPage /> },
           { path: '/terminos', element: <TermsPage /> },
           // Cualquier otra dirección: sin esto React Router enseña su error en inglés.
