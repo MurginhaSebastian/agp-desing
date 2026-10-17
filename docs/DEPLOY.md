@@ -1,14 +1,19 @@
 # Despliegue de AGP Desing
 
-Estado actual: **todo corre en local** salvo la base de datos, que ya está en Supabase.
-Esta guía es para el día que se decida publicar. Todo lo que hace falta ya está en el repo.
+Estado actual: **publicado** (oct. 2026) en `https://agp-desing.vercel.app`. Los pasos de abajo
+son los que se siguieron y sirven para rehacerlo o para mover una pieza de sitio.
 
 | Pieza | Dónde | Costo | Estado |
 |---|---|---|---|
-| Base de datos | Supabase (Postgres, São Paulo) | Gratis | ✅ en uso |
-| Backend Spring Boot | Render (web service Docker) | Gratis (duerme a los 15 min) | preparado: `backend/Dockerfile` |
-| Frontend Vite | Vercel (estático) | Gratis | preparado: `frontend/vercel.json` |
-| Keep-alive | GitHub Actions | Gratis | `.github/workflows/keep-alive.yml` |
+| Base de datos y fotos | Supabase (Postgres + Storage, São Paulo) | Gratis | ✅ en uso |
+| Backend Spring Boot | Render (web service Docker) | Gratis (duerme a los 15 min) | ✅ en uso |
+| Frontend Vite | Vercel (estático + dos funciones en `frontend/api/`) | Gratis | ✅ en uso |
+| Render despierto | Un ping externo cada 5 min (fuera del repo) | Gratis | ✅ en uso |
+| Supabase despierto | GitHub Actions, `.github/workflows/keep-alive.yml` | Gratis | ping diario |
+| Google | Search Console, propiedad `https://agp-desing.vercel.app/` | Gratis | ✅ verificada, sitemap enviado |
+
+Cómo llegan los cambios: se preparan en la rama `produccion`, se abre un pull request a `main` y
+**fusionarlo es publicar**. Vercel y Render redespliegan solos al recibir el commit en `main`.
 
 ## 0. Supabase (ya hecho)
 
@@ -67,7 +72,10 @@ Esta guía es para el día que se decida publicar. Todo lo que hace falta ya est
    la fila a mano: en Supabase → SQL Editor:
    `update admin_users set password_hash = '<hash>' where username = 'admin';`
 5. **Create Web Service**. La primera build tarda ~5 min. Probar: `curl https://<app>.onrender.com/api/products`.
-6. Activar el ping cada 10 min: `gh variable set BACKEND_URL --body https://<app>.onrender.com`.
+6. Mantenerlo despierto. Hoy lo hace un ping externo cada 5 min a la API (mejor a
+   `/api/products`, que además consulta Supabase). Alternativa dentro del repo: el job de Render
+   del workflow `keep-alive`, que se activa con
+   `gh variable set BACKEND_URL --body https://<app>.onrender.com` (no está puesta).
    Alternativa sin sueño: Railway Hobby (~US$5/mes), mismo Dockerfile.
 
 ## 1 bis. El almacén de fotos (Supabase Storage)
@@ -84,13 +92,16 @@ borra en cada despliegue). Una vez, a mano:
    `SUPABASE_SERVICE_KEY`, tanto en `backend/.env` (local) como en Render.
 
 Comprobación: subir una foto desde `/admin/cuadros/nuevo` y abrir la dirección que queda
-guardada. Debe responder la imagen, sin pedir permisos.
+guardada. Debe responder la imagen, sin pedir permisos. Con una foto JPG o PNG, al lado debe
+existir también su copia ligera: la misma dirección acabada en `.min.jpg` en vez de `.jpg`/`.png`.
 
 ## 2. Frontend en Vercel
 
 1. https://vercel.com → entrar con GitHub → **Add New → Project** → repo `agp-desing`.
 2. Root Directory `frontend` · Framework **Vite** (lo detecta) · Build `npm run build` · Output `dist`.
-3. Environment variable: `VITE_API_URL` = `https://<app>.onrender.com` (sin barra final).
+3. Environment variable: `VITE_API_URL` = `https://<app>.onrender.com` (sin barra final). La
+   leen también las funciones `api/sitemap.ts` y `api/obra.ts` al responder; sin ella el sitemap
+   sale solo con las páginas fijas y la vista previa de las obras, con el logo.
    Y `VITE_MAX_IMAGEN_MB` = `5`, el mismo número que `MAX_IMAGEN_MB` en Render: con dos números
    distintos, uno de los dos avisos mentiría.
    WhatsApp, Instagram y TikTok ya van por defecto en `src/config/env.ts`.
@@ -108,9 +119,30 @@ curl -X OPTIONS https://<app>.onrender.com/api/products \
 ```
 Abrir la web, entrar en `/admin/login` con la clave de producción, crear un cuadro, verlo en el catálogo.
 
+## 4. Google y la vista previa al compartir
+
+- **Search Console**: propiedad de tipo «Prefijo de la URL», verificada con
+  `frontend/public/google*.html` (no borrarlo: si desaparece, Google retira la verificación).
+  Sitemap enviado: `sitemap.xml`. Indexación y errores, en **Páginas** y **Sitemaps**.
+- **Comprobar el sitemap**: `curl https://agp-desing.vercel.app/sitemap.xml` debe dar XML con las
+  páginas fijas y una línea por obra.
+- **Comprobar la vista previa de una obra** como la ve WhatsApp:
+  `curl -A "WhatsApp/2.23" https://agp-desing.vercel.app/catalogo/<slug> | grep og:image`.
+  WhatsApp guarda las vistas previas un tiempo: para probar un cambio, compartir el enlace con
+  `?v=1` al final.
+
+## Si llega un dominio propio
+
+1. Apuntarlo en Vercel (Settings → Domains).
+2. Render → `CORS_ALLOWED_ORIGIN` = el dominio nuevo, exacto y sin barra final → **Manual Deploy**.
+3. Cambiar `agp-desing.vercel.app` por el dominio en `frontend/public/robots.txt` (línea
+   `Sitemap:`) y en las etiquetas `og:url` y `og:image` de `frontend/index.html`. El sitemap, las
+   direcciones canónicas y la vista previa de cada obra toman el dominio de la propia petición.
+4. Search Console: añadir el dominio nuevo como propiedad, verificarlo y enviar otra vez el sitemap.
+
 ## Después
 
-- Cada `git push` a `main` redespliega Render y Vercel automáticamente.
+- Cada commit que llega a `main` (al fusionar un pull request) redespliega Render y Vercel.
 - Rotar la clave del admin: generar hash nuevo y hacer el `update admin_users …` en Supabase.
 - Rotar `JWT_SECRET`: cambiarlo en Render; invalida las sesiones abiertas, nada más.
 - Los crons de GitHub Actions se desactivan tras 60 días sin commits en repos públicos:

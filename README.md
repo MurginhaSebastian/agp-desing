@@ -4,7 +4,7 @@ Catálogo web de un taller peruano de regalos personalizados: cuadros 3D y boxes
 por encargo. La web enseña el trabajo y abre la conversación por WhatsApp; el dueño publica y
 edita las piezas desde un panel propio, sin tocar código.
 
-Trujillo, La Libertad · Perú
+Trujillo, La Libertad · Perú · [agp-desing.vercel.app](https://agp-desing.vercel.app)
 
 ![La portada de AGP Desing](docs/portada.png)
 
@@ -14,11 +14,17 @@ Trujillo, La Libertad · Perú
 
 **Para quien visita**
 
-- Una portada editorial, con el titular como pieza principal y una imagen opcional al lado.
+- Una portada editorial, con el titular como pieza principal y, al lado, un carrusel con la
+  imagen de portada y las obras más recientes.
 - El catálogo, montado como una pared de galería: alturas escalonadas y la ficha debajo de cada
   pieza, como en una exposición. Cada foto se ve entera, con su propia proporción.
 - La ficha de cada pieza, con medidas, formato, precio de referencia y un botón que abre WhatsApp
-  con el mensaje ya escrito.
+  con el mensaje ya escrito y el enlace de la obra.
+- **Arma tu pedido** (`/pedido`): ocasión, pieza, tamaño, lo que va escrito, la idea, la entrega
+  y la fecha. Al final se abre WhatsApp con el pedido entero escrito. No hay carrito: la venta se
+  cierra en el chat. Desde una ficha, «Personalizar este diseño» abre el pedido con esa obra.
+- Al compartir el enlace de una obra por WhatsApp o Facebook, la vista previa enseña su foto y su
+  nombre.
 - Páginas de privacidad y de términos, redactadas para la normativa peruana (Ley 29733 y el
   Código de Protección y Defensa del Consumidor).
 
@@ -28,6 +34,15 @@ Trujillo, La Libertad · Perú
 - **Subir las fotos desde el ordenador**, sin pasar por ningún sitio de terceros: se elige el
   archivo, se ve al momento y queda publicado.
 - Cambiar la imagen de la portada, o dejarla sin imagen y que quede solo el titular.
+- Apuntar las ventas que se cierran por WhatsApp (cliente, adelanto, saldo, estado), ver el
+  resumen del mes y exportarlo a Excel. Las ventas no se ven nunca en la web pública.
+
+**Para que la encuentren**
+
+- Sitemap automático con todas las obras, título y descripción propios en cada página y datos
+  para Google (schema.org). Cada obra nueva entra sola, sin tocar código.
+- Renombrar una obra no cambia su dirección: los enlaces que ya están en Google y en los chats
+  siguen funcionando.
 
 ## Cómo está hecho
 
@@ -125,6 +140,10 @@ teléfono— sin tocar los píxeles. La anotación de giro sí se conserva, o la
 saldrían tumbadas. Se aceptan JPG, PNG y WebP, reconocidos por sus primeros bytes y no por el
 nombre del archivo.
 
+**El catálogo carga copias ligeras.** Al lado de cada foto JPG o PNG, el servidor guarda una copia
+de 1200 px de ancho. Las tarjetas, el carrusel y la vista previa de WhatsApp usan esa copia; la
+ficha y la ampliación, la original. Si una foto no tiene copia, la web usa la original sin más.
+
 **Ningún tercero de más.** Las tipografías se sirven desde el propio sitio. No hay analítica ni
 cookies de publicidad, y por eso tampoco hace falta un aviso de cookies. Lo único que el
 navegador del visitante pide fuera son las fotos, alojadas en el mismo proveedor que la base de
@@ -135,8 +154,13 @@ claves. El repositorio solo lleva valores de ejemplo.
 
 ## Estado
 
-La web y el panel funcionan de punta a punta contra Supabase. El despliegue está preparado y
-documentado, pero todavía no publicado.
+Publicada desde octubre de 2026: la web en Vercel y la API en Render, con los datos en Supabase.
+Indexada en Google (Search Console verificada y sitemap enviado). Los cambios se preparan en la
+rama `produccion` y llegan a `main` por pull request; fusionar es publicar.
+
+Pendiente: las fotos reales de las obras, el logo con fondo transparente y, más adelante, un
+dominio propio. Detalle en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) y
+[`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ---
 

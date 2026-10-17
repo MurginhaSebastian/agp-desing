@@ -2,6 +2,12 @@
 
 > **Plan original (sept. 2026).** La estructura actual, los patrones y cómo añadir un recurso
 > nuevo están en [`ARQUITECTURA.md`](ARQUITECTURA.md); los árboles de abajo son el punto de partida.
+>
+> **Estado (oct. 2026):** las fases 0 a 6 están hechas, y de la 7 todo salvo la integración
+> continua (no hay un workflow que compile y pruebe en cada push; se hace a mano con `mvnw test`,
+> `npm test`, `npm run qa` y `npm run seg`). La web está publicada (ver
+> [`DEPLOY.md`](DEPLOY.md)). Lo añadido después (módulo de ventas, Google, WhatsApp, Arma tu
+> pedido, fotos ligeras) está descrito en `ARQUITECTURA.md`.
 
 Fuente: el encargo inicial (`docs/PROMPT-MAESTRO.md`, retirado en oct. 2026; sigue en el historial de git). Stack: React 19 + TypeScript + Vite 8 + Tailwind v4 (frontend) · Java 21 + Spring Boot 3.3 + PostgreSQL (backend). Clean Architecture en ambos lados.
 
