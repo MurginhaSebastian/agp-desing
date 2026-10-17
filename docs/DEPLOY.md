@@ -8,7 +8,7 @@ son los que se siguieron y sirven para rehacerlo o para mover una pieza de sitio
 | Base de datos y fotos | Supabase (Postgres + Storage, São Paulo) | Gratis | ✅ en uso |
 | Backend Spring Boot | Render (web service Docker) | Gratis (duerme a los 15 min) | ✅ en uso |
 | Frontend Vite | Vercel (estático + dos funciones en `frontend/api/`) | Gratis | ✅ en uso |
-| Render despierto | Un ping externo cada 5 min (fuera del repo) | Gratis | ✅ en uso |
+| Render despierto | Pinger externo cada 5 min (cron-job.org) | Gratis | ✅ en uso |
 | Supabase despierto | GitHub Actions, `.github/workflows/keep-alive.yml` | Gratis | ping diario |
 | Google | Search Console, propiedad `https://agp-desing.vercel.app/` | Gratis | ✅ verificada, sitemap enviado |
 
@@ -21,8 +21,8 @@ Cómo llegan los cambios: se preparan en la rama `produccion`, se abre un pull r
   usuario `postgres.<ref>`, `?sslmode=require`). No usar el Transaction pooler (6543): rompe los
   prepared statements de JDBC. La conexión directa es solo IPv6 y Render sale por IPv4.
 - Las tablas las crea Flyway. `V3__enable_rls.sql` activa RLS para que la API REST de Supabase
-  (clave anon) no vea nada. Además, en el dashboard: **Project Settings → API → Exposed schemas**,
-  quitar `public`.
+  (clave anon) no vea nada. Además, en el dashboard: **Project Settings → API → Exposed schemas**
+  (en el panel nuevo está bajo **Data API**), quitar `public`.
 - El plan gratis pausa el proyecto tras 7 días sin actividad; el workflow `keep-alive` le hace
   un ping diario. Si aun así se pausa: dashboard → **Restore project**.
 
@@ -44,7 +44,7 @@ Cómo llegan los cambios: se preparan en la rama `produccion`, se abre un pull r
    | `ADMIN_USERNAME` | `admin` |
    | `ADMIN_PASSWORD_HASH` | hash bcrypt de una clave **nueva** de producción: `docker run --rm httpd:alpine htpasswd -bnBC 12 "" 'clave' \| tr -d ':\n'` |
    | `CORS_ALLOWED_ORIGIN` | de momento `https://agp-desing.vercel.app`; se corrige en el paso 2 con la URL real |
-   | `TRUSTED_PROXY_HOPS` | cuántos proxies propios hay delante de la app. **Hay que ponerlo** (ver aviso abajo) |
+   | `TRUSTED_PROXY_HOPS` | número de proxies propios delante de la app. En Render es `1`, confirmado (ver aviso abajo) |
    | `SUPABASE_URL` | `https://<ref>.supabase.co` — el mismo identificador que ya aparece en `DB_USER` |
    | `SUPABASE_SERVICE_KEY` | la clave **secreta** de Supabase (Settings → API). Da acceso total a la base de datos: solo aquí y en `backend/.env`, nunca en Vercel ni en el código |
    | `SUPABASE_BUCKET` | `productos` |
@@ -58,11 +58,10 @@ Cómo llegan los cambios: se preparan en la rama `produccion`, se abre un pull r
    misma IP** (la del proxy) y cinco intentos fallidos de cualquiera dejarían al dueño sin poder
    entrar a su propio panel durante un minuto.
 
-   El valor correcto es el número de proxies propios, que casi siempre es `1`, pero **hay que
-   confirmarlo tras el primer despliegue** en vez de darlo por hecho: registrar una vez el
-   contenido de `X-Forwarded-For` en una petición real y contar cuántas IPs trae. Si trae una
-   sola, el valor es `1`. Con el número bien puesto, `ClientIpResolver` toma la IP que escribió
-   el proxio contando desde la derecha, que es la única que no puede falsear el visitante.
+   El valor correcto es el número de proxies propios. En Render es `1`, **confirmado**: al falsear
+   `X-Forwarded-For` en una ráfaga contra el login de producción, los intentos siguieron contando
+   como 429 (no se saltó el freno). Con el número bien puesto, `ClientIpResolver` toma la IP que
+   escribió el proxy contando desde la derecha, que es la única que no puede falsear el visitante.
 
    Comprobación después: `npm run seg:login` contra la URL de producción
    (`QA_API=https://<app>.onrender.com`) debe dar el 429 a partir del sexto intento.
@@ -72,11 +71,15 @@ Cómo llegan los cambios: se preparan en la rama `produccion`, se abre un pull r
    la fila a mano: en Supabase → SQL Editor:
    `update admin_users set password_hash = '<hash>' where username = 'admin';`
 5. **Create Web Service**. La primera build tarda ~5 min. Probar: `curl https://<app>.onrender.com/api/products`.
-6. Mantenerlo despierto. Hoy lo hace un ping externo cada 5 min a la API (mejor a
-   `/api/products`, que además consulta Supabase). Alternativa dentro del repo: el job de Render
-   del workflow `keep-alive`, que se activa con
-   `gh variable set BACKEND_URL --body https://<app>.onrender.com` (no está puesta).
-   Alternativa sin sueño: Railway Hobby (~US$5/mes), mismo Dockerfile.
+6. Mantenerlo despierto (si no, duerme a los 15 min y la primera visita espera ~40 s). Lo hace un
+   **pinger externo cada 5 min** (cron-job.org) a `/api/products`, que además toca Supabase. Ojo:
+   cron-job.org no dispara hasta que verificas el correo de la cuenta; la prueba es su Historial de
+   ejecuciones con códigos 200. El workflow `keep-alive` del repo **también** pinga Render cada
+   10 min porque `BACKEND_URL` ya está puesta (`gh variable set BACKEND_URL --body https://<app>.onrender.com`),
+   pero GitHub retrasa esos crons y los apaga tras 60 días sin commits, así que no basta por sí
+   solo. El plan gratis de Render da 750 horas-instancia al mes: justo para **un** servicio siempre
+   encendido (un segundo se pasaría del cupo). Alternativa sin sueño: Railway Hobby (~US$5/mes),
+   mismo Dockerfile.
 
 ## 1 bis. El almacén de fotos (Supabase Storage)
 
@@ -88,8 +91,9 @@ borra en cada despliegue). Una vez, a mano:
    `image/png`, `image/webp`. Es la segunda red, además de la del backend.
 3. Storage → **Policies**: comprobar que `anon` **no** tiene permiso de escritura. El backend
    sube con la clave secreta, que se salta las políticas; nadie más debe poder escribir.
-4. Settings → **API** → copiar la clave secreta (`service_role` o `sb_secret_…`) en
-   `SUPABASE_SERVICE_KEY`, tanto en `backend/.env` (local) como en Render.
+4. Settings → **API** → copiar la clave secreta (`service_role` o `sb_secret_…`; en el panel nuevo,
+   pestaña **Legacy anon, service_role API keys**) en `SUPABASE_SERVICE_KEY`, tanto en
+   `backend/.env` (local) como en Render.
 
 Comprobación: subir una foto desde `/admin/cuadros/nuevo` y abrir la dirección que queda
 guardada. Debe responder la imagen, sin pedir permisos. Con una foto JPG o PNG, al lado debe
@@ -104,7 +108,10 @@ existir también su copia ligera: la misma dirección acabada en `.min.jpg` en v
    sale solo con las páginas fijas y la vista previa de las obras, con el logo.
    Y `VITE_MAX_IMAGEN_MB` = `5`, el mismo número que `MAX_IMAGEN_MB` en Render: con dos números
    distintos, uno de los dos avisos mentiría.
-   WhatsApp, Instagram y TikTok ya van por defecto en `src/config/env.ts`.
+   Los contactos (`VITE_WHATSAPP_NUMBER`, `VITE_CONTACT_EMAIL`, `VITE_INSTAGRAM_URL`,
+   `VITE_TIKTOK_URL`) también van aquí, como tipo **Config** (no Secreto): son públicos y se hornean
+   en el bundle al construir, así que cambiarlos exige un redespliegue. Sin ellos la web sale con
+   los contactos de ejemplo (el aviso del banner).
 4. **Deploy** → anotar la URL (`https://agp-desing-xxxx.vercel.app`).
 5. Volver a Render → `CORS_ALLOWED_ORIGIN` = esa URL exacta (sin barra final) → **Manual Deploy**.
    Con dominio propio: apuntarlo en Vercel y poner ese dominio en `CORS_ALLOWED_ORIGIN`.
@@ -112,7 +119,7 @@ existir también su copia ligera: la misma dirección acabada en `.min.jpg` en v
 ## 3. Comprobar
 
 ```bash
-curl https://<app>.onrender.com/api/products                                   # 200 []
+curl https://<app>.onrender.com/api/products                                   # 200 con las obras
 curl -X OPTIONS https://<app>.onrender.com/api/products \
   -H "Origin: https://<front>.vercel.app" -H "Access-Control-Request-Method: GET" -D - -o /dev/null
 # → Access-Control-Allow-Origin: https://<front>.vercel.app

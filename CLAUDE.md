@@ -49,7 +49,7 @@ Para conectar el front al back: `frontend/.env` con `VITE_API_URL=http://localho
 
 Las fotos del panel se suben a **Supabase Storage** (`POST /api/imagenes`), no al disco: en Render se borraría en cada despliegue. Hace falta el bucket público `productos` y `SUPABASE_URL`/`SUPABASE_SERVICE_KEY` en `backend/.env` (ver `docs/DEPLOY.md`). Sin eso la web funciona igual y solo la subida responde «no está configurado».
 
-La base de datos real está en **Supabase** (Session pooler, ver `docs/DEPLOY.md`); el Postgres de `docker compose` es solo respaldo local. **Producción está publicada**: la web en Vercel (`https://agp-desing.vercel.app`, desde `main`) y el backend en Render, con datos reales de Supabase. Un ping externo cada 5 min mantiene despierto a Render (la variable `BACKEND_URL` del workflow no está puesta). Los cambios van a la rama `produccion` y llegan a `main` por pull request, que fusiona el usuario: fusionar es publicar.
+La base de datos real está en **Supabase** (Session pooler, ver `docs/DEPLOY.md`); el Postgres de `docker compose` es solo respaldo local. **Producción está publicada**: la web en Vercel (`https://agp-desing.vercel.app`, desde `main`) y el backend en Render, con datos reales de Supabase. Un pinger externo cada 5 min (cron-job.org) mantiene despierto a Render; el workflow `keep-alive` también lo pinga porque `BACKEND_URL` está puesta, pero los crons de GitHub no son fiables (se retrasan y se apagan tras 60 días sin commits). Los cambios van a la rama `produccion` y llegan a `main` por pull request, que fusiona el usuario: fusionar es publicar.
 
 ## Reglas de diseño (frontend)
 
@@ -118,8 +118,8 @@ Mapa completo, patrones y recetas en `docs/ARQUITECTURA.md`.
   pase; si da un falso positivo, se arregla el control y se anota en
   `.claude/skills/security-audit/TRAMPAS.md`.
 - El freno del login cuenta por IP **de la conexión**. `X-Forwarded-For` solo se lee cuando
-  `TRUSTED_PROXY_HOPS` dice cuántos proxies propios hay delante (0 en local; en Render, el número
-  de proxies, que hay que confirmar tras desplegar — ver `docs/DEPLOY.md`):
+  `TRUSTED_PROXY_HOPS` dice cuántos proxies propios hay delante (0 en local; en Render es `1`,
+  confirmado con la prueba de falsear `X-Forwarded-For` — ver `docs/DEPLOY.md`):
   esa cabecera la escribe quien llama y falsearla saltaba el freno por completo.
 - Cabeceras de la web en `frontend/vercel.json`; las de la API, en el bloque `.headers(...)` de
   `SecurityConfig`. En la CSP, nunca `unsafe-eval` ni `unsafe-inline` en `script-src`. Al tocar la
