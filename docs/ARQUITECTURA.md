@@ -24,9 +24,9 @@ domain  ←  application  ←  presentation
 | Capa | Qué hay | Qué no puede importar |
 |---|---|---|
 | `domain/` | `Product`, `Money`, `SiteSettings`, `UrlPublica`; puertos de repositorio; `DomainException` y sus hijas | Spring, JPA, validación, Jackson, JJWT, servlets, bucket4j |
-| `application/` | casos de uso (POJOs); puertos de salida (`ImageStorage`, `TokenProvider`, `PasswordHasher`, `Transacciones`); `ApplicationException` y sus hijas; limpieza de fotos | lo mismo |
+| `application/` | casos de uso (POJOs); puertos de salida (`ImageStorage`, `ReductorDeImagen`, `TokenProvider`, `PasswordHasher`, `Transacciones`); `ApplicationException` y sus hijas; limpieza de fotos | lo mismo |
 | `presentation/` | controladores REST, DTOs, mappers, `GlobalExceptionHandler`, frenos de peticiones | `infrastructure` |
-| `infrastructure/` | JPA, Spring Security + JWT, Supabase Storage, `UseCaseConfig` (cablea los casos de uso) | — |
+| `infrastructure/` | JPA, Spring Security + JWT, Supabase Storage, la copia reducida de las fotos (`imagen/ReductorImageIO`), `UseCaseConfig` (cablea los casos de uso) | — |
 
 ### Patrones y dónde están
 
@@ -68,12 +68,13 @@ el panel pinta bajo cada casilla.
 ## Frontend (React 19 + TypeScript + Vite)
 
 ```
+api/             funciones de Vercel: sitemap.ts (/sitemap.xml) y obra.ts (vista previa al compartir)
 src/
 ├── config/      env.ts (variables VITE_*), enlaces.ts (menú, pie y redes, una sola vez)
-├── types/       contratos con el backend: product.ts ↔ ProductResponse.java, settings.ts ↔ SiteSettingsResponse.java
+├── types/       contratos con el backend: product.ts ↔ ProductResponse.java, settings.ts ↔ SiteSettingsResponse.java, sale.ts
 ├── services/    contratos.ts · demo/ · remoto/ · servicios.ts · http.ts
-├── hooks/       useProducts (con caché), useSettings, useRecurso, usePageTitle, useAuth
-├── lib/         format, whatsapp, errores, navegacion, movimiento, sonido
+├── hooks/       useProducts (con caché), useSettings, useRecurso, usePageTitle, useSeo, useFotoReducida, useAuth
+├── lib/         format, whatsapp, pedido, fotos, errores, navegacion, movimiento, sonido, dinero, fechas
 ├── security/    AuthContext, ProtectedRoute, tokenStorage
 ├── components/  ui/ · layout/ · catalog/ · admin/
 └── pages/       public/ (y sections/) · admin/
@@ -136,6 +137,39 @@ recetas de arriba, de punta a punta.
   `VentaEditPage` y `VentaForm`. Importes con `formatSoles` (céntimos incluidos, a diferencia de
   `formatPrice`, que redondea al sol) y fechas con `lib/fechas.ts` (siempre hora de Lima).
 
+## Google, WhatsApp y fotos ligeras (oct. 2026)
+
+Lo que se añadió con la web ya publicada. Todo funciona solo con cada obra nueva que se sube desde
+el panel.
+
+- **Google.** Cada página pública llama a `useSeo` (descripción, dirección canónica, `noindex` y
+  datos schema.org); el título sigue en `usePageTitle`. La ficha lleva datos de producto **sin
+  precio**: los términos dicen que los precios son referenciales. La 404 y las obras que no
+  existen llevan `noindex`, porque Vercel responde 200 a cualquier dirección.
+- **Sitemap.** `api/sitemap.ts` pide las obras a la API (`VITE_API_URL`) y arma `/sitemap.xml` con
+  las páginas fijas y una línea por obra; `vercel.json` le reescribe la dirección. Si Render no
+  responde, devuelve 503 para que Google vuelva luego, nunca un sitemap a medias. `robots.txt`
+  apunta a él con la dirección completa.
+- **Vista previa al compartir.** `index.html` lleva la tarjeta general (`og.jpg`, el logo). Para
+  `/catalogo/:slug`, una regla con `has` en `vercel.json` manda a `api/obra.ts` solo a los robots de
+  vista previa (WhatsApp, Facebook, Telegram…, por su user-agent; nunca a Google), que reciben una
+  página mínima con la foto, el nombre y la descripción de esa obra.
+- **El slug no cambia al renombrar.** Se fija al crear la obra (`Product.update` ya no lo toca).
+  Dos obras siguen sin poder llamarse igual, pero se comparan los nombres (`seLlamaComo`); si el
+  slug de una obra nueva lo conserva una renombrada, toma `-2`, `-3`… (`elegirSlugLibre`).
+- **WhatsApp.** `lib/whatsapp.ts` escribe el mensaje de «Cotizar» (con la dirección de la obra
+  como referencia). `lib/pedido.ts` arma el de «Arma tu pedido» (`PedidoPage`): solo ocasión y
+  pieza son obligatorias, nada se guarda en la web y el mensaje sale cuando lo envía el cliente.
+  Desde la ficha se llega con `/pedido?obra=<slug>`. La página usa dos piezas propias del sistema
+  Capas: `.opcion` (hojita que se hunde al elegirla) y `.campo` (renglón para escribir).
+- **Fotos ligeras.** Al subir una foto, `UploadImageUseCase` guarda la original igual que antes y,
+  al lado, `<uuid>.min.jpg`: 1200 px de ancho, la orientación del celular aplicada a los píxeles
+  (`ReductorDeImagen` → `ReductorImageIO`, ImageIO de Java, sin librerías). Si no se puede hacer
+  (WebP, que Java no lee) o falla, la subida sigue. En la web, `fotoReducida` deduce la dirección
+  de la copia y `useFotoReducida` vuelve a la original si no carga. La usan las tarjetas, el
+  carrusel y `api/obra.ts` (que antes comprueba que exista); la ficha y la ampliación usan la
+  original.
+
 ## Cómo se comprueba que nada se rompe
 
 | Qué | Comando | Qué mira |
@@ -170,3 +204,10 @@ aprobado:
   Arreglarlo del todo exigiría guardar las medidas en píxeles de cada foto en la base de datos.
 - Cuando la base de datos rechaza un nombre repetido, Hibernate escribe una línea `ERROR` en el log
   aunque la respuesta sea un 409 correcto.
+- **Las fotos subidas antes del 17 oct. 2026 no tienen copia ligera.** La web las enseña igual (cae
+  a la original tras un intento fallido con la copia). Para que carguen ligeras hay que volver a
+  subir su foto desde el panel.
+- **`npm run qa:muerto` no revisa nada en Linux** (sí en Windows): `scripts/qa/muerto.mjs` quita la
+  primera `/` de la ruta del proyecto, pensado para rutas de Windows, y en Linux deja una ruta
+  relativa que no existe. El propio control lo avisa («no revisó nada»), así que no da por bueno lo
+  que no ha mirado.
