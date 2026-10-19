@@ -75,4 +75,33 @@ class ClientIpResolverTest {
         var resolver = new ClientIpResolver(-5);
         assertThat(resolver.resolve(peticion("203.0.113.9", "1.2.3.4"))).isEqualTo("203.0.113.9");
     }
+
+    @Test
+    @DisplayName("sin IP de conexión (null), se devuelve «desconocida» en vez de fallar")
+    void sinIpDeConexion() {
+        assertThat(new ClientIpResolver(0).resolve(peticion(null, "1.2.3.4"))).isEqualTo("desconocida");
+        assertThat(new ClientIpResolver(1).resolve(peticion(null, null))).isEqualTo("desconocida");
+        assertThat(new ClientIpResolver(1).resolve(peticion(null, ", "))).isEqualTo("desconocida");
+    }
+
+    @Test
+    @DisplayName("quita los espacios alrededor de la IP elegida")
+    void quitaEspacios() {
+        assertThat(new ClientIpResolver(1).resolve(peticion("10.0.0.1", "1.1.1.1 ,   198.51.100.7  ")))
+                .isEqualTo("198.51.100.7");
+    }
+
+    @Test
+    @DisplayName("si el valor que escribió el proxy viene vacío, se usa la IP de la conexión y no el de al lado")
+    void valorDelProxyVacio() {
+        // «1.1.1.1,,10.0.0.2» con dos proxies: la posición que toca está vacía.
+        assertThat(new ClientIpResolver(2).resolve(peticion("10.0.0.1", "1.1.1.1,,10.0.0.2"))).isEqualTo("10.0.0.1");
+    }
+
+    @Test
+    @DisplayName("varios proxies de confianza: se salta exactamente ese número desde la derecha")
+    void tresProxies() {
+        assertThat(new ClientIpResolver(3).resolve(peticion("10.0.0.1", "9.9.9.9, 198.51.100.7, 10.0.0.2, 10.0.0.3")))
+                .isEqualTo("198.51.100.7");
+    }
 }
