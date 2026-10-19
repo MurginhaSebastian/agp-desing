@@ -7,10 +7,10 @@ Estado de las pruebas automáticas y qué cubren. Auditoría y ampliación en tr
 | | Antes | Después | Añadido |
 |---|---|---|---|
 | **Frontend** (Vitest, modo demo) | 76 casos / 20 archivos | **162 casos / 30 archivos** | +86 casos |
-| **Backend** (JUnit, sin BD) | 132 `@Test` / 15 clases | **263 `@Test` / 23 clases** | +131 métodos |
+| **Backend** (JUnit, sin BD) | 132 `@Test` / 15 clases | **264 `@Test` / 23 clases** | +132 métodos |
 
-La suite backend completa ejecuta **310** pruebas (los parametrizados y ArchUnit expanden `@Test`):
-`.\mvnw.cmd test` → `Tests run: 310, Failures: 0` / BUILD SUCCESS.
+La suite backend completa ejecuta **311** pruebas (los parametrizados y ArchUnit expanden `@Test`):
+`.\mvnw.cmd test` → `Tests run: 311, Failures: 0` / BUILD SUCCESS.
 
 Además, sin contar aquí: `CleanArchitectureTest` (ArchUnit, verifica la regla de dependencias) y
 `ApiContractTest` (contrato HTTP del backend).
@@ -123,14 +123,16 @@ porque `vite.config.ts` solo incluye `src/**/*.test.*`; importan `../../api/...`
 - El 401 solo cierra la sesión si la petición lleva `auth: true`; un 401 en el login **no** dispara
   `unauthorizedEvent`, a propósito.
 
-### Observaciones latentes del backend (sin arreglar, a decisión del dueño)
-- `SalesSummaryUseCase.masVendido` usa `item().toLowerCase()` sin `Locale`: en un servidor con locale
-  turco, «Seda I» y «seda i» dejarían de agruparse. Debería ser `Locale.ROOT`, como `Product.slugify`.
-  Impacto real nulo (el servidor no está en turco); fix de una línea cuando se quiera.
-- `GlobalExceptionHandler` responde a **cualquier** 415 con el mensaje de la subida de fotos («La
-  petición no llegó como un envío de archivo»). Es un texto poco preciso, no un fallo.
-- Los dobles en memoria de los tests mutan el objeto guardado al hacer `Product.update`, así que la
-  atomicidad de una edición a medias solo la garantiza el rollback real de JPA, no los dobles.
+### Observaciones del backend
+- **Arreglado** — `SalesSummaryUseCase.masVendido` agrupa ahora con `toLowerCase(Locale.ROOT)`, así no
+  depende del locale del servidor (en turco «Seda I» y «seda i» dejarían de agruparse), igual que
+  `Product.slugify`.
+- **Arreglado** — el 415 ya no responde siempre con el mensaje de subida de archivo: dice qué tipo de
+  contenido se esperaba (multipart en `/api/imagenes`, JSON en el resto). Con sus pruebas en
+  `ApiContractTest` (`sinFormularioEs415`, `el415DeOtroEndpointDaSuPropioTipoNoElDeArchivo`).
+- Se deja a conciencia: los dobles en memoria de los tests mutan el objeto al hacer `Product.update`,
+  así que la atomicidad de una edición a medias solo la garantiza el rollback real de JPA, no los
+  dobles. No es un bug de producción.
 
 ## Huecos pendientes
 
