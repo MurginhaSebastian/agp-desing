@@ -1,13 +1,16 @@
 # Pruebas de AGP Desing
 
-Estado de las pruebas automáticas y qué cubren. Auditoría y ampliación en dos tandas, octubre de 2026.
+Estado de las pruebas automáticas y qué cubren. Auditoría y ampliación en tres tandas, octubre de 2026.
 
 ## Resumen
 
 | | Antes | Después | Añadido |
 |---|---|---|---|
-| **Frontend** (Vitest, modo demo) | 76 casos / 20 archivos | **147 casos / 29 archivos** | +71 casos |
-| **Backend** (JUnit, sin BD) | 132 `@Test` / 15 clases | **189 `@Test` / 20 clases** | +57 métodos |
+| **Frontend** (Vitest, modo demo) | 76 casos / 20 archivos | **162 casos / 30 archivos** | +86 casos |
+| **Backend** (JUnit, sin BD) | 132 `@Test` / 15 clases | **263 `@Test` / 23 clases** | +131 métodos |
+
+La suite backend completa ejecuta **310** pruebas (los parametrizados y ArchUnit expanden `@Test`):
+`.\mvnw.cmd test` → `Tests run: 310, Failures: 0` / BUILD SUCCESS.
 
 Además, sin contar aquí: `CleanArchitectureTest` (ArchUnit, verifica la regla de dependencias) y
 `ApiContractTest` (contrato HTTP del backend).
@@ -95,21 +98,45 @@ porque `vite.config.ts` solo incluye `src/**/*.test.*`; importan `../../api/...`
     por tres honestas: hasta 500 vale (20/250/500), 501 se rechaza en la foto (`imageUrl`) y en la
     portada (`heroImageUrl`).
 
+### Tercera tanda (auditoría a fondo y un bug de seguridad)
+
+- **Bug de seguridad arreglado** en `security/tokenStorage.ts` (`get()`): una sesión con fecha de
+  caducidad **ilegible** no caducaba nunca (`Date.parse` → `NaN`, y `NaN <= now` es `false`, así que
+  el token se aceptaba para siempre). Lo destapó la auditoría de la suite. Corregido (solo vale si
+  caduca en el futuro) con su prueba en `tokenStorage.test.ts`. Poco probable en producción (el
+  servidor manda un ISO válido), pero rompía la regla de cerrar la sesión caducada.
+- **Frontend**: `lib/sonido.test.ts` (12) — el pop al pulsar: crea el AudioContext y suena en
+  botón/enlace, no suena en `div`/`aria-disabled`/`disabled`/`label`, sin Web Audio no rompe, y la
+  limpieza quita el escuchador. `security/tokenStorage.test.ts` (+3, incluye el caso del bug).
+- **Backend (+76 métodos)**: auditoría caso por caso de casos de uso, infraestructura y presentación.
+  Nuevas: `application/ProductUseCasesCasosLimiteTest`, `application/SalesUseCasesCasosLimiteTest`,
+  `presentation/ratelimit/LimitadorPorClaveTest` (caducidad del mapa de contadores). Ampliadas:
+  `SalesUseCasesTest` (ramas de editar venta y del resumen), `ReductorImageIOTest` (las 8
+  orientaciones EXIF, antes solo 1), `ApiContractTest` (ventas por id, límite de 731 días, 409 al
+  renombrar), `AuthenticateAdminUseCaseTest` (usuario inexistente de verdad, límite de 72 bytes),
+  `ProductRepositoryImplTest`, `SubirImagenTest`, `SiteSettingsUseCasesTest`, `AtomicidadTest`,
+  `ClientIpResolverTest`, `VentasCsvTest`.
+
 ### Comportamientos que los tests dejan fijados (a saber)
 - `aCentimos('-5')` devuelve `500`: el signo se descarta como cualquier símbolo, así que un precio
   negativo se vuelve positivo en silencio. Es coherente con su documentación.
 - El 401 solo cierra la sesión si la petición lleva `auth: true`; un 401 en el login **no** dispara
   `unauthorizedEvent`, a propósito.
 
+### Observaciones latentes del backend (sin arreglar, a decisión del dueño)
+- `SalesSummaryUseCase.masVendido` usa `item().toLowerCase()` sin `Locale`: en un servidor con locale
+  turco, «Seda I» y «seda i» dejarían de agruparse. Debería ser `Locale.ROOT`, como `Product.slugify`.
+  Impacto real nulo (el servidor no está en turco); fix de una línea cuando se quiera.
+- `GlobalExceptionHandler` responde a **cualquier** 415 con el mensaje de la subida de fotos («La
+  petición no llegó como un envío de archivo»). Es un texto poco preciso, no un fallo.
+- Los dobles en memoria de los tests mutan el objeto guardado al hacer `Product.update`, así que la
+  atomicidad de una edición a medias solo la garantiza el rollback real de JPA, no los dobles.
+
 ## Huecos pendientes
 
-Poco y de baja prioridad:
-- `lib/sonido.ts` necesita mockear `AudioContext` (coste alto, poco valor); `lib/movimiento.ts` y
-  `config/enlaces.ts` son solo constantes y no valen test.
-- Auditar a fondo (caso por caso) los tests de casos de uso e infraestructura del backend, que hasta
-  ahora solo se inventariaron.
-- Sin test unitario directo: el `AuthProvider` completo y el router (el hook `useAuth` no los
-  necesita); el `strip()` de `Sale` antes de medir longitudes.
+Prácticamente nada de valor. Queda, si algún día se quiere: fijar en un test el mensaje del 415 y el
+`strip()` de `Sale` antes de medir longitudes; `lib/movimiento.ts` y `config/enlaces.ts` son solo
+constantes y no valen test; el `AuthProvider` completo y el router no hacen falta como unidad.
 
 ## Reglas al tocar las pruebas
 
