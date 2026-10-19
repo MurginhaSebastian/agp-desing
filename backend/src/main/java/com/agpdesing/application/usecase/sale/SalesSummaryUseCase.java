@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -54,7 +55,9 @@ public class SalesSummaryUseCase {
     private static List<TopItem> masVendido(List<Sale> ventas) {
         Map<String, TopItem> grupos = new LinkedHashMap<>();
         for (Sale s : ventas) {
-            String clave = s.productId().map((id) -> "obra:" + id.value()).orElse("item:" + s.item().toLowerCase());
+            // Locale.ROOT para que la agrupacion no dependa del locale del servidor (en turco, "I"
+            // en minuscula no es "i"); igual que Product.slugify.
+            String clave = s.productId().map((id) -> "obra:" + id.value()).orElse("item:" + s.item().toLowerCase(Locale.ROOT));
             grupos.merge(clave, new TopItem(s.productId(), s.item(), s.quantity(), s.totalCents()),
                     (a, b) -> new TopItem(a.productId(), a.item(), a.quantity() + b.quantity(), a.totalCents() + b.totalCents()));
         }

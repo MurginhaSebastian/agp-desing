@@ -52,6 +52,35 @@ class AuthenticateAdminUseCaseTest {
     }
 
     @Test
+    void anUnknownUserIsRejectedEvenIfTheHasherWouldAcceptTheDummyHash() {
+        // Protege el «&& user != null»: sin él, un hasher que dijera sí al hash de relleno dejaría entrar a cualquiera.
+        AuthenticateAdminUseCase complaciente = new AuthenticateAdminUseCase(
+                username -> Optional.empty(), (raw, hash) -> true, tokens);
+        assertThrows(InvalidCredentialsException.class, () -> complaciente.execute("nadie", "lo-que-sea"));
+    }
+
+    @Test
+    void wrongPasswordOfAKnownUserComparesAgainstItsRealHash() {
+        assertThrows(InvalidCredentialsException.class, () -> useCase.execute("admin", "otra"));
+        assertEquals(List.of(HASH_REAL), comparados);
+    }
+
+    @Test
+    void emptyPasswordIsInvalid() {
+        assertThrows(InvalidCredentialsException.class, () -> useCase.execute("admin", ""));
+    }
+
+    @Test
+    void multiByteCharactersCountAsBytesAtTheLimit() {
+        String treintaYSeisEnes = "ñ".repeat(36);      // 72 bytes: se compara
+        String treintaYSieteEnes = "ñ".repeat(37);     // 74 bytes: ni se compara
+        assertThrows(InvalidCredentialsException.class, () -> useCase.execute("admin", treintaYSeisEnes));
+        assertEquals(1, comparados.size());
+        assertThrows(InvalidCredentialsException.class, () -> useCase.execute("admin", treintaYSieteEnes));
+        assertEquals(1, comparados.size());
+    }
+
+    @Test
     void nullPasswordIsInvalidWithoutComparing() {
         assertThrows(InvalidCredentialsException.class, () -> useCase.execute("admin", null));
         assertTrue(comparados.isEmpty());

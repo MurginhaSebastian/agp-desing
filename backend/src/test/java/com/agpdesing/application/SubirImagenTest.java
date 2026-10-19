@@ -298,6 +298,73 @@ class SubirImagenTest {
         }
 
         @Test
+        @DisplayName("el tope es exacto: pesar justo el máximo pasa, un byte más no")
+        void topeExacto() {
+            byte[] foto = ImagenesDePrueba.jpeg(10, 10);
+            new UploadImageUseCase(almacen, reductor, foto.length)
+                    .execute(new UploadImageUseCase.ImagenNueva(foto, "image/jpeg", "a.jpg"));
+            assertThat(almacen.guardados).isNotEmpty();
+
+            assertThatThrownBy(() -> new UploadImageUseCase(new AlmacenFalso(), reductor, foto.length - 1)
+                    .execute(new UploadImageUseCase.ImagenNueva(foto, "image/jpeg", "a.jpg")))
+                    .isInstanceOfSatisfying(DomainValidationException.class, e -> assertThat(e.field()).isEqualTo("archivo"));
+        }
+
+        @Test
+        @DisplayName("sin contenido (null) se rechaza señalando el campo archivo")
+        void contenidoNulo() {
+            assertThatThrownBy(() -> subir.execute(new UploadImageUseCase.ImagenNueva(null, "image/jpeg", "a.jpg")))
+                    .isInstanceOfSatisfying(DomainValidationException.class, e -> assertThat(e.field()).isEqualTo("archivo"));
+        }
+
+        @Test
+        @DisplayName("si falla guardar la original, el error sube y ni se intenta la copia")
+        void fallaLaOriginal() {
+            var llamadas = new ArrayList<String>();
+            ImageStorage roto = (nombre, tipo, bytes) -> {
+                llamadas.add(nombre);
+                throw new StorageFailedException("caído", null);
+            };
+            var caso = new UploadImageUseCase(roto, reductor, 5 * 1024 * 1024);
+
+            assertThatThrownBy(() -> caso.execute(new UploadImageUseCase.ImagenNueva(ImagenesDePrueba.jpeg(10, 10), "image/jpeg", "a.jpg")))
+                    .isInstanceOf(StorageFailedException.class);
+            assertThat(llamadas).hasSize(1);
+            assertThat(reductor.orientacion).isNull();
+        }
+
+        @Test
+        @DisplayName("la copia sale como image/jpeg con los bytes del reductor y pidiendo 1200 px")
+        void copiaConTipoYAncho() {
+            var guardado = new java.util.LinkedHashMap<String, String>();
+            var bytesCopia = new byte[][] { null };
+            var anchos = new ArrayList<Integer>();
+            ImageStorage espia = (nombre, tipo, bytes) -> {
+                guardado.put(nombre, tipo);
+                if (nombre.endsWith(UploadImageUseCase.SUFIJO_COPIA)) bytesCopia[0] = bytes;
+                return "https://x/" + nombre;
+            };
+            ReductorDeImagen reductorEspia = (img, orientacion, ancho) -> {
+                anchos.add(ancho);
+                return Optional.of(new byte[] { 9, 8, 7 });
+            };
+
+            new UploadImageUseCase(espia, reductorEspia, 5 * 1024 * 1024)
+                    .execute(new UploadImageUseCase.ImagenNueva(ImagenesDePrueba.png(16, 16), "image/png", "a.png"));
+
+            assertThat(anchos).containsExactly(1200);
+            assertThat(guardado.values()).containsExactly("image/png", "image/jpeg");
+            assertThat(bytesCopia[0]).containsExactly(9, 8, 7);
+        }
+
+        @Test
+        @DisplayName("un PNG no lleva orientación: el reductor recibe 1")
+        void pngSinOrientacion() {
+            subir.execute(new UploadImageUseCase.ImagenNueva(ImagenesDePrueba.png(16, 16), "image/png", "a.png"));
+            assertThat(reductor.orientacion).isEqualTo(1);
+        }
+
+        @Test
         @DisplayName("un archivo vacío se rechaza")
         void vacio() {
             assertThatThrownBy(() -> subir.execute(new UploadImageUseCase.ImagenNueva(new byte[0], "image/jpeg", "foto.jpg")))

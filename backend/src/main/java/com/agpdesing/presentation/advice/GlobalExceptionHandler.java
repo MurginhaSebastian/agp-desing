@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -34,6 +35,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Convierte excepciones en RFC 7807 (ProblemDetail). Nunca expone stack traces.
@@ -159,15 +161,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * La petición no vino como envío de formulario con archivo. Sin esto acababa en el comodín
+     * El cuerpo no vino con un tipo de contenido que el endpoint admita (415). Vale tanto para la
+     * foto que no llega como multipart como para un JSON mandado a un endpoint que no lo espera: el
+     * mensaje dice qué se esperaba, en vez de hablar siempre de archivos. Sin esto caía en el comodín
      * de abajo y salía un 500 con «Algo salió mal», que no ayuda a nadie.
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     ProblemDetail onTipoDePeticionNoAdmitido(HttpMediaTypeNotSupportedException ex) {
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-                "La petición no llegó como un envío de archivo.");
-        pd.setTitle("Envío no admitido");
-        pd.setProperty("errors", Map.of("archivo", "La petición no llegó como un envío de archivo."));
+        String admitidos = ex.getSupportedMediaTypes().stream()
+                .map(MediaType::toString).collect(Collectors.joining(", "));
+        String detalle = admitidos.isBlank()
+                ? "El tipo de contenido de la petición no se admite."
+                : "El tipo de contenido no se admite; se esperaba " + admitidos + ".";
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNSUPPORTED_MEDIA_TYPE, detalle);
+        pd.setTitle("Tipo de contenido no admitido");
         return pd;
     }
 

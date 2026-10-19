@@ -105,4 +105,78 @@ class ReductorImageIOTest {
         assertThat(reductor.reducir(webp, 1, 1200)).isEmpty();
         assertThat(reductor.reducir(new byte[] { 1, 2, 3 }, 1, 1200)).isEmpty();
     }
+
+    /** Dónde cae el cuadrado rojo (arriba a la izquierda en el original de 400 × 200) tras cada orientación EXIF. */
+    @org.junit.jupiter.params.ParameterizedTest(name = "orientación {0}: ancho {1}, alto {2}, marca en {3}")
+    @org.junit.jupiter.params.provider.CsvSource({
+            "1, 400, 200, TL", "2, 400, 200, TR", "3, 400, 200, BR", "4, 400, 200, BL",
+            "5, 200, 400, TL", "6, 200, 400, TR", "7, 200, 400, BR", "8, 200, 400, BL"
+    })
+    void lasOchoOrientaciones(int orientacion, int ancho, int alto, String esquina) throws IOException {
+        BufferedImage leida = leer(reductor.reducir(codificar(conMarca(400, 200), "png"), orientacion, 1200).orElseThrow());
+
+        assertThat(leida.getWidth()).isEqualTo(ancho);
+        assertThat(leida.getHeight()).isEqualTo(alto);
+        int x = esquina.endsWith("L") ? 5 : ancho - 6;
+        int y = esquina.startsWith("T") ? 5 : alto - 6;
+        assertThat(esRojo(leida.getRGB(x, y))).as("esquina %s en orientación %d", esquina, orientacion).isTrue();
+        // Y las otras tres esquinas siguen blancas: la marca no se ha corrido ni duplicado.
+        for (String otra : new String[] { "TL", "TR", "BL", "BR" }) {
+            if (otra.equals(esquina)) continue;
+            int ox = otra.endsWith("L") ? 5 : ancho - 6;
+            int oy = otra.startsWith("T") ? 5 : alto - 6;
+            assertThat(esRojo(leida.getRGB(ox, oy))).as("esquina %s no debe ser roja (orientación %d)", otra, orientacion).isFalse();
+        }
+    }
+
+    @Test
+    @DisplayName("una orientación fuera de 1–8 deja la foto como está")
+    void orientacionDesconocida() throws IOException {
+        for (int rara : new int[] { 0, 9, -1 }) {
+            BufferedImage leida = leer(reductor.reducir(codificar(conMarca(400, 200), "png"), rara, 1200).orElseThrow());
+            assertThat(leida.getWidth()).isEqualTo(400);
+            assertThat(leida.getHeight()).isEqualTo(200);
+            assertThat(esRojo(leida.getRGB(5, 5))).isTrue();
+        }
+    }
+
+    @Test
+    @DisplayName("una foto de justo el ancho máximo queda igual; una de 1 px más se reduce a él")
+    void anchoEnElLimite() throws IOException {
+        assertThat(leer(reductor.reducir(codificar(conMarca(1200, 600), "png"), 1, 1200).orElseThrow()).getWidth()).isEqualTo(1200);
+        BufferedImage una = leer(reductor.reducir(codificar(conMarca(1201, 600), "png"), 1, 1200).orElseThrow());
+        assertThat(una.getWidth()).isEqualTo(1200);
+        assertThat(una.getHeight()).isEqualTo(600);
+    }
+
+    @Test
+    @DisplayName("una foto que se reduce por mitades llega exacta: 4800 × 3200 → 1200 × 800")
+    void reduccionPorMitades() throws IOException {
+        BufferedImage leida = leer(reductor.reducir(codificar(conMarca(4800, 3200), "jpg"), 1, 1200).orElseThrow());
+        assertThat(leida.getWidth()).isEqualTo(1200);
+        assertThat(leida.getHeight()).isEqualTo(800);
+    }
+
+    @Test
+    @DisplayName("un panorama muy fino no se queda en 0 px de alto")
+    void panoramaFino() throws IOException {
+        BufferedImage leida = leer(reductor.reducir(codificar(new BufferedImage(20_000, 1, BufferedImage.TYPE_INT_RGB), "png"), 1, 1200).orElseThrow());
+        assertThat(leida.getWidth()).isEqualTo(1200);
+        assertThat(leida.getHeight()).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("una foto en escala de grises también da copia")
+    void grises() throws IOException {
+        var gris = new BufferedImage(300, 200, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage leida = leer(reductor.reducir(codificar(gris, "png"), 1, 1200).orElseThrow());
+        assertThat(leida.getWidth()).isEqualTo(300);
+        assertThat(leida.getHeight()).isEqualTo(200);
+    }
+
+    @Test
+    @DisplayName("sin bytes no hay copia")
+    void sinBytes() {
+        assertThat(reductor.reducir(new byte[0], 1, 1200)).isEmpty();
+    }
 }

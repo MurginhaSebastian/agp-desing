@@ -22,7 +22,9 @@ export const tokenStorage = {
       const token = sessionStorage.getItem(KEY)
       const exp = sessionStorage.getItem(EXP_KEY)
       if (!token || !exp) return null
-      if (Date.parse(exp) <= Date.now()) {
+      // Una fecha ilegible (Date.parse → NaN) cuenta como caducada: NaN <= now es false y
+      // dejaba pasar el token para siempre. Solo vale si caduca en el futuro.
+      if (!(Date.parse(exp) > Date.now())) {
         tokenStorage.clear()
         return null
       }
