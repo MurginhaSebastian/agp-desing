@@ -59,6 +59,35 @@ class AtomicidadTest {
         assertTrue(repo.todoDentro);
     }
 
+    @Test
+    void altaRepetidaNoLlegaAGuardar() {
+        repo.inner.save(Product.create("Seda I", "", new Money(100, Money.Currency.PEN), 1, 1, "x",
+                "/a.jpg", ProductStatus.AVAILABLE, false, Instant.EPOCH));
+        org.junit.jupiter.api.Assertions.assertThrows(com.agpdesing.domain.exception.SlugAlreadyExistsException.class,
+                () -> new CreateProductUseCase(repo, clock, tx).execute(command("Seda I")));
+        assertEquals(List.of("findAll"), repo.llamadas);
+        assertEquals(1, repo.inner.findAll().size());
+    }
+
+    @Test
+    void edicionRepetidaNoLlegaAGuardar() {
+        repo.inner.save(Product.create("Seda I", "", new Money(100, Money.Currency.PEN), 1, 1, "x",
+                "/a.jpg", ProductStatus.AVAILABLE, false, Instant.EPOCH));
+        Product otra = repo.inner.save(Product.create("Bruma", "", new Money(100, Money.Currency.PEN), 1, 1, "x",
+                "/b.jpg", ProductStatus.AVAILABLE, false, Instant.EPOCH));
+        org.junit.jupiter.api.Assertions.assertThrows(com.agpdesing.domain.exception.SlugAlreadyExistsException.class,
+                () -> new UpdateProductUseCase(repo, clock, tx).execute(otra.id(), command("Seda I")));
+        assertEquals(List.of("findById", "findAll"), repo.llamadas);
+        assertTrue(repo.todoDentro);
+    }
+
+    @Test
+    void borrarUnaObraInexistenteNoLlamaAlBorrado() {
+        org.junit.jupiter.api.Assertions.assertThrows(com.agpdesing.domain.exception.ProductNotFoundException.class,
+                () -> new DeleteProductUseCase(repo, tx).execute(ProductId.newId()));
+        assertEquals(List.of("findById"), repo.llamadas);
+    }
+
     private static ProductCommand command(String name) {
         return new ProductCommand(name, "", 9_500, Money.Currency.PEN, 30, 40, "Acrílico", "/a.jpg", ProductStatus.AVAILABLE, false);
     }
