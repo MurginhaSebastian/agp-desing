@@ -5,6 +5,7 @@ import com.agpdesing.domain.model.Money;
 import com.agpdesing.domain.model.Product;
 import com.agpdesing.domain.model.ProductStatus;
 import com.agpdesing.domain.model.SiteSettings;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -65,16 +66,27 @@ class ReglasDelDominioTest {
         assertEquals("", new SiteSettings(url).heroImageUrl());
     }
 
+    private static String direccionDe(int largo) {
+        return "https://x/" + "a".repeat(largo - "https://x/".length());
+    }
+
     @ParameterizedTest
-    @ValueSource(ints = {500, 501})
-    void direccionDeMasDe500CaracteresSeRechaza(int largo) {
-        String url = "https://x/" + "a".repeat(largo - 10);
-        if (largo <= 500) {
-            assertDoesNotThrow(() -> obra(10, 10, url));
-            assertDoesNotThrow(() -> new SiteSettings(url));
-        } else {
-            assertThrows(DomainValidationException.class, () -> obra(10, 10, url));
-            assertThrows(DomainValidationException.class, () -> new SiteSettings(url));
-        }
+    @ValueSource(ints = {20, 250, 500})
+    void direccionDeHasta500CaracteresVale(int largo) {
+        String url = direccionDe(largo);
+        assertDoesNotThrow(() -> obra(10, 10, url));
+        assertDoesNotThrow(() -> new SiteSettings(url));
+    }
+
+    @Test
+    void direccionDe501CaracteresSeRechazaEnLaFoto() {
+        var e = assertThrows(DomainValidationException.class, () -> obra(10, 10, direccionDe(501)));
+        assertEquals("imageUrl", e.field());
+    }
+
+    @Test
+    void direccionDe501CaracteresSeRechazaEnLaPortada() {
+        var e = assertThrows(DomainValidationException.class, () -> new SiteSettings(direccionDe(501)));
+        assertEquals("heroImageUrl", e.field());
     }
 }
