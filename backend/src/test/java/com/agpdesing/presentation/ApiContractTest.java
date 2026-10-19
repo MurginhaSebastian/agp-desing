@@ -74,6 +74,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
@@ -438,7 +439,15 @@ class ApiContractTest {
         void sinFormularioEs415() throws Exception {
             mvc.perform(json(post("/api/imagenes"), "{}").with(admin()))
                     .andExpect(status().isUnsupportedMediaType())
-                    .andExpect(jsonPath("$.title").value("Envío no admitido"));
+                    .andExpect(jsonPath("$.title").value("Tipo de contenido no admitido"))
+                    .andExpect(jsonPath("$.detail", containsString("multipart/form-data")));
+        }
+
+        @Test
+        void el415DeOtroEndpointDaSuPropioTipoNoElDeArchivo() throws Exception {
+            mvc.perform(post("/api/products").contentType(MediaType.TEXT_PLAIN).content("hola").with(admin()))
+                    .andExpect(status().isUnsupportedMediaType())
+                    .andExpect(jsonPath("$.detail", containsString("application/json")));
         }
 
         @Test
