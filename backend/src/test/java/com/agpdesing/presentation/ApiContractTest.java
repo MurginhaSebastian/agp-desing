@@ -259,6 +259,24 @@ class ApiContractTest {
             mvc.perform(delete(ruta).with(admin())).andExpect(status().isNotFound());
         }
 
+        @Test
+        void renombrarConElNombreDeOtraObraEsConflicto() throws Exception {
+            guardado("Tarde en Bordeaux", false);
+            Product otra = guardado("Seda I", false);
+            mvc.perform(json(put("/api/products/" + otra.id().value()), CUERPO_VALIDO).with(admin()))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.title").value("Conflicto"))
+                    .andExpect(jsonPath("$.errors.name").exists());
+        }
+
+        @Test
+        void cuerpoVacioMarcaLosCamposObligatorios() throws Exception {
+            mvc.perform(json(post("/api/products"), "{}").with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title").value("Datos inválidos"))
+                    .andExpect(jsonPath("$.errors.name").exists());
+        }
+
         /** Antes acababa en el comodín y respondía 500, como si el servidor se hubiera roto. */
         @Test
         void metodoNoAdmitidoEs405() throws Exception {
@@ -590,6 +608,82 @@ class ApiContractTest {
                     .andExpect(jsonPath("$.topItems[0].quantity").value(2))
                     .andExpect(jsonPath("$.topItems[1].productId").value(a.id().value().toString()));
             mvc.perform(get("/api/sales/resumen").with(admin())).andExpect(jsonPath("$.month").value("2026-09"));
+        }
+
+        @Test
+        void fichaDeUnaVentaConSesion() throws Exception {
+            String location = mvc.perform(json(post("/api/sales"), VENTA).with(admin()))
+                    .andReturn().getResponse().getHeader("Location");
+            mvc.perform(get(location).with(admin()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.item").value("Cuadro de la promo 2010"))
+                    .andExpect(jsonPath("$.customerPhone").value("51987654321"))
+                    .andExpect(jsonPath("$.length()").value(16));
+            mvc.perform(get("/api/sales/" + UUID.randomUUID()).with(admin()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.title").value("No encontrado"));
+        }
+
+        @Test
+        void cadaCampoInvalidoSeSenalaPorSuNombre() throws Exception {
+            mvc.perform(json(post("/api/sales"), VENTA.replace("\"quantity\":2", "\"quantity\":0")).with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.quantity").exists());
+            mvc.perform(json(post("/api/sales"), VENTA.replace("\"quantity\":2", "\"quantity\":100")).with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.quantity").exists());
+            mvc.perform(json(post("/api/sales"), VENTA.replace("\"totalCents\":15050", "\"totalCents\":0")).with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.totalCents").exists());
+            mvc.perform(json(post("/api/sales"), VENTA.replace("Ana Torres", "  ")).with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.customerName").exists());
+            mvc.perform(json(post("/api/sales"), VENTA.replace("2026-09-27", "2026-09-19")).with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.deliveryDate").value("La entrega no puede ser antes de la venta"));
+            mvc.perform(json(post("/api/sales"), VENTA.replace("\"saleDate\":\"2026-09-20\",", "")).with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.saleDate").exists());
+            org.junit.jupiter.api.Assertions.assertTrue(ventas.store.isEmpty(), "ninguna venta inválida llegó a guardarse");
+        }
+
+        @Test
+        void elPeriodoMaximoEsDeDosAnosExactos() throws Exception {
+            // 2024-09-20 + 731 días = 2026-09-21: el último día que se admite.
+            mvc.perform(get("/api/sales?desde=2024-09-20&hasta=2026-09-21").with(admin())).andExpect(status().isOk());
+            mvc.perform(get("/api/sales?desde=2024-09-20&hasta=2026-09-22").with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.hasta").value("Elige un periodo de dos años como mucho"));
+            mvc.perform(get("/api/sales/export.csv?desde=2024-09-20&hasta=2026-09-22").with(admin()))
+                    .andExpect(status().isBadRequest());
+            mvc.perform(get("/api/sales/export.csv?desde=2026-09-30&hasta=2026-09-01").with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.hasta").exists());
+        }
+
+        @Test
+        void unRangoDeUnSoloDiaIncluyeEseDia() throws Exception {
+            mvc.perform(json(post("/api/sales"), VENTA).with(admin())).andExpect(status().isCreated());
+            mvc.perform(get("/api/sales?desde=2026-09-20&hasta=2026-09-20").with(admin()))
+                    .andExpect(jsonPath("$", hasSize(1)));
+            mvc.perform(get("/api/sales?desde=2026-09-21&hasta=2026-09-21").with(admin()))
+                    .andExpect(jsonPath("$", hasSize(0)));
+        }
+
+        @Test
+        void mesMalEscritoEnElResumenEs400() throws Exception {
+            mvc.perform(get("/api/sales/resumen?mes=octubre").with(admin()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.mes").value("Formato no válido"));
+            mvc.perform(get("/api/sales/resumen?mes=2026-13").with(admin()))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void exportarSinFechasUsaElMesEnCursoEnElNombreDelArchivo() throws Exception {
+            mvc.perform(get("/api/sales/export.csv").with(admin()))
+                    .andExpect(status().isOk())
+                    .andExpect(header().string("Content-Disposition", "attachment; filename=\"ventas-2026-09-01-a-2026-09-30.csv\""));
         }
 
         @Test
