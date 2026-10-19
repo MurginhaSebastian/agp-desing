@@ -1,13 +1,13 @@
 # Pruebas de AGP Desing
 
-Estado de las pruebas automáticas y qué cubren. Auditoría y ampliación de octubre de 2026.
+Estado de las pruebas automáticas y qué cubren. Auditoría y ampliación en dos tandas, octubre de 2026.
 
 ## Resumen
 
-| | Antes | Después | Archivos |
+| | Antes | Después | Añadido |
 |---|---|---|---|
-| **Frontend** (Vitest, modo demo) | 76 casos / 20 archivos | **102 casos / 24 archivos** | +26 casos |
-| **Backend** (JUnit, sin BD) | 132 `@Test` / 15 clases | **171 `@Test` / 20 clases** | +39 métodos (53 ejecuciones) |
+| **Frontend** (Vitest, modo demo) | 76 casos / 20 archivos | **147 casos / 29 archivos** | +71 casos |
+| **Backend** (JUnit, sin BD) | 132 `@Test` / 15 clases | **189 `@Test` / 20 clases** | +57 métodos |
 
 Además, sin contar aquí: `CleanArchitectureTest` (ArchUnit, verifica la regla de dependencias) y
 `ApiContractTest` (contrato HTTP del backend).
@@ -29,7 +29,7 @@ cd backend && .\mvnw.cmd test              # toda la suite
 **Veredicto: sólida en lo que cubre, con huecos concretos.** No se reescribió nada: lo que había
 está bien planteado (fronteras exactas, se comprueba el campo que falla y no solo que lance).
 
-Puntos a mejorar detectados (no corregidos aún, anotados como pendientes):
+Puntos a mejorar detectados en la auditoría — **todos corregidos en la segunda tanda**:
 
 - **Backend**
   - `domain/ReglasDelDominioTest.java`: la prueba `direccionDeMasDe500CaracteresSeRechaza` es
@@ -75,14 +75,41 @@ Detalle técnico: los tests de las funciones de Vercel viven en `src/api-vercel/
 porque `vite.config.ts` solo incluye `src/**/*.test.*`; importan `../../api/...` y llevan
 `/// <reference types="node" />` para que `tsc -b` no se queje de `process`.
 
-## Huecos pendientes (siguiente tanda)
+### Segunda tanda (los huecos de la auditoría)
 
-- **Frontend**: `services/remoto/api.ts` (cabecera `Authorization` y manejo de errores del cliente
-  HTTP), hooks sin test (`useAuth`, `usePageTitle`, `useSeo`, `useSettings`), y los casos límite que
-  faltan en `dinero.test.ts`. `lib/sonido.ts` necesita mockear `AudioContext` (coste alto, baja
-  prioridad); `lib/movimiento.ts` y `config/enlaces.ts` son solo constantes y no valen test.
-- **Backend**: las fronteras que faltan en `SaleTest` y arreglar la prueba floja de
-  `ReglasDelDominioTest`; auditar a fondo los tests de casos de uso e infraestructura.
+- **Frontend**
+  - `services/remoto/api.test.ts` (18 casos) — el cliente HTTP real con `fetch` mockeado: cabecera
+    `Authorization: Bearer` (se envía con sesión, no en rutas públicas ni con token caducado), forma
+    de las peticiones (JSON, `FormData` sin `Content-Type` manual, `Blob` al exportar, 204 →
+    `undefined`), errores (`ApiError` con status/detail/`fieldErrors`, cuerpo no-JSON, fallo de red),
+    y el 401 con `auth` que borra la sesión y dispara `unauthorizedEvent` (no en el login).
+  - `hooks/useSettings.test.tsx` (6), `hooks/usePageTitle.test.tsx` (4), `hooks/useSeo.test.tsx`
+    (12, incluye `resumen`), `hooks/useAuth.test.tsx` (2) — los hooks que faltaban.
+  - `lib/dinero.test.ts` (+3) — redondeo de más de dos decimales, negativos, `aTextoDeSoles` con 0 y
+    con un céntimo.
+- **Backend**
+  - `domain/SaleTest.java` (+14 métodos) — topes exactos de `item`/`detail`/`customerName`/`quantity`
+    (desde las constantes del dominio), teléfonos de 9 y 15 dígitos, `update()`, `rehydrate()`,
+    `cancelled()`.
+  - `domain/ReglasDelDominioTest.java` — la prueba floja (`if` dentro, nombre engañoso) se reemplazó
+    por tres honestas: hasta 500 vale (20/250/500), 501 se rechaza en la foto (`imageUrl`) y en la
+    portada (`heroImageUrl`).
+
+### Comportamientos que los tests dejan fijados (a saber)
+- `aCentimos('-5')` devuelve `500`: el signo se descarta como cualquier símbolo, así que un precio
+  negativo se vuelve positivo en silencio. Es coherente con su documentación.
+- El 401 solo cierra la sesión si la petición lleva `auth: true`; un 401 en el login **no** dispara
+  `unauthorizedEvent`, a propósito.
+
+## Huecos pendientes
+
+Poco y de baja prioridad:
+- `lib/sonido.ts` necesita mockear `AudioContext` (coste alto, poco valor); `lib/movimiento.ts` y
+  `config/enlaces.ts` son solo constantes y no valen test.
+- Auditar a fondo (caso por caso) los tests de casos de uso e infraestructura del backend, que hasta
+  ahora solo se inventariaron.
+- Sin test unitario directo: el `AuthProvider` completo y el router (el hook `useAuth` no los
+  necesita); el `strip()` de `Sale` antes de medir longitudes.
 
 ## Reglas al tocar las pruebas
 
