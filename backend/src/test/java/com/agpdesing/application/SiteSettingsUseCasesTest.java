@@ -45,6 +45,37 @@ class SiteSettingsUseCasesTest {
         assertThrows(DomainValidationException.class, () -> update.execute("javascript:alert(1)"));
     }
 
+    @Test
+    void nullAndBlankClearTheImage() {
+        update.execute("/images/portada.jpg");
+        assertFalse(update.execute(null).hasHeroImage());
+        update.execute("/images/portada.jpg");
+        assertFalse(update.execute("   ").hasHeroImage());
+    }
+
+    @Test
+    void bareSchemeOrBareSlashIsRejectedWithTheField() {
+        for (String vacia : new String[] { "https://", "http://", "/" }) {
+            DomainValidationException e = assertThrows(DomainValidationException.class, () -> update.execute(vacia), vacia);
+            assertEquals("heroImageUrl", e.field());
+        }
+    }
+
+    @Test
+    void urlLengthLimitIsExactly500() {
+        String justa = "https://x.co/" + "a".repeat(SiteSettings.URL_MAX - "https://x.co/".length());
+        assertEquals(SiteSettings.URL_MAX, update.execute(justa).heroImageUrl().length());
+        DomainValidationException e = assertThrows(DomainValidationException.class, () -> update.execute(justa + "a"));
+        assertEquals("heroImageUrl", e.field());
+    }
+
+    @Test
+    void aRejectedUpdateKeepsThePreviousImage() {
+        update.execute("/images/portada.jpg");
+        assertThrows(DomainValidationException.class, () -> update.execute("ftp://x/y.jpg"));
+        assertEquals("/images/portada.jpg", get.execute().heroImageUrl());
+    }
+
     static final class InMemorySettings implements SiteSettingsRepository {
         private SiteSettings current = SiteSettings.empty();
 
