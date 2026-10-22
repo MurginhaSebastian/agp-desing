@@ -196,12 +196,18 @@ export async function run() {
     }
   }
 
+  // Mismo filtro de ejemplos que las credenciales a mano: los patrones de formato de maquina
+  // tambien aciertan en los ejemplos de la documentacion (p. ej. `postgres://real:password@host`
+  // en .claude/skills/) y en este mismo archivo. Se miran linea a linea y commit a commit, con
+  // `esDeVerdad`/`hayCredencialDeVerdadEn`, para descartarlos sin dejar pasar una clave real.
   for (const p of PATRONES) {
-    const archivos = [...new Set(enElArbol(p.regex, false))]
-    if (archivos.length) {
+    const lineas = lineasEnElArbol(p.regex, false).filter(esDeVerdad)
+    if (lineas.length) {
+      const archivos = [...new Set(lineas.map((l) => l.split(':')[0]))]
       hallazgos.push({ gravedad: p.gravedad, donde: 'archivos actuales', que: `hay ${p.nombre} escrito en el repositorio`, detalle: archivos.slice(0, 4).join(', ') })
     }
     const commits = enElHistorial(p.regex, false)
+      .filter((linea) => hayCredencialDeVerdadEn(linea.trim().split(' ')[0], p.regex))
     if (commits.length) {
       hallazgos.push({ gravedad: p.gravedad, donde: 'historial', que: `${p.nombre} apareció en el historial`, detalle: `${commits.length} commit(s): ${commits.slice(0, 3).join(' · ')}` })
     }
