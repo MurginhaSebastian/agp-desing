@@ -1,12 +1,12 @@
 # Pruebas de AGP Desing
 
-Estado de las pruebas automáticas y qué cubren. Auditoría y ampliación en tres tandas, octubre de 2026.
+Estado de las pruebas automáticas y qué cubren. Auditoría y ampliación en cuatro tandas, octubre de 2026.
 
 ## Resumen
 
 | | Antes | Después | Añadido |
 |---|---|---|---|
-| **Frontend** (Vitest, modo demo) | 76 casos / 20 archivos | **162 casos / 30 archivos** | +86 casos |
+| **Frontend** (Vitest, modo demo) | 76 casos / 20 archivos | **184 casos / 35 archivos** | +108 casos |
 | **Backend** (JUnit, sin BD) | 132 `@Test` / 15 clases | **264 `@Test` / 23 clases** | +132 métodos |
 
 La suite backend completa ejecuta **311** pruebas (los parametrizados y ArchUnit expanden `@Test`):
@@ -134,11 +134,42 @@ porque `vite.config.ts` solo incluye `src/**/*.test.*`; importan `../../api/...`
   así que la atomicidad de una edición a medias solo la garantiza el rollback real de JPA, no los
   dobles. No es un bug de producción.
 
+### Cuarta tanda (componentes y las suites de calidad/seguridad)
+
+- **Tests de componentes (+23)**, los primeros fuera de `lib`/hooks: `WhatsAppButton` (enlace
+  `wa.me`), `ProductCard` (proporción de la foto y caída a la original), `CarruselPortada` (autoplay,
+  pausa, navegación; y en archivo aparte, `prefers-reduced-motion`), `VentaForm` (validación, saldo,
+  errores del backend).
+- **Se corrió `npm run seg`** (local, sin backend). Encontró 3 «graves» que resultaron **falsos
+  positivos**, y se arregló el control de cada uno (no se aflojó nada):
+  - 2 CRÍTICO de «datos privados»: la cadena `postgres://real:password@host/db` de ejemplo de la
+    skill `all-deploy`. Los `PATRONES` de `secretos.mjs` ahora pasan por el mismo filtro de ejemplos
+    que las credenciales a mano (TRAMPAS seguridad nº 19).
+  - 1 ALTO de «librerías»: `vite`/`source-map-js` entran al árbol de producción solo por el plugin de
+    build `@tailwindcss/vite`; no van en el bundle. `dependencias.mjs` los degrada a BAJO (TRAMPAS
+    seguridad nº 20).
+  - Tras los arreglos, `seg` local: **0 críticos, 0 altos, 0 medios**.
+- **Se corrió `npm run qa`**. Los controles estáticos quedaron limpios tras dos arreglos:
+  - `textos` marcaba «óleo/lienzo» (negocio anterior) en el fixture `api-vercel/obra.test.ts` → se
+    cambió a `Cuadro 3D`.
+  - `muerto` marcaba el archivo de verificación de Google (`public/google<token>.html`) → se añadió
+    el patrón a su lista blanca (los dos, en TRAMPAS de qa).
+
+### Lo que estas suites NO cubren desde aquí
+- Los controles de **navegador** de `qa` (accesibilidad, contraste, enlaces, pantallas) expiran en el
+  paso de login al panel (`entrarAlPanel`): necesitan el **backend en marcha** (local en `:8080`, o
+  producción con `QA_ADMIN_PASS`). Es un prerequisito de entorno, no un defecto del sitio. Para
+  medirlos: `backend\run-dev.ps1` + `npm run dev`, y luego `npm run qa`.
+- Los controles de `seg` que necesitan la API (cabeceras, fotos, permisos, freno del login) se saltan
+  sin backend; el propio informe lo dice.
+
 ## Huecos pendientes
 
-Prácticamente nada de valor. Queda, si algún día se quiere: fijar en un test el mensaje del 415 y el
-`strip()` de `Sale` antes de medir longitudes; `lib/movimiento.ts` y `config/enlaces.ts` son solo
-constantes y no valen test; el `AuthProvider` completo y el router no hacen falta como unidad.
+Prácticamente nada de valor. Queda, si algún día se quiere: correr las suites de **navegador**
+(`qa`) y las de **API** (`seg`) con el backend en marcha; `ProductForm` (se cubrió `VentaForm`, que
+tiene la validación más clara); fijar en un test el mensaje del 415 y el `strip()` de `Sale`;
+`lib/movimiento.ts`, `config/enlaces.ts` y `lib/sonido` de bajo valor. El `AuthProvider` completo y
+el router no hacen falta como unidad.
 
 ## Reglas al tocar las pruebas
 
