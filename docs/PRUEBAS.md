@@ -6,7 +6,7 @@ Estado de las pruebas automáticas y qué cubren. Auditoría y ampliación en cu
 
 | | Antes | Después | Añadido |
 |---|---|---|---|
-| **Frontend** (Vitest, modo demo) | 76 casos / 20 archivos | **184 casos / 35 archivos** | +108 casos |
+| **Frontend** (Vitest, modo demo) | 76 casos / 20 archivos | **198 casos / 40 archivos** | +122 casos |
 | **Backend** (JUnit, sin BD) | 132 `@Test` / 15 clases | **264 `@Test` / 23 clases** | +132 métodos |
 
 La suite backend completa ejecuta **311** pruebas (los parametrizados y ArchUnit expanden `@Test`):
@@ -163,13 +163,27 @@ porque `vite.config.ts` solo incluye `src/**/*.test.*`; importan `../../api/...`
 - Los controles de `seg` que necesitan la API (cabeceras, fotos, permisos, freno del login) se saltan
   sin backend; el propio informe lo dice.
 
+### Quinta tanda (frontend, cinco archivos)
+
+Un commit por archivo. Cierran los huecos de frontend que quedaban anotados.
+
+- `lib/movimiento.test.ts` (3) — las curvas `EASE_OUT`/`EASE_IN_OUT`/`EASE_DRAWER` coinciden con los
+  `--ease-*` leídos de `index.css`: guardia contra que se desincronicen en silencio.
+- `config/enlaces.test.ts` (3) — `SECCIONES` (el catálogo es ruta, el resto anclas; Contacto no va en
+  el pie) y `REDES` toman su URL de `env`.
+- `components/admin/ProductForm.test.tsx` (3) — validación en vacío, envío con el precio en céntimos y
+  el error del servidor cuando `onSubmit` lanza.
+- `components/layout/Footer.test.tsx` (3) — secciones del pie (sin Contacto), WhatsApp y redes de
+  `env`, enlaces legales.
+- `components/ui/Reveal.test.tsx` (2) — pinta los hijos y respeta la etiqueta pedida (`as`), con
+  `IntersectionObserver` fingido.
+
 ## Huecos pendientes
 
 Prácticamente nada de valor. Queda, si algún día se quiere: correr las suites de **navegador**
-(`qa`) y las de **API** (`seg`) con el backend en marcha; `ProductForm` (se cubrió `VentaForm`, que
-tiene la validación más clara); fijar en un test el mensaje del 415 y el `strip()` de `Sale`;
-`lib/movimiento.ts`, `config/enlaces.ts` y `lib/sonido` de bajo valor. El `AuthProvider` completo y
-el router no hacen falta como unidad.
+(`qa`) y las de **API** (`seg`) con el backend en marcha; fijar en un test el `strip()` de `Sale`
+(el mensaje del 415 ya quedó cubierto en `ApiContractTest`); `lib/sonido` ya está cubierto. El
+`AuthProvider` completo y el router no hacen falta como unidad.
 
 ## Reglas al tocar las pruebas
 
