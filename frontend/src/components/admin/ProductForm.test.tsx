@@ -34,7 +34,7 @@ describe('ProductForm', () => {
   })
 
   it('con datos válidos envía el DTO con el precio en céntimos', async () => {
-    const onSubmit = vi.fn(async () => {})
+    const onSubmit = vi.fn(async (_dto: ProductCreateDTO) => {})
     render(<ProductForm initial={valido} submitLabel="Guardar" onSubmit={onSubmit} />)
     enviar()
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
