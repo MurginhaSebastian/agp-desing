@@ -213,3 +213,34 @@ no puede parsear se lee igual que uno que no encuentra nada —o peor, que da un
 tapa lo demás—. Ahora `auditarNpm` recorta al objeto JSON (del primer `{` al último `}`) antes de
 parsear. Lección repetida: cuando un control depende de la salida de un comando, tiene que separar
 lo que mide de lo que el sistema le mete por el mismo tubo.
+
+## 19. El filtro de ejemplos lo aplicaban las contraseñas a mano, pero no los patrones de formato
+
+El 21 oct. 2026, tras instalar la skill `all-deploy`, el control de secretos marcó **dos CRÍTICO**:
+una «cadena de conexión con contraseña» en los archivos actuales y otra en el historial. El valor
+era `postgres://real:password@host/db`, un **ejemplo de la documentación** de esa skill
+(`.claude/skills/all-deploy/references/env-mapping.md`), no un secreto de AGP.
+
+La causa estaba en el control, no en el repo. Había dos caminos: las «credenciales a mano»
+(`CREDENCIALES_A_MANO`) ya pasaban cada línea y cada commit por `esDeVerdad`/`hayCredencialDeVerdadEn`,
+que descartan los archivos de ejemplos (`ARCHIVOS_CON_EJEMPLOS`, incluye `.claude/skills/`) y las
+líneas con pinta de mentira. Pero los «patrones de formato de máquina» (`PATRONES`: `sb_secret_…`,
+`AKIA…`, la cadena de conexión…) reportaban **sin pasar por ese filtro**. Arreglo: los `PATRONES`
+usan ahora el mismo filtro, línea a línea y commit a commit. Una cadena de conexión con una
+contraseña real en nuestro propio código sigue bloqueando; un ejemplo en una skill o en
+`secretos.mjs` no. No se tocó la skill de terceros: el control es quien no debía denunciar sus
+ejemplos.
+
+## 20. Una herramienta de build en el árbol de producción no «llega al navegador»
+
+El mismo día, `dependencias.mjs` marcó **ALTO**: «2 librerías con fallo que llega al navegador →
+source-map-js, vite». `npm audit --omit=dev` las ve en el árbol de producción, pero solo porque
+`@tailwindcss/vite` (un plugin de *build*) está en `dependencies` y arrastra a `vite` y su
+transitiva `source-map-js`. Vite es el empaquetador: su código **no va en el bundle** que recibe el
+visitante, así que un aviso suyo (servidor de desarrollo, parseo de source maps) no lo expone.
+
+Arreglo acotado, como el nº 17: una lista `PAQUETES_DE_BUILD` (vite, source-map-js, @tailwindcss/*,
+esbuild, rollup, postcss) cuyos avisos se degradan a BAJO y salen bajo «web (herramienta de build)».
+Un paquete que **sí** llega al navegador no está en la lista y sigue bloqueando. La raíz de verdad
+—esos build tools están en `dependencies` en vez de `devDependencies`— se deja como está para no
+tocar la instalación del despliegue; se arregla el control, que es quien clasificaba mal.

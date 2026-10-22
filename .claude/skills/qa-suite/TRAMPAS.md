@@ -156,3 +156,19 @@ no se medían nunca y el informe decía «sin hallazgos». `chip` y `tab` ya no 
 colaba en `tabular`. Ahora compara clases enteras de los dos sistemas y se comprueba a sí mismo:
 si no ha medido ningún `.boton` fuera del menú y del pie, avisa en crítico. Comprobado al revés:
 con un `.boton` encogido a 30 px salta; con la regla vieja no se medía ninguno.
+
+## El archivo de verificación de Google parecía código muerto
+
+El control `muerto` marcó `public/google<token>.html` como «no lo usa ni el código ni el catálogo».
+Y es verdad que no lo usa el código: lo pide **Google** por su URL para verificar la propiedad en
+Search Console, igual que `robots.txt` o el favicon. Añadido un salto por patrón
+(`/^public\/google[0-9a-f]+\.html$/`) en vez de a `SIEMPRE_EN_USO` con el nombre exacto, porque el
+token cambia al cambiar de propietario. Un archivo suelto de verdad en `public/` sigue saliendo.
+
+## Los datos de prueba también cuentan como texto de la web
+
+El control `textos` marcó «óleo» y «lienzo» (vocabulario del negocio anterior; AGP hace cuadros 3D y
+boxes) dentro de un **fixture de test**: `src/api-vercel/obra.test.ts` usaba `technique: 'Óleo sobre
+lienzo'` como dato de ejemplo. No es un falso positivo del control: igual que la lista de palabras
+prohibidas lee los nombres de variables, también lee los datos de las pruebas, y un ejemplo fuera de
+marca acaba copiándose. Se cambió el fixture a `'Cuadro 3D'`. Los datos de muestra van en la marca.

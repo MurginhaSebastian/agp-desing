@@ -10,7 +10,7 @@ const obra = {
   name: 'Tarde "en" Bordeaux',
   slug: 'tarde-en-bordeaux',
   description: 'Un cuadro con capas.',
-  technique: 'Óleo sobre lienzo',
+  technique: 'Cuadro 3D',
   widthCm: 40,
   heightCm: 60,
   imageUrl: '/images/obras/01.svg',
@@ -34,7 +34,7 @@ describe('tarjetaDeObra', () => {
     const t = tarjetaDeObra(obra, ORIGEN, obra.slug)
     expect(t.tipo).toBe('product')
     expect(t.titulo).toBe('Tarde "en" Bordeaux — AGP Desing')
-    expect(t.descripcion).toBe('Óleo sobre lienzo, 40 × 60 cm. Un cuadro con capas.')
+    expect(t.descripcion).toBe('Cuadro 3D, 40 × 60 cm. Un cuadro con capas.')
     expect(t.imagen).toBe(`${ORIGEN}/images/obras/01.svg`)
     expect(t.url).toBe(`${ORIGEN}/catalogo/tarde-en-bordeaux`)
   })

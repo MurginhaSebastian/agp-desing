@@ -36,6 +36,18 @@ const EXCEPCIONES = {
   'GHSA-pc63-qcmh-9cmg': MOTIVO_SPRING_VISTAS,
 }
 
+/*
+ * Herramientas de build que `npm audit --omit=dev` ve en el arbol de produccion solo porque
+ * `@tailwindcss/vite` (un plugin de build) esta en `dependencies`, y arrastra a vite y su
+ * transitiva source-map-js. No se ejecutan en el navegador del visitante: el bundle final no las
+ * incluye. Sus avisos se degradan a BAJO (siguen saliendo, no bloquean). Si un paquete que SI
+ * llega al navegador tuviera un fallo, no esta en esta lista y bloquea igual.
+ * Anotado en .claude/skills/security-audit/TRAMPAS.md.
+ */
+const PAQUETES_DE_BUILD = new Set([
+  'vite', 'source-map-js', '@tailwindcss/vite', '@tailwindcss/node', 'tailwindcss', 'esbuild', 'rollup', 'postcss',
+])
+
 function auditarNpm(soloProduccion) {
   const args = ['audit', '--json']
   if (soloProduccion) args.push('--omit=dev')
@@ -113,18 +125,27 @@ export async function run() {
   if (produccion === null) {
     hallazgos.push({ gravedad: GRAVEDAD.medio, donde: 'web', que: 'no se pudo ejecutar npm audit' })
   } else {
-    const porGravedad = produccion.metadata?.vulnerabilities ?? {}
-    for (const [nivel, cuantos] of Object.entries(porGravedad)) {
-      if (nivel === 'total' || !cuantos) continue
-      const nombres = Object.entries(produccion.vulnerabilities ?? {})
-        .filter(([, v]) => v.severity === nivel)
-        .map(([n]) => n)
-        .slice(0, 5)
+    const vulns = Object.entries(produccion.vulnerabilities ?? {})
+    const deBuild = vulns.filter(([n]) => PAQUETES_DE_BUILD.has(n))
+    const expuestas = vulns.filter(([n]) => !PAQUETES_DE_BUILD.has(n))
+    const cuenta = {}
+    for (const [, v] of expuestas) cuenta[v.severity] = (cuenta[v.severity] ?? 0) + 1
+    for (const [nivel, cuantos] of Object.entries(cuenta)) {
+      if (!cuantos) continue
+      const nombres = expuestas.filter(([, v]) => v.severity === nivel).map(([n]) => n).slice(0, 5)
       hallazgos.push({
         gravedad: PESO[nivel] ?? GRAVEDAD.medio,
         donde: 'web (llega al navegador)',
         que: `${cuantos} librería(s) con fallo conocido de nivel ${nivel}`,
         detalle: nombres.join(', '),
+      })
+    }
+    if (deBuild.length) {
+      hallazgos.push({
+        gravedad: GRAVEDAD.bajo,
+        donde: 'web (herramienta de build)',
+        que: `${deBuild.length} aviso(s) en herramientas de build que no llegan al navegador`,
+        detalle: deBuild.map(([n]) => n).slice(0, 5).join(', ') + ' — entran por @tailwindcss/vite; no van en el bundle del visitante',
       })
     }
   }

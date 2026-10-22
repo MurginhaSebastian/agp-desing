@@ -164,6 +164,9 @@ export async function run() {
   }
   for (const archivo of [...listar(join(RAIZ, 'public')), ...listar(join(RAIZ, 'src', 'assets'))]) {
     if (SIEMPRE_EN_USO.has(archivo)) continue
+    // Los archivos de verificacion de Google Search Console (public/google<token>.html) los pide
+    // Google por su URL, no el codigo; el token cambia al cambiar de propietario, por eso el patron.
+    if (/^public\/google[0-9a-f]+\.html$/.test(archivo)) continue
     revisados.imagenes++
     const nombre = archivo.split('/').pop()
     if (seMencionaEn(textos, nombre, null)) continue
