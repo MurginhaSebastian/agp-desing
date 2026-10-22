@@ -1,3 +1,4 @@
+/// <reference types="node" /> // función de Vercel: corre en Node y usa process.env
 /**
  * La tarjeta de una obra al compartir su enlace (/catalogo/{slug}) por WhatsApp, Facebook,
  * Telegram… Esos servicios no ejecutan JavaScript: de la web solo verían `index.html`, con el

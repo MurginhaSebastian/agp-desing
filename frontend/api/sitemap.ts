@@ -1,3 +1,4 @@
+/// <reference types="node" /> // función de Vercel: corre en Node y usa process.env
 /**
  * /sitemap.xml — la lista de páginas que se le da a Google (Search Console).
  *
