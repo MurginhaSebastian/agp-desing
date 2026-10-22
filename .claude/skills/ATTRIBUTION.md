@@ -60,6 +60,7 @@ On **motion**, this repo's authority is `animate` / `emil-design-eng`, not
 | `vercel-react-best-practices` | Vercel | MIT — frontmatter | None. |
 | `web-reader` | z-ai-web-dev-sdk Skills | MIT — `LICENSE.txt` | None. |
 | `all-deploy` | https://github.com/Hainrixz/all-deploy, commit `42600c412c2188885c68e19a1e704bb7b0b130b5` (2026-09-19) | MIT — `LICENSE` | None in the files copied. Only `SKILL.md`, `LICENSE`, `references/`, `assets/templates/` and the three runtime scripts (`audit.py`, `env_extract.py`, `static_check.py`); left out tests, CI, images, `cowork-plugin/` and the packaging scripts. `assets/templates/.env.example.template` is not committed: the repo's `.gitignore` excludes `.env.*`. |
+| `cloudflare-security-audit` | https://github.com/cloudflare/security-audit-skill, commit `c1c8a8c1471069fb0e188eeaff69b8e8db6564a8` (2026-09-14), folder `skills/security-audit/` | MIT — `LICENSE` (Copyright 2025-2026 Cloudflare, Inc.) | **Yes — 1 line.** `SKILL.md` frontmatter `name: security-audit` → `name: cloudflare-security-audit`, so it does not shadow this repo's own `security-audit` skill. Everything else copied as is, tests included. |
 
 ## Updating the Emil skills
 
